@@ -1,0 +1,25 @@
+import { setGuildOption } from '../functions';
+import { Command } from '../types';
+
+const command: Command = {
+  name: 'changePrefix',
+  permissions: ['Administrator'],
+  aliases: [],
+  execute: async (message, args) => {
+    let prefix = args[1];
+
+    if (!prefix) {
+      const res = await message.channel.send('No prefix provided');
+
+      return res;
+    }
+
+    if (!message.guild) {
+      return;
+    }
+
+    await setGuildOption(message.guild, 'prefix', prefix);
+
+    message.channel.send('Prefix successfully changed!');
+  }
+};
