@@ -35,6 +35,7 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             cd ${{ secrets.SSH_PATH }}/${{ github.ref_name == 'dev' && 'dev' || 'prod' }}
+            source ~/.bashrc
             git pull
             npm ci
             npm run build
