@@ -1,8 +1,8 @@
-import { Interaction } from 'discord.js';
+import type { BotEvent } from '../types';
+import type { Interaction } from 'discord.js';
 
-import { BotEvent } from '../types';
 
-const event: BotEvent = {
+const eventInteractionCreate: BotEvent = {
   name: 'interactionCreate',
   execute: (interaction: Interaction) => {
     if (interaction.isChatInputCommand()) {
@@ -54,4 +54,4 @@ const event: BotEvent = {
   }
 };
 
-export default event;
+export default eventInteractionCreate;

@@ -1,16 +1,16 @@
+import type { Command, SlashCommand } from './types';
 import {
   Client, Collection, GatewayIntentBits
 } from 'discord.js';
-import { config } from 'dotenv';
-import { readdirSync } from 'node:fs';
-import { join } from 'node:path';
 
-import { Command, SlashCommand } from './types';
-
-config();
+import handlers from './handlers';
+import { useConfig } from './utils/useConfig';
 
 const {
-  Guilds, MessageContent, GuildMessages, GuildMembers
+  Guilds,
+  MessageContent,
+  GuildMessages,
+  GuildMembers
 } = GatewayIntentBits;
 
 const client = new Client({
@@ -26,10 +26,11 @@ client.slashCommands = new Collection<string, SlashCommand>();
 client.commands = new Collection<string, Command>();
 client.cooldowns = new Collection<string, number>();
 
-const handlersDir = join(__dirname, './handlers');
+for (let handler of handlers) {
+  handler(client);
+}
 
-readdirSync(handlersDir).forEach(handler => {
-  require(`${ handlersDir }/${ handler }`)(client);
-});
+const { TOKEN } = useConfig();
 
-client.login(process.env.TOKEN).then();
+client.login(TOKEN)
+  .then();

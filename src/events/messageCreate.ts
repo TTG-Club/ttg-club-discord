@@ -1,30 +1,32 @@
-import { ChannelType, Message } from 'discord.js';
-import mongoose from 'mongoose';
+import type { BotEvent } from '../types';
+import type { Message } from 'discord.js';
+import { ChannelType } from 'discord.js';
 
-import {
-  checkPermissions, getGuildOption, sendTimedMessage
-} from '../functions';
-import { BotEvent } from '../types';
+import { useConfig } from '../utils/useConfig';
+import { useHelpers } from '../utils/useHelpers';
 
-const event: BotEvent = {
+const { PREFIX } = useConfig();
+
+const eventMessageCreate: BotEvent = {
   name: 'messageCreate',
-  execute: async (message: Message) => {
+  execute: (message: Message) => {
+    const { sendTimedMessage, checkPermissions } = useHelpers();
+
     if (!message.member || message.member.user.bot) return;
     if (!message.guild) return;
-    let prefix = process.env.PREFIX;
-
-    if (mongoose.connection.readyState === 1) {
-      let guildPrefix = await getGuildOption(message.guild, 'prefix');
-      if (guildPrefix) prefix = guildPrefix;
-    }
+    let prefix = PREFIX;
 
     if (!message.content.startsWith(prefix)) return;
     if (message.channel.type !== ChannelType.GuildText) return;
 
-    let args = message.content.substring(prefix.length).split(' ');
+    let args = message.content.substring(prefix.length)
+      .split(' ');
+
+    // @ts-ignore
     let command = message.client.commands.get(args[0]);
 
     if (!command) {
+      // @ts-ignore
       let commandFromAlias = message.client.commands.find(command => command.aliases.includes(args[0]));
       if (commandFromAlias) command = commandFromAlias;
       else return;
@@ -32,8 +34,9 @@ const event: BotEvent = {
 
     let cooldown = message.client.cooldowns.get(`${ command.name }-${ message.member.user.username }`);
     let neededPermissions = checkPermissions(message.member, command.permissions);
-    if (neededPermissions !== null)
-      return sendTimedMessage(
+
+    if (neededPermissions !== null) {
+      sendTimedMessage(
         `
             You don't have enough permissions to use this command. 
             \n Needed permissions: ${ neededPermissions.join(', ') }
@@ -41,6 +44,9 @@ const event: BotEvent = {
         message.channel,
         5000
       );
+
+      return;
+    }
 
     if (command.cooldown && cooldown) {
       if (Date.now() < cooldown) {
@@ -72,4 +78,4 @@ const event: BotEvent = {
   }
 };
 
-export default event;
+export default eventMessageCreate;

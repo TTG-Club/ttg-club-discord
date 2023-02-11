@@ -1,11 +1,16 @@
 import type { AxiosInstance, AxiosRequestConfig } from 'axios';
 import axios from 'axios';
 
+import { useConfig } from './useConfig';
+
 export type RequestConfig = {
   url: AxiosRequestConfig['url'],
   payload?: AxiosRequestConfig['params'] | AxiosRequestConfig['data'],
   signal?: AbortSignal
 }
+
+
+const { API_URL } = useConfig();
 
 class HTTPService {
   protected instance: AxiosInstance;
@@ -16,7 +21,7 @@ class HTTPService {
     axios.defaults.withCredentials = true;
 
     this.instance = axios.create({
-      baseURL: `${ process.env.API_URL || 'http://localhost:8080' }/api/v1`,
+      baseURL: `${ API_URL || 'http://localhost:8080' }/api/v1`,
       withCredentials: true,
       headers: {}
     });
@@ -28,6 +33,7 @@ class HTTPService {
   }
 
   get(config: RequestConfig) {
+    // @ts-ignore
     return this.instance({
       method: 'get',
       url: config.url,
@@ -37,6 +43,7 @@ class HTTPService {
   }
 
   post(config: RequestConfig) {
+    // @ts-ignore
     return this.instance({
       method: 'post',
       url: config.url,
@@ -46,6 +53,7 @@ class HTTPService {
   }
 
   put(config: RequestConfig) {
+    // @ts-ignore
     return this.instance({
       method: 'put',
       url: config.url,
@@ -55,6 +63,7 @@ class HTTPService {
   }
 
   patch(config: RequestConfig) {
+    // @ts-ignore
     return this.instance({
       method: 'patch',
       url: config.url,
@@ -64,6 +73,7 @@ class HTTPService {
   }
 
   delete(config: RequestConfig) {
+    // @ts-ignore
     return this.instance({
       method: 'delete',
       url: config.url,
@@ -73,6 +83,7 @@ class HTTPService {
   }
 
   rawGet(config: RequestConfig) {
+    // @ts-ignore
     return this.instanceRaw({
       method: 'get',
       url: config.url,

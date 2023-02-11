@@ -1,40 +1,26 @@
 import { REST } from '@discordjs/rest';
-import {
-  Client, Routes, SlashCommandBuilder
-} from 'discord.js';
-import { readdirSync } from 'node:fs';
-import { join } from 'node:path';
+import type { Client, SlashCommandBuilder } from 'discord.js';
+import { Routes } from 'discord.js';
 
-import { color } from '../functions';
-import { Command, SlashCommand } from '../types';
+import commands from '../commands';
+import { useConfig } from '../utils/useConfig';
+import { useHelpers } from '../utils/useHelpers';
 
-module.exports = (client: Client) => {
+const { TOKEN, CLIENT_ID } = useConfig();
+
+export default (client: Client) => {
+  const { color } = useHelpers();
   const slashCommands: SlashCommandBuilder[] = [];
 
-  // const commands: Command[] = [];
-
-  let slashCommandsDir = join(__dirname, '../slashCommands');
-
-  // let commandsDir = join(__dirname, '../commands');
-
-  readdirSync(slashCommandsDir).forEach(file => {
-    if (!file.endsWith('.js')) return;
-    let command: SlashCommand = require(`${ slashCommandsDir }/${ file }`).default;
+  commands.forEach(command => {
     slashCommands.push(command.command);
     client.slashCommands.set(command.command.name, command);
   });
 
-  // readdirSync(commandsDir).forEach(file => {
-  //   if (!file.endsWith('.js')) return;
-  //   let command: Command = require(`${ commandsDir }/${ file }`).default;
-  //   commands.push(command);
-  //   client.commands.set(command.name, command);
-  // });
-
-  const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
+  const rest = new REST({ version: '10' }).setToken(TOKEN);
 
   rest
-    .put(Routes.applicationCommands(process.env.CLIENT_ID), {
+    .put(Routes.applicationCommands(CLIENT_ID), {
       body: slashCommands.map(command => command.toJSON())
     })
     .then((data: any) => {

@@ -1,12 +1,14 @@
+import type { SlashCommand } from '../types';
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 
-import { getThemeColor } from '../functions';
-import { SlashCommand } from '../types';
+import { useHelpers } from '../utils/useHelpers';
 
 const command: SlashCommand = {
   command: new SlashCommandBuilder().setName('ping')
     .setDescription('Shows the bot\'s ping'),
   execute: async interaction => {
+    const { getThemeColor } = useHelpers();
+
     await interaction.reply({
       embeds: [
         new EmbedBuilder()

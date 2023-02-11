@@ -1,14 +1,16 @@
-import { Client } from 'discord.js';
+import type { BotEvent } from '../types';
+import type { Client } from 'discord.js';
 
-import { color } from '../functions';
-import { BotEvent } from '../types';
+import { useHelpers } from '../utils/useHelpers';
 
-const event: BotEvent = {
+const eventReady: BotEvent = {
   name: 'ready',
   once: true,
   execute: (client: Client) => {
+    const { color } = useHelpers();
+
     console.log(color('text', `💪 Logged in as ${ color('variable', client.user?.tag) }`));
   }
 };
 
-export default event;
+export default eventReady;

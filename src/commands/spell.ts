@@ -1,16 +1,18 @@
+import type { SlashCommand } from '../types';
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import _ from 'lodash';
-import * as process from 'node:process';
+import * as console from 'node:console';
 import sanitizeHtml from 'sanitize-html';
 import TurndownService from 'turndown';
 import { gfm } from 'turndown-plugin-gfm';
 
-import { SlashCommand } from '../types';
 import { useAxios } from '../utils/useAxios';
+import { useConfig } from '../utils/useConfig';
 
 const http = useAxios();
+const { API_URL } = useConfig();
 
-const command: SlashCommand = {
+const commandSpell: SlashCommand = {
   command: new SlashCommandBuilder()
     .setName('spell')
     .setDescription('Получение информации о заклинании')
@@ -56,17 +58,12 @@ const command: SlashCommand = {
         value: spell.url
       })));
     } catch (err) {
+      console.error(err);
       await interaction.respond([]);
     }
-
-    // await interaction.respond(filtered.map(choice => ({
-    //   name: choice,
-    //   value: choice
-    // })));
   },
   execute: async interaction => {
     try {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       const url = interaction.options.getString('name');
 
@@ -110,8 +107,8 @@ const command: SlashCommand = {
       });
 
       const title = `${ spell.name.rus } [${ spell.name.eng }]`;
-      const thumbnail = `${ process.env.API_URL }/style/icons/192.png`;
-      const spellUrl = `${ process.env.API_URL }${ spell.url }`;
+      const thumbnail = `${ API_URL }/style/icons/192.png`;
+      const spellUrl = `${ API_URL }${ spell.url }`;
 
       const description = spell.description
         ? turndownService.turndown(sanitizeHtml(spell.description, {
@@ -255,21 +252,11 @@ const command: SlashCommand = {
 
       await interaction.reply({ embeds });
     } catch (err) {
-      console.log(err);
+      console.error(err);
       await interaction.reply('Произошла какая-то ошибка... попробуй еще раз');
     }
-
-    //
-    // await interaction.reply({
-    //   embeds: [
-    //     new EmbedBuilder()
-    //       .setAuthor({ name: 'MRC License' })
-    //       .setDescription(`🏓 Pong! \n 📡 Ping: ${ interaction.client.ws.ping }`)
-    //       .setColor(getThemeColor('text'))
-    //   ]
-    // });
   },
   cooldown: 10
 };
 
-export default command;
+export default commandSpell;

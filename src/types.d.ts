@@ -1,4 +1,4 @@
-import {
+import type {
   AutocompleteInteraction,
   Collection,
   CommandInteraction,
@@ -6,7 +6,6 @@ import {
   PermissionResolvable,
   SlashCommandBuilder
 } from 'discord.js';
-import mongoose from 'mongoose';
 
 export interface SlashCommand {
   command: SlashCommandBuilder | any;
@@ -22,18 +21,6 @@ export interface Command {
   aliases: Array<string>;
   cooldown?: number;
 }
-
-interface GuildOptions {
-  prefix: string;
-}
-
-export interface IGuild extends mongoose.Document {
-  guildID: string;
-  options: GuildOptions;
-  joinedAt: Date;
-}
-
-export type GuildOption = keyof GuildOptions;
 
 export interface BotEvent {
   name: string;

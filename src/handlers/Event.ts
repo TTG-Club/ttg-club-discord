@@ -1,20 +1,15 @@
-import { Client } from 'discord.js';
-import { readdirSync } from 'node:fs';
-import { join } from 'node:path';
+import type { Client } from 'discord.js';
 
-import { color } from '../functions';
-import { BotEvent } from '../types';
+import events from '../events';
+import { useHelpers } from '../utils/useHelpers';
 
-module.exports = (client: Client) => {
-  let eventsDir = join(__dirname, '../events');
+export default (client: Client) => {
+  const { color } = useHelpers();
 
-  readdirSync(eventsDir).forEach(file => {
-    if (!file.endsWith('.js')) return;
-    let event: BotEvent = require(`${ eventsDir }/${ file }`).default;
-
+  for (const event of events) {
     event.once
       ? client.once(event.name, (...args) => event.execute(...args))
       : client.on(event.name, (...args) => event.execute(...args));
     console.log(color('text', `🌠 Successfully loaded event ${ color('variable', event.name) }`));
-  });
+  }
 };
