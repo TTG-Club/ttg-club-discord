@@ -34,8 +34,8 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            source .bashrc
             cd ${{ secrets.SSH_PATH }}/${{ github.ref_name == 'dev' && 'dev' || 'prod' }}
             git pull
             npm ci
             npm run build
+            pm2 restart ${{ github.ref_name == 'dev' && 'ttg-club-discord-dev' || 'ttg-club-discord' }}
