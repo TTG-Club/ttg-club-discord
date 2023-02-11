@@ -8,7 +8,6 @@
     "build": "npm run clean && tsc --project tsconfig.json",
     "build:dev": "npm run build && npm run start",
     "clean": "rimraf dist/*",
-    "deploy": "pm2 restart ttg-club-discord",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "lint:fix": "eslint . --fix --ext .js,.jsx,.ts,.tsx"
   },
