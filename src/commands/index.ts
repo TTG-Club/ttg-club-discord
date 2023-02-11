@@ -1,3 +1,4 @@
+import commandDiceRoller from './diceRoller';
 import commandSpell from './spell';
 
-export default [commandSpell];
+export default [commandSpell, commandDiceRoller];

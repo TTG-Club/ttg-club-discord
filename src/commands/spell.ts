@@ -148,7 +148,9 @@ const commandSpell: SlashCommand = {
         },
         level: {
           name: 'Уровень',
-          value: spell.level.toString(),
+          value: !spell.level
+            ? 'Заговор'
+            : spell.level.toString(),
           inline: true
         },
         source: {

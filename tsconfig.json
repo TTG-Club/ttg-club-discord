@@ -14,6 +14,7 @@
     "allowJs": true,
     "allowSyntheticDefaultImports": true,
     "strict": true,
+    "jsx": "preserve",
     "skipLibCheck": true,
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,

@@ -1,0 +1,41 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+
+permissions:
+  deployments: write
+  contents: read
+  pages: write
+  actions: write
+  id-token: write
+
+concurrency:
+  group: build-${{ github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint Workflow
+    uses: ./.github/workflows/lint.yml
+
+  build:
+    name: Build Job
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            cd ${{ secrets.SSH_PATH }}/${{ github.ref_name == 'dev' && 'dev' || 'prod' }}
+            git pull
+            npm ci
+            npm run build
+            pm2 restart ${{ github.ref_name == 'dev' && 'ttg-club-discord-dev' || 'ttg-club-discord' }}
