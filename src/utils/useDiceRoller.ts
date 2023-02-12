@@ -15,8 +15,6 @@ export function useDiceRoller() {
 
       let msg: TRollResult | null;
 
-      console.log(formula);
-
       switch (formula) {
         case '2d20':
         case '2d20kh1':
