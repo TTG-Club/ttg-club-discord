@@ -11,19 +11,21 @@ export type TRollResult = {
 export function useDiceRoller() {
   const getDiceMsg = async (str: string): Promise<TRollResult | null> => {
     try {
+      const formula = str.replace(/к/g, 'd');
+
       let msg: TRollResult | null;
 
-      switch (str) {
-        case 'пом':
-        case 'пре':
+      console.log(formula);
+
+      switch (formula) {
         case '2d20':
         case '2d20kh1':
         case '2d20kl1':
-          msg = await getDropOrKeepMsg(str);
+          msg = await getDropOrKeepMsg(formula);
 
           break;
         default:
-          msg = await getDefaultDiceMsg(str);
+          msg = await getDefaultDiceMsg(formula);
 
           break;
       }
@@ -45,14 +47,6 @@ export function useDiceRoller() {
       if (str === '2d20kh1' || str === '2d20kl1') {
         formula = str;
       }
-
-      if (str === 'пре' || str === 'пом') {
-        formula = str === 'пре'
-          ? '2d20kh1'
-          : '2d20kl1';
-      }
-
-      // const isCritical = formula === '2d20kh1';
 
       const roll = new DiceRoll(formula);
       const resultStr = roll.export();
