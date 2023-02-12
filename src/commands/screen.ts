@@ -18,7 +18,7 @@ const { API_URL } = useConfig();
 const commandScreen: SlashCommand = {
   command: new SlashCommandBuilder()
     .setName('screen')
-    .setDescription('Получение информации из ширмы')
+    .setDescription('Beta: Получение информации из ширмы')
     .addStringOption(option => option
       .setName('name')
       .setNameLocalization('ru', 'название')
