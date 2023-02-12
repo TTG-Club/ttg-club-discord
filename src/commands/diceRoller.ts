@@ -53,7 +53,7 @@ const commandDiceRoller: SlashCommand = {
         });
       }
 
-      if (formula !== '2d20') {
+      if (formula !== '2d20' && formula !== '2к20') {
         embed.addFields({
           name: 'Результат',
           value: roll.result,
