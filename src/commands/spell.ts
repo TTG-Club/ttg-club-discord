@@ -54,10 +54,22 @@ const commandSpell: SlashCommand = {
 
       const spells: TSpellLink[] = _.cloneDeep(resp.data);
 
-      await interaction.respond(spells.map((spell: TSpellLink) => ({
-        name: spell.name.rus,
-        value: spell.url
-      })));
+      await interaction.respond(spells.map((spell: TSpellLink) => {
+        let name = spell.name.rus;
+
+        if (spell.concentration) {
+          name = `${ name } [К]`;
+        }
+
+        if (spell.ritual) {
+          name = `${ name } [Р]`;
+        }
+
+        return {
+          name: `[${ spell.level || '-' }] ${ name }`,
+          value: spell.url
+        };
+      }));
     } catch (err) {
       console.error(err);
       await interaction.respond([]);
