@@ -1,4 +1,5 @@
 import type { SlashCommand } from '../types';
+import type { TSpellItem, TSpellLink } from '../types/Spell';
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import _ from 'lodash';
 import * as console from 'node:console';
@@ -51,9 +52,9 @@ const commandSpell: SlashCommand = {
         return;
       }
 
-      const spells = _.cloneDeep(resp.data) as any[];
+      const spells: TSpellLink[] = _.cloneDeep(resp.data);
 
-      await interaction.respond(spells.map((spell: any) => ({
+      await interaction.respond(spells.map((spell: TSpellLink) => ({
         name: spell.name.rus,
         value: spell.url
       })));
@@ -75,7 +76,7 @@ const commandSpell: SlashCommand = {
         return;
       }
 
-      const spell = _.cloneDeep(resp.data);
+      const spell: TSpellItem = _.cloneDeep(resp.data);
 
       const components = [];
 
@@ -91,7 +92,11 @@ const commandSpell: SlashCommand = {
         components.push(spell.components.m);
       }
 
-      const embed = {
+      const embed: {
+        main: EmbedBuilder,
+        desc: EmbedBuilder | null,
+        upper: EmbedBuilder | null
+      } = {
         main: new EmbedBuilder(),
         desc: null,
         upper: null
@@ -191,7 +196,6 @@ const commandSpell: SlashCommand = {
         }
       };
 
-      // @ts-ignore
       embed.main
         .setTitle(title)
         .setURL(spellUrl)
@@ -219,13 +223,11 @@ const commandSpell: SlashCommand = {
       embed.main
         .addFields(fields.url);
 
-      // @ts-ignore
       embed.desc = new EmbedBuilder()
         .setTitle('Описание')
         .setDescription(description);
 
       if (!upper) {
-        // @ts-ignore
         embed.desc
           .setFooter({
             text: footer
@@ -233,7 +235,6 @@ const commandSpell: SlashCommand = {
       }
 
       if (upper) {
-        // @ts-ignore
         embed.upper = new EmbedBuilder()
           .setTitle('На более высоких уровнях')
           .setDescription(upper)

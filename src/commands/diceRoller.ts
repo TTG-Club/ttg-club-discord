@@ -3,9 +3,6 @@ import type { TRollResult } from '../utils/useDiceRoller';
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import * as console from 'node:console';
 
-// import TurndownService from 'turndown';
-// import { gfm } from 'turndown-plugin-gfm';
-
 import { useDiceRoller } from '../utils/useDiceRoller';
 
 const { getDiceMsg } = useDiceRoller();
