@@ -1,5 +1,5 @@
 import type { SlashCommand } from '../types';
-import type { TItemItem, TItemLink } from '../types/Item';
+import type { TEquipmentItem, TEquipmentLink } from '../types/Equipment';
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import _ from 'lodash';
 import * as console from 'node:console';
@@ -12,9 +12,9 @@ const http = useAxios();
 const { API_URL } = useConfig();
 const { getDescriptionEmbeds, getPagination } = useMarkdown();
 
-const commandItem: SlashCommand = {
+const commandEquipment: SlashCommand = {
   command: new SlashCommandBuilder()
-    .setName('item')
+    .setName('equipment')
     .setDescription('Снаряжение')
     .addStringOption(option => option
       .setName('name')
@@ -48,9 +48,9 @@ const commandItem: SlashCommand = {
         return;
       }
 
-      const items: TItemLink[] = _.cloneDeep(resp.data);
+      const equipments: TEquipmentLink[] = _.cloneDeep(resp.data);
 
-      await interaction.respond(items.map((item: TItemLink) => ({
+      await interaction.respond(equipments.map((item: TEquipmentLink) => ({
         name: item.name.rus,
         value: item.url
       })));
@@ -72,26 +72,26 @@ const commandItem: SlashCommand = {
         return;
       }
 
-      const item: TItemItem = _.cloneDeep(resp.data);
+      const equipment: TEquipmentItem = _.cloneDeep(resp.data);
 
-      const title = `${ item.name.rus } [${ item.name.eng }]`;
+      const title = `${ equipment.name.rus } [${ equipment.name.eng }]`;
       const itemUrl = `${ API_URL }${ url }`;
-      const footer = `TTG Club | ${ item.source.name } ${ item.source.page || '' }`.trim();
+      const footer = `TTG Club | ${ equipment.source.name } ${ equipment.source.page || '' }`.trim();
 
       const fields = {
         price: {
           name: 'Цена',
-          value: String(item.price),
+          value: String(equipment.price),
           inline: true
         },
         weight: {
           name: 'Вес (в фунтах)',
-          value: String(item.weight),
+          value: String(equipment.weight),
           inline: true
         },
         source: {
           name: 'Источник',
-          value: item.source.shortName,
+          value: equipment.source.shortName,
           inline: true
         },
         url: {
@@ -101,7 +101,7 @@ const commandItem: SlashCommand = {
         },
         categories: {
           name: 'Категории',
-          value: item.categories.join(', '),
+          value: equipment.categories.join(', '),
           inline: false
         }
       };
@@ -118,12 +118,12 @@ const commandItem: SlashCommand = {
         .setTitle(title)
         .setURL(itemUrl);
 
-      if (item.price) {
+      if (equipment.price) {
         embeds.main
           .addFields(fields.price);
       }
 
-      if (item.weight) {
+      if (equipment.weight) {
         embeds.main
           .addFields(fields.weight);
       }
@@ -138,8 +138,8 @@ const commandItem: SlashCommand = {
         embeds: [embeds.main]
       });
 
-      if (item.description) {
-        const description = getDescriptionEmbeds(item.description);
+      if (equipment.description) {
+        const description = getDescriptionEmbeds(equipment.description);
 
         embeds.desc = description.map(str => (
           new EmbedBuilder()
@@ -165,4 +165,4 @@ const commandItem: SlashCommand = {
   cooldown: 10
 };
 
-export default commandItem;
+export default commandEquipment;
