@@ -1,5 +1,4 @@
 import type { BotEvent } from '../types';
-import { userMention } from 'discord.js';
 import type { Interaction } from 'discord.js';
 
 
@@ -10,7 +9,7 @@ const eventInteractionCreate: BotEvent = {
       let command = interaction.client.slashCommands.get(interaction.commandName);
       let cooldown = interaction.client.cooldowns.get(`${ interaction.commandName }-${ interaction.user.username }`);
 
-      await interaction.deferReply({ ephemeral: true });
+      await interaction.deferReply();
 
       if (!command) return;
 
@@ -42,12 +41,6 @@ const eventInteractionCreate: BotEvent = {
           Date.now() + command.cooldown * 1000
         );
       }
-
-      await interaction.followUp({
-        content: `${ userMention(interaction.user.id) } использует /${ interaction.commandName }`,
-        ephemeral: true,
-        fetchReply: true
-      });
 
       command.execute(interaction);
     } else if (interaction.isAutocomplete()) {
