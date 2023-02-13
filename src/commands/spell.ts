@@ -219,9 +219,7 @@ const commandSpell: SlashCommand = {
           )));
       }
 
-      const pagination = await getPagination(interaction, embeds);
-
-      await interaction.reply({ embeds: [embed]});
+      await interaction.followUp({ embeds: [embed]});
 
       if (embeds.length <= 2) {
         await interaction.followUp({ embeds });
@@ -229,10 +227,12 @@ const commandSpell: SlashCommand = {
         return;
       }
 
+      const pagination = await getPagination(interaction, embeds);
+
       await pagination.paginate();
     } catch (err) {
       console.error(err);
-      await interaction.reply('Произошла какая-то ошибка... попробуй еще раз');
+      await interaction.followUp('Произошла какая-то ошибка... попробуй еще раз');
     }
   },
   cooldown: 10

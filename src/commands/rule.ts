@@ -121,9 +121,7 @@ const commandRule: SlashCommand = {
           .setDescription(str)
       ));
 
-      const pagination = await getPagination(interaction, embeds.desc);
-
-      await interaction.reply({
+      await interaction.followUp({
         embeds: [embeds.main]
       });
 
@@ -133,10 +131,12 @@ const commandRule: SlashCommand = {
         return;
       }
 
+      const pagination = await getPagination(interaction, embeds.desc);
+
       await pagination.paginate();
     } catch (err) {
       console.error(err);
-      await interaction.reply('Произошла какая-то ошибка... попробуй еще раз');
+      await interaction.followUp('Произошла какая-то ошибка... попробуй еще раз');
     }
   },
   cooldown: 10
