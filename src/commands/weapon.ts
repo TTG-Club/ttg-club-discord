@@ -1,0 +1,163 @@
+import type { SlashCommand } from '../types';
+import type { TWeaponItem, TWeaponLink } from '../types/Weapon';
+import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
+import _ from 'lodash';
+import * as console from 'node:console';
+
+import { useAxios } from '../utils/useAxios';
+import { useConfig } from '../utils/useConfig';
+import { useMarkdown } from '../utils/useMarkdown';
+
+const http = useAxios();
+const { API_URL } = useConfig();
+const { getDescriptionEmbeds, getPagination } = useMarkdown();
+
+const commandWeapon: SlashCommand = {
+  command: new SlashCommandBuilder()
+    .setName('weapon')
+    .setDescription('Оружие')
+    .addStringOption(option => option
+      .setName('name')
+      .setNameLocalization('ru', 'название')
+      .setDescription('Название оружия')
+      .setRequired(true)
+      .setAutocomplete(true)),
+  autocomplete: async interaction => {
+    try {
+      const resp = await http.post({
+        url: `/weapons`,
+        payload: {
+          page: 0,
+          limit: 10,
+          search: {
+            value: interaction.options.getString('name'),
+            exact: false
+          },
+          order: [
+            {
+              field: 'name',
+              direction: 'asc'
+            }
+          ]
+        }
+      });
+
+      if (resp.status !== 200) {
+        await interaction.respond([]);
+
+        return;
+      }
+
+      const weapons: TWeaponLink[] = _.cloneDeep(resp.data);
+
+      await interaction.respond(weapons.map((weapon: TWeaponLink) => ({
+        name: weapon.name.rus,
+        value: weapon.url
+      })));
+    } catch (err) {
+      console.error(err);
+      await interaction.respond([]);
+    }
+  },
+  execute: async interaction => {
+    try {
+      // @ts-ignore
+      const url = interaction.options.getString('name');
+
+      const resp = await http.post({ url });
+
+      if (resp.status !== 200) {
+        await interaction.followUp('Произошла какая-то ошибка... попробуй еще раз');
+
+        return;
+      }
+
+      const weapon: TWeaponItem = _.cloneDeep(resp.data);
+
+      const title = `${ weapon.name.rus } [${ weapon.name.eng }]`;
+      const weaponUrl = `${ API_URL }${ url }`;
+      const footer = `TTG Club | ${ weapon.source.name } ${ weapon.source.page || '' }`.trim();
+
+      const embeds: {
+        main: EmbedBuilder,
+        desc: EmbedBuilder[]
+      } = {
+        main: new EmbedBuilder(),
+        desc: []
+      };
+
+      embeds.main
+        .setTitle(title)
+        .setURL(weaponUrl)
+        .addFields({
+          name: 'Стоимость',
+          value: weapon.price,
+          inline: true
+        })
+        .addFields({
+          name: 'Урон',
+          value: `${ weapon.damage.dice } ${ weapon.damage.type }`,
+          inline: true
+        })
+        .addFields({
+          name: 'Вес (в фунтах)',
+          value: String(weapon.weight),
+          inline: true
+        })
+        .addFields({
+          name: 'Источник',
+          value: weapon.source.shortName,
+          inline: false
+        })
+        .addFields({
+          name: 'Тип',
+          value: weapon.type.name,
+          inline: false
+        })
+        .addFields({
+          name: 'Оригинал',
+          value: weaponUrl,
+          inline: false
+        })
+        .setFooter({ text: footer });
+
+      await interaction.followUp({
+        embeds: [embeds.main]
+      });
+
+      if (weapon.description) {
+        embeds.desc = getDescriptionEmbeds(weapon.description)
+          .map(str => (
+            new EmbedBuilder()
+              .setTitle('Описание')
+              .setDescription(str)
+          ));
+      }
+
+      if (weapon.special) {
+        embeds.desc.push(...getDescriptionEmbeds(weapon.special)
+          .map(str => (
+            new EmbedBuilder()
+              .setTitle('Особое свойство')
+              .setDescription(str)
+          )));
+      }
+
+      if (embeds.desc.length <= 2) {
+        await interaction.followUp({ embeds: embeds.desc });
+
+        return;
+      }
+
+      const pagination = await getPagination(interaction, embeds.desc);
+
+      await pagination.paginate();
+    } catch (err) {
+      console.error(err);
+      await interaction.followUp('Произошла какая-то ошибка... попробуй еще раз');
+    }
+  },
+  cooldown: 10
+};
+
+export default commandWeapon;

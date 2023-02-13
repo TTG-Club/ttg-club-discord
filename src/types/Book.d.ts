@@ -1,4 +1,6 @@
-import type { TName, TSource } from './BaseTypes';
+import type {
+  TName, TSource, TType
+} from './BaseTypes';
 
 export type TBookLink = {
   name: TName;
@@ -8,15 +10,10 @@ export type TBookLink = {
   year?: number;
 }
 
-export type TBookType = {
-  name: string;
-  order: number;
-}
-
 export type TBookItem = {
   name: TName;
   url: string;
-  type: TBookType;
+  type: TType;
   description?: string;
   source: TSource;
   year?: number;
