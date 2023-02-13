@@ -17,7 +17,7 @@ const { getDescriptionEmbeds, getPagination } = useMarkdown();
 const commandScreen: SlashCommand = {
   command: new SlashCommandBuilder()
     .setName('screen')
-    .setDescription('Beta: Получение информации из ширмы')
+    .setDescription('Записи ширмы')
     .addStringOption(option => option
       .setName('name')
       .setNameLocalization('ru', 'название')
