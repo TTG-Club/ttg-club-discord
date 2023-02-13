@@ -105,13 +105,24 @@ const commandWeapon: SlashCommand = {
           inline: true
         })
         .addFields({
-          name: 'Источник',
-          value: weapon.source.shortName,
+          name: 'Тип',
+          value: weapon.type.name,
           inline: false
         })
         .addFields({
-          name: 'Тип',
-          value: weapon.type.name,
+          name: 'Свойства',
+          value: weapon.properties.map(prop => (
+            `${ prop.name }${
+            prop.twoHandDice ? ` (${ prop.twoHandDice })` : ''
+          }${
+            prop.distance ? ` (дис. ${ prop.distance }` : ''
+          }`
+          )).join(', '),
+          inline: false
+        })
+        .addFields({
+          name: 'Источник',
+          value: weapon.source.shortName,
           inline: false
         })
         .addFields({
