@@ -203,8 +203,6 @@ const commandSpell: SlashCommand = {
       embed
         .addFields(fields.url);
 
-      await interaction.reply({ embeds: [embed]});
-
       const embeds = getDescriptionEmbeds(spell.description)
         .map(str => (
           new EmbedBuilder()
@@ -221,13 +219,15 @@ const commandSpell: SlashCommand = {
           )));
       }
 
+      const pagination = await getPagination(interaction, embeds);
+
+      await interaction.reply({ embeds: [embed]});
+
       if (embeds.length <= 2) {
         await interaction.followUp({ embeds });
 
         return;
       }
-
-      const pagination = await getPagination(interaction, embeds);
 
       await pagination.paginate();
     } catch (err) {

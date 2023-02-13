@@ -121,6 +121,8 @@ const commandRule: SlashCommand = {
           .setDescription(str)
       ));
 
+      const pagination = await getPagination(interaction, embeds.desc);
+
       await interaction.reply({
         embeds: [embeds.main]
       });
@@ -130,8 +132,6 @@ const commandRule: SlashCommand = {
 
         return;
       }
-
-      const pagination = await getPagination(interaction, embeds.desc);
 
       await pagination.paginate();
     } catch (err) {

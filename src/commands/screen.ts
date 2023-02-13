@@ -120,7 +120,6 @@ const commandScreen: SlashCommand = {
           text: footer
         });
 
-      await interaction.reply({ embeds: [embed]});
 
       const embeds = getDescriptionEmbeds(screen.description)
         .map(str => (
@@ -129,13 +128,15 @@ const commandScreen: SlashCommand = {
             .setDescription(str)
         ));
 
+      await interaction.reply({ embeds: [embed]});
+
+      const pagination = await getPagination(interaction, embeds);
+
       if (embeds.length <= 2) {
         await interaction.followUp({ embeds });
 
         return;
       }
-
-      const pagination = await getPagination(interaction, embeds);
 
       await pagination.paginate();
     } catch (err) {
