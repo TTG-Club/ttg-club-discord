@@ -5,6 +5,7 @@ import commandDiceRoller from './diceRoller';
 import commandEquipment from './equipment';
 import commandGod from './god';
 import commandOption from './option';
+import commandRace from './race';
 import commandRule from './rule';
 import commandScreen from './screen';
 import commandSpell from './spell';
@@ -23,5 +24,6 @@ export default [
   commandGod,
   commandBook,
   commandWeapon,
-  commandArmor
+  commandArmor,
+  commandRace
 ];

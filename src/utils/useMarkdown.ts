@@ -101,7 +101,9 @@ export const useMarkdown = () => {
   };
 
   const getDescriptionEmbeds = (html: string) => {
-    const rows = getMarkdownParagraphs(html);
+    const rows = getMarkdownParagraphs(html)
+      .filter(row => !!row);
+
     const embeds: string[] = [];
 
     let str = '';
