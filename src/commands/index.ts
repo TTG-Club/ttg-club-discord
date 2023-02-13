@@ -1,3 +1,4 @@
+import commandArmor from './armor';
 import commandArtifact from './artifact';
 import commandBook from './book';
 import commandDiceRoller from './diceRoller';
@@ -21,5 +22,6 @@ export default [
   commandArtifact,
   commandGod,
   commandBook,
-  commandWeapon
+  commandWeapon,
+  commandArmor
 ];
