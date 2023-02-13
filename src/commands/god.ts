@@ -75,7 +75,7 @@ const commandGod: SlashCommand = {
       const god: TGodItem = _.cloneDeep(resp.data);
 
       const title = `${ god.name.rus } [${ god.name.eng }]`;
-      const artifactUrl = `${ API_URL }${ url }`;
+      const godUrl = `${ API_URL }${ url }`;
       const thumbnail = god.images?.length ? god.images[0] : null;
       const footer = `TTG Club | ${ god.source.name } ${ god.source.page || '' }`.trim();
 
@@ -89,7 +89,7 @@ const commandGod: SlashCommand = {
 
       embeds.main
         .setTitle(title)
-        .setURL(artifactUrl)
+        .setURL(godUrl)
         .addFields({
           name: 'Источник',
           value: god.source.shortName,
@@ -134,6 +134,13 @@ const commandGod: SlashCommand = {
             inline: false
           });
       }
+
+      embeds.main
+        .addFields({
+          name: 'Оригинал',
+          value: godUrl,
+          inline: false
+        });
 
       if (thumbnail) {
         embeds.main
