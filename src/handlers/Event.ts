@@ -10,6 +10,7 @@ export default (client: Client) => {
     event.once
       ? client.once(event.name, (...args) => event.execute(...args))
       : client.on(event.name, (...args) => event.execute(...args));
+    // eslint-disable-next-line no-console
     console.log(color('text', `🌠 Successfully loaded event ${ color('variable', event.name) }`));
   }
 };

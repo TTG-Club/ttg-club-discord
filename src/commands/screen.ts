@@ -5,15 +5,14 @@ import type {
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import _ from 'lodash';
 import * as console from 'node:console';
-import sanitizeHtml from 'sanitize-html';
-import TurndownService from 'turndown';
-import { gfm } from 'turndown-plugin-gfm';
 
 import { useAxios } from '../utils/useAxios';
 import { useConfig } from '../utils/useConfig';
+import { useMarkdown } from '../utils/useMarkdown';
 
 const http = useAxios();
 const { API_URL } = useConfig();
+const { getDescriptionEmbeds, getPagination } = useMarkdown();
 
 const commandScreen: SlashCommand = {
   command: new SlashCommandBuilder()
@@ -93,34 +92,15 @@ const commandScreen: SlashCommand = {
 
       const embed = new EmbedBuilder();
 
-      const turndownService = new TurndownService();
-
-      turndownService.use(gfm);
-
-      turndownService.addRule('strikethrough', {
-        filter: 'p',
-        replacement: content => `\n\n${ content }\n\n`
-      });
-
       const title = `${ screen.name.rus } [${ screen.name.eng }]`;
       const thumbnail = `${ API_URL }/style/icons/192.png`;
       const screenUrl = `${ API_URL }${ screen.url }`;
-
-      const description = screen.description
-        ? turndownService.turndown(sanitizeHtml(screen.description, {
-          transformTags: {
-            'dice-roller': 'b'
-          }
-        }))
-        : '';
-
       const footer = `TTG Club | ${ screen.source.name } ${ screen.source.page || '' }`.trim();
 
       embed
         .setTitle(title)
         .setURL(screenUrl)
         .setThumbnail(thumbnail)
-        .setDescription(description)
         .addFields({
           name: 'Источник',
           value: screen.source.shortName,
@@ -141,6 +121,23 @@ const commandScreen: SlashCommand = {
         });
 
       await interaction.reply({ embeds: [embed]});
+
+      const embeds = getDescriptionEmbeds(screen.description)
+        .map(str => (
+          new EmbedBuilder()
+            .setTitle('Описание')
+            .setDescription(str)
+        ));
+
+      if (embeds.length <= 2) {
+        await interaction.followUp({ embeds });
+
+        return;
+      }
+
+      const pagination = await getPagination(interaction, embeds);
+
+      await pagination.paginate();
     } catch (err) {
       console.error(err);
       await interaction.reply('Произошла какая-то ошибка... попробуй еще раз');

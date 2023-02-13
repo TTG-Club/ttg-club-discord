@@ -12,7 +12,9 @@ const eventInteractionCreate: BotEvent = {
 
       if (command.cooldown && cooldown) {
         if (Date.now() < cooldown) {
-          interaction.reply(`You have to wait ${ Math.floor(Math.abs(Date.now() - cooldown) / 1000) } second(s) to use this command again.`);
+          interaction.reply(`You have to wait ${
+            Math.floor(Math.abs(Date.now() - cooldown) / 1000)
+          } second(s) to use this command again.`);
 
           setTimeout(() => interaction.deleteReply(), 5000);
 
@@ -39,6 +41,7 @@ const eventInteractionCreate: BotEvent = {
       const command = interaction.client.slashCommands.get(interaction.commandName);
 
       if (!command) {
+        // eslint-disable-next-line no-console
         console.error(`No command matching ${ interaction.commandName } was found.`);
 
         return;
@@ -48,6 +51,7 @@ const eventInteractionCreate: BotEvent = {
         if (!command.autocomplete) return;
         command.autocomplete(interaction);
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.error(error);
       }
     }

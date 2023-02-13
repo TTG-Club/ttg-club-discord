@@ -51,7 +51,9 @@ const eventMessageCreate: BotEvent = {
     if (command.cooldown && cooldown) {
       if (Date.now() < cooldown) {
         sendTimedMessage(
-          `You have to wait ${ Math.floor(Math.abs(Date.now() - cooldown) / 1000) } second(s) to use this command again.`,
+          `You have to wait ${
+            Math.floor(Math.abs(Date.now() - cooldown) / 1000)
+          } second(s) to use this command again.`,
           message.channel,
           5000
         );

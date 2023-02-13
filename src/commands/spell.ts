@@ -3,15 +3,14 @@ import type { TSpellItem, TSpellLink } from '../types/Spell';
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import _ from 'lodash';
 import * as console from 'node:console';
-import sanitizeHtml from 'sanitize-html';
-import TurndownService from 'turndown';
-import { gfm } from 'turndown-plugin-gfm';
 
 import { useAxios } from '../utils/useAxios';
 import { useConfig } from '../utils/useConfig';
+import { useMarkdown } from '../utils/useMarkdown';
 
 const http = useAxios();
 const { API_URL } = useConfig();
+const { getDescriptionEmbeds, getPagination } = useMarkdown();
 
 const commandSpell: SlashCommand = {
   command: new SlashCommandBuilder()
@@ -104,45 +103,9 @@ const commandSpell: SlashCommand = {
         components.push(spell.components.m);
       }
 
-      const embed: {
-        main: EmbedBuilder,
-        desc: EmbedBuilder | null,
-        upper: EmbedBuilder | null
-      } = {
-        main: new EmbedBuilder(),
-        desc: null,
-        upper: null
-      };
-
-      const turndownService = new TurndownService();
-
-      turndownService.use(gfm);
-
-      turndownService.addRule('strikethrough', {
-        filter: 'p',
-        replacement: content => `\n\n${ content }\n\n`
-      });
-
       const title = `${ spell.name.rus } [${ spell.name.eng }]`;
       const thumbnail = `${ API_URL }/style/icons/192.png`;
       const spellUrl = `${ API_URL }${ spell.url }`;
-
-      const description = spell.description
-        ? turndownService.turndown(sanitizeHtml(spell.description, {
-          transformTags: {
-            'dice-roller': 'b'
-          }
-        }))
-        : '';
-
-      const upper = spell.upper
-        ? turndownService.turndown(sanitizeHtml(spell.upper, {
-          transformTags: {
-            'dice-roller': 'b'
-          }
-        }))
-        : '';
-
       const footer = `TTG Club | ${ spell.source.name } ${ spell.source.page || '' }`.trim();
 
       const fields = {
@@ -208,7 +171,9 @@ const commandSpell: SlashCommand = {
         }
       };
 
-      embed.main
+      const embed = new EmbedBuilder();
+
+      embed
         .setTitle(title)
         .setURL(spellUrl)
         .setThumbnail(thumbnail)
@@ -220,52 +185,51 @@ const commandSpell: SlashCommand = {
           fields.range,
           fields.duration,
           fields.components
-        ]);
+        ])
+        .setFooter({
+          text: footer
+        });
 
       if (spell.classes?.length) {
-        embed.main
+        embed
           .addFields(fields.classes);
       }
 
       if (spell.subclasses?.length) {
-        embed.main
+        embed
           .addFields(fields.subclasses);
       }
 
-      embed.main
+      embed
         .addFields(fields.url);
 
-      embed.desc = new EmbedBuilder()
-        .setTitle('Описание')
-        .setDescription(description);
+      await interaction.reply({ embeds: [embed]});
 
-      if (!upper) {
-        embed.desc
-          .setFooter({
-            text: footer
-          });
+      const embeds = getDescriptionEmbeds(spell.description)
+        .map(str => (
+          new EmbedBuilder()
+            .setTitle('Описание')
+            .setDescription(str)
+        ));
+
+      if (spell.upper) {
+        embeds.push(...getDescriptionEmbeds(spell.upper)
+          .map(str => (
+            new EmbedBuilder()
+              .setTitle('На более высоких уровнях')
+              .setDescription(str)
+          )));
       }
 
-      if (upper) {
-        embed.upper = new EmbedBuilder()
-          .setTitle('На более высоких уровнях')
-          .setDescription(upper)
-          .setFooter({
-            text: footer
-          });
+      if (embeds.length <= 2) {
+        await interaction.followUp({ embeds });
+
+        return;
       }
 
-      const embeds = [embed.main];
+      const pagination = await getPagination(interaction, embeds);
 
-      if (embed.desc) {
-        embeds.push(embed.desc);
-      }
-
-      if (embed.upper) {
-        embeds.push(embed.upper);
-      }
-
-      await interaction.reply({ embeds });
+      await pagination.paginate();
     } catch (err) {
       console.error(err);
       await interaction.reply('Произошла какая-то ошибка... попробуй еще раз');

@@ -24,11 +24,13 @@ export default (client: Client) => {
       body: slashCommands.map(command => command.toJSON())
     })
     .then((data: any) => {
+      // eslint-disable-next-line no-console
       console.log(color('text', `🔥 Successfully loaded ${ color('variable', data.length) } slash command(s)`));
 
       // console.log(color('text', `🔥 Successfully loaded ${ color('variable', commands.length) } command(s)`));
     })
     .catch(e => {
+      // eslint-disable-next-line no-console
       console.log(e);
     });
 };
