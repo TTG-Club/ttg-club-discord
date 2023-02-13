@@ -1,5 +1,5 @@
 import type { SlashCommand } from '../types';
-import type { TRuleItem, TRuleLink } from '../types/Rules';
+import type { TOptionItem, TOptionLink } from '../types/Option';
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import _ from 'lodash';
 import * as console from 'node:console';
@@ -12,20 +12,20 @@ const http = useAxios();
 const { API_URL } = useConfig();
 const { getDescriptionEmbeds, getPagination } = useMarkdown();
 
-const commandRule: SlashCommand = {
+const commandOption: SlashCommand = {
   command: new SlashCommandBuilder()
-    .setName('rule')
-    .setDescription('Правила и термины')
+    .setName('option')
+    .setDescription('Особенности классов')
     .addStringOption(option => option
       .setName('name')
       .setNameLocalization('ru', 'название')
-      .setDescription('Название правила или термина')
+      .setDescription('Название особенности класса')
       .setRequired(true)
       .setAutocomplete(true)),
   autocomplete: async interaction => {
     try {
       const resp = await http.post({
-        url: `/rules`,
+        url: `/options`,
         payload: {
           page: 0,
           limit: 10,
@@ -48,11 +48,11 @@ const commandRule: SlashCommand = {
         return;
       }
 
-      const rules: TRuleLink[] = _.cloneDeep(resp.data);
+      const options: TOptionLink[] = _.cloneDeep(resp.data);
 
-      await interaction.respond(rules.map((rule: TRuleLink) => ({
-        name: rule.name.rus,
-        value: rule.url
+      await interaction.respond(options.map((option: TOptionLink) => ({
+        name: option.name.rus,
+        value: option.url
       })));
     } catch (err) {
       console.error(err);
@@ -72,27 +72,35 @@ const commandRule: SlashCommand = {
         return;
       }
 
-      const rule: TRuleItem = _.cloneDeep(resp.data);
+      const option: TOptionItem = _.cloneDeep(resp.data);
 
-      const title = `${ rule.name.rus } [${ rule.name.eng }]`;
-      const ruleUrl = `${ API_URL }${ url }`;
-      const footer = `TTG Club | ${ rule.source.name } ${ rule.source.page || '' }`.trim();
-      const description = getDescriptionEmbeds(rule.description);
+      const title = `${ option.name.rus } [${ option.name.eng }]`;
+      const optionUrl = `${ API_URL }${ url }`;
+      const footer = `TTG Club | ${ option.source.name } ${ option.source.page || '' }`.trim();
+      const description = getDescriptionEmbeds(option.description);
 
       const fields = {
-        category: {
-          name: 'Категория',
-          value: rule.type,
-          inline: true
+        requirements: {
+          name: 'Требования',
+          value: option.requirements,
+          inline: false
         },
         source: {
           name: 'Источник',
-          value: rule.source.shortName,
+          value: option.source.shortName,
           inline: true
         },
         url: {
           name: 'Оригинал',
-          value: ruleUrl,
+          value: optionUrl,
+          inline: false
+        },
+        classes: {
+          name: 'Классы',
+          value: option.classes?.length
+            ? option.classes.map((classItem: any) => classItem.name)
+              .join(', ')
+            : '',
           inline: false
         }
       };
@@ -107,9 +115,10 @@ const commandRule: SlashCommand = {
 
       embeds.main
         .setTitle(title)
-        .setURL(ruleUrl)
-        .addFields(fields.category)
+        .setURL(optionUrl)
         .addFields(fields.source)
+        .addFields(fields.requirements)
+        .addFields(fields.classes)
         .addFields(fields.url)
         .setFooter({ text: footer });
 
@@ -140,4 +149,4 @@ const commandRule: SlashCommand = {
   cooldown: 10
 };
 
-export default commandRule;
+export default commandOption;

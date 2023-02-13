@@ -1,4 +1,5 @@
 import type { BotEvent } from '../types';
+import { userMention } from 'discord.js';
 import type { Interaction } from 'discord.js';
 
 
@@ -6,17 +7,21 @@ const eventInteractionCreate: BotEvent = {
   name: 'interactionCreate',
   execute: async (interaction: Interaction) => {
     if (interaction.isChatInputCommand()) {
-      await interaction.deferReply();
-
       let command = interaction.client.slashCommands.get(interaction.commandName);
       let cooldown = interaction.client.cooldowns.get(`${ interaction.commandName }-${ interaction.user.username }`);
+
+      await interaction.deferReply({ ephemeral: true });
+
       if (!command) return;
 
       if (command.cooldown && cooldown) {
         if (Date.now() < cooldown) {
-          interaction.followUp(`You have to wait ${
-            Math.floor(Math.abs(Date.now() - cooldown) / 1000)
-          } second(s) to use this command again.`);
+          interaction.followUp({
+            content: `Тебе нужно подождать ${
+              Math.floor(Math.abs(Date.now() - cooldown) / 1000)
+            } секунд, чтобы использовать команды снова.`,
+            ephemeral: true
+          });
 
           setTimeout(() => interaction.deleteReply(), 5000);
 
@@ -37,6 +42,12 @@ const eventInteractionCreate: BotEvent = {
           Date.now() + command.cooldown * 1000
         );
       }
+
+      await interaction.followUp({
+        content: `${ userMention(interaction.user.id) } использует /${ interaction.commandName }`,
+        ephemeral: true,
+        fetchReply: true
+      });
 
       command.execute(interaction);
     } else if (interaction.isAutocomplete()) {

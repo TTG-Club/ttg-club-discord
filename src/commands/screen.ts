@@ -93,14 +93,12 @@ const commandScreen: SlashCommand = {
       const embed = new EmbedBuilder();
 
       const title = `${ screen.name.rus } [${ screen.name.eng }]`;
-      const thumbnail = `${ API_URL }/style/icons/192.png`;
       const screenUrl = `${ API_URL }${ screen.url }`;
       const footer = `TTG Club | ${ screen.source.name } ${ screen.source.page || '' }`.trim();
 
       embed
         .setTitle(title)
         .setURL(screenUrl)
-        .setThumbnail(thumbnail)
         .addFields({
           name: 'Источник',
           value: screen.source.shortName,

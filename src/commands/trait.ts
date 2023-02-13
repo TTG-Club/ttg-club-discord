@@ -75,13 +75,12 @@ const commandTrait: SlashCommand = {
       const trait: TTraitItem = _.cloneDeep(resp.data);
 
       const title = `${ trait.name.rus } [${ trait.name.eng }]`;
-      const thumbnail = `${ API_URL }/style/icons/192.png`;
       const traitUrl = `${ API_URL }${ url }`;
       const footer = `TTG Club | ${ trait.source.name } ${ trait.source.page || '' }`.trim();
       const description = getDescriptionEmbeds(trait.description);
 
       const fields = {
-        category: {
+        requirements: {
           name: 'Требования',
           value: trait.requirements,
           inline: false
@@ -109,9 +108,8 @@ const commandTrait: SlashCommand = {
       embeds.main
         .setTitle(title)
         .setURL(traitUrl)
-        .setThumbnail(thumbnail)
         .addFields(fields.source)
-        .addFields(fields.category)
+        .addFields(fields.requirements)
         .addFields(fields.url)
         .setFooter({ text: footer });
 

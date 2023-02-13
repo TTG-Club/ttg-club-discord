@@ -104,7 +104,6 @@ const commandSpell: SlashCommand = {
       }
 
       const title = `${ spell.name.rus } [${ spell.name.eng }]`;
-      const thumbnail = `${ API_URL }/style/icons/192.png`;
       const spellUrl = `${ API_URL }${ spell.url }`;
       const footer = `TTG Club | ${ spell.source.name } ${ spell.source.page || '' }`.trim();
 
@@ -176,7 +175,6 @@ const commandSpell: SlashCommand = {
       embed
         .setTitle(title)
         .setURL(spellUrl)
-        .setThumbnail(thumbnail)
         .addFields([
           fields.level,
           fields.school,
