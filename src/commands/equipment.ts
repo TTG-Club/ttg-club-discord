@@ -1,5 +1,5 @@
 import type { SlashCommand } from '../types';
-import type { TRuleItem, TRuleLink } from '../types/Rules';
+import type { TEquipmentItem, TEquipmentLink } from '../types/Equipment';
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import _ from 'lodash';
 import * as console from 'node:console';
@@ -12,20 +12,20 @@ const http = useAxios();
 const { API_URL } = useConfig();
 const { getDescriptionEmbeds, getPagination } = useMarkdown();
 
-const commandRule: SlashCommand = {
+const commandEquipment: SlashCommand = {
   command: new SlashCommandBuilder()
-    .setName('rule')
-    .setDescription('Правила и термины')
+    .setName('equipment')
+    .setDescription('Снаряжение')
     .addStringOption(option => option
       .setName('name')
       .setNameLocalization('ru', 'название')
-      .setDescription('Название правила или термина')
+      .setDescription('Название предмета')
       .setRequired(true)
       .setAutocomplete(true)),
   autocomplete: async interaction => {
     try {
       const resp = await http.post({
-        url: `/rules`,
+        url: `/items`,
         payload: {
           page: 0,
           limit: 10,
@@ -48,11 +48,11 @@ const commandRule: SlashCommand = {
         return;
       }
 
-      const rules: TRuleLink[] = _.cloneDeep(resp.data);
+      const equipments: TEquipmentLink[] = _.cloneDeep(resp.data);
 
-      await interaction.respond(rules.map((rule: TRuleLink) => ({
-        name: rule.name.rus,
-        value: rule.url
+      await interaction.respond(equipments.map((item: TEquipmentLink) => ({
+        name: item.name.rus,
+        value: item.url
       })));
     } catch (err) {
       console.error(err);
@@ -72,27 +72,36 @@ const commandRule: SlashCommand = {
         return;
       }
 
-      const rule: TRuleItem = _.cloneDeep(resp.data);
+      const equipment: TEquipmentItem = _.cloneDeep(resp.data);
 
-      const title = `${ rule.name.rus } [${ rule.name.eng }]`;
-      const ruleUrl = `${ API_URL }${ url }`;
-      const footer = `TTG Club | ${ rule.source.name } ${ rule.source.page || '' }`.trim();
-      const description = getDescriptionEmbeds(rule.description);
+      const title = `${ equipment.name.rus } [${ equipment.name.eng }]`;
+      const itemUrl = `${ API_URL }${ url }`;
+      const footer = `TTG Club | ${ equipment.source.name } ${ equipment.source.page || '' }`.trim();
 
       const fields = {
-        category: {
-          name: 'Категория',
-          value: rule.type,
+        price: {
+          name: 'Цена',
+          value: String(equipment.price),
+          inline: true
+        },
+        weight: {
+          name: 'Вес (в фунтах)',
+          value: String(equipment.weight),
           inline: true
         },
         source: {
           name: 'Источник',
-          value: rule.source.shortName,
+          value: equipment.source.shortName,
           inline: true
         },
         url: {
           name: 'Оригинал',
-          value: ruleUrl,
+          value: itemUrl,
+          inline: false
+        },
+        categories: {
+          name: 'Категории',
+          value: equipment.categories.join(', '),
           inline: false
         }
       };
@@ -107,38 +116,54 @@ const commandRule: SlashCommand = {
 
       embeds.main
         .setTitle(title)
-        .setURL(ruleUrl)
-        .addFields(fields.category)
+        .setURL(itemUrl);
+
+      if (equipment.price) {
+        embeds.main
+          .addFields(fields.price);
+      }
+
+      if (equipment.weight) {
+        embeds.main
+          .addFields(fields.weight);
+      }
+
+      embeds.main
         .addFields(fields.source)
+        .addFields(fields.categories)
         .addFields(fields.url)
         .setFooter({ text: footer });
-
-      const descLength = description.length;
-
-      embeds.desc = description.map((str, index) => {
-        const embed = new EmbedBuilder()
-          .setDescription(str);
-
-        if (!index || descLength > 2) {
-          embed.setTitle('Описание');
-        }
-
-        return embed;
-      });
 
       await interaction.followUp({
         embeds: [embeds.main]
       });
 
-      if (embeds.desc.length <= 2) {
-        await interaction.followUp({ embeds: embeds.desc });
+      if (equipment.description) {
+        const description = getDescriptionEmbeds(equipment.description);
 
-        return;
+        const descLength = description.length;
+
+        embeds.desc = description.map((str, index) => {
+          const embed = new EmbedBuilder()
+            .setDescription(str);
+
+          if (!index || descLength > 2) {
+            embed.setTitle('Описание');
+          }
+
+          return embed;
+        });
+
+        if (embeds.desc.length <= 2) {
+          await interaction.followUp({ embeds: embeds.desc });
+
+          return;
+        }
+
+        const pagination = await getPagination(interaction, embeds.desc);
+
+        await pagination.paginate();
       }
-
-      const pagination = await getPagination(interaction, embeds.desc);
-
-      await pagination.paginate();
     } catch (err) {
       console.error(err);
       await interaction.followUp('Произошла какая-то ошибка... попробуй еще раз');
@@ -147,4 +172,4 @@ const commandRule: SlashCommand = {
   cooldown: 10
 };
 
-export default commandRule;
+export default commandEquipment;

@@ -3,6 +3,7 @@ import type {
 } from 'discord.js';
 import { ButtonStyle } from 'discord.js';
 import { Pagination } from 'discordjs-button-embed-pagination';
+import type sanitize from 'sanitize-html';
 import sanitizeHtml from 'sanitize-html';
 import TurndownService from 'turndown';
 import { gfm } from 'turndown-plugin-gfm';
@@ -10,19 +11,74 @@ import { gfm } from 'turndown-plugin-gfm';
 import { useJSDom } from './useJSDom';
 
 export const useMarkdown = () => {
-  const turndownService = new TurndownService();
+  const turndownService = new TurndownService({
+    bulletListMarker: '-'
+  });
 
   turndownService.use(gfm);
 
-  turndownService.addRule('strikethrough', {
+  turndownService.addRule('paragraph', {
     filter: 'p',
     replacement: content => `\n\n${ content }\n\n`
   });
 
   const getSanitized = (html: string) => {
     return sanitizeHtml(html, {
+      allowedTags: [
+        'a',
+        'abbr',
+        'b',
+        'blockquote',
+        'br',
+        'caption',
+        'code',
+        'col',
+        'colgroup',
+        'h1',
+        'h2',
+        'h3',
+        'h4',
+        'h5',
+        'h6',
+        'hr',
+        'i',
+        'li',
+        'ol',
+        'p',
+        'pre',
+        's',
+        'section',
+        'span',
+        'strong',
+        'table',
+        'tbody',
+        'td',
+        'tfoot',
+        'th',
+        'thead',
+        'tr',
+        'u',
+        'ul'
+      ],
       transformTags: {
-        'dice-roller': 'b'
+        'dice-roller': (_tagName, attribs) => {
+          const newTag: sanitize.Tag = {
+            attribs,
+            tagName: 'b'
+          };
+
+          const attributes = Object.keys(attribs);
+
+          if (attributes.includes('formula')) {
+            newTag.text = attribs.formula;
+          }
+
+          if (attributes.includes(':formula')) {
+            newTag.text = attribs[':formula'];
+          }
+
+          return newTag;
+        }
       }
     });
   };
@@ -32,7 +88,9 @@ export const useMarkdown = () => {
       return '';
     }
 
-    return turndownService.turndown(getSanitized(html));
+    const sanitized = getSanitized(html);
+
+    return turndownService.turndown(sanitized);
   };
 
   const getMarkdownParagraphs = (html: string) => {

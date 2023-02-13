@@ -15,7 +15,7 @@ const { getDescriptionEmbeds, getPagination } = useMarkdown();
 const commandSpell: SlashCommand = {
   command: new SlashCommandBuilder()
     .setName('spell')
-    .setDescription('Получение информации о заклинании')
+    .setDescription('Заклинания')
     .addStringOption(option => option
       .setName('name')
       .setNameLocalization('ru', 'название')
@@ -82,7 +82,7 @@ const commandSpell: SlashCommand = {
       const resp = await http.post({ url });
 
       if (resp.status !== 200) {
-        await interaction.reply('Произошла какая-то ошибка... попробуй еще раз');
+        await interaction.followUp('Произошла какая-то ошибка... попробуй еще раз');
 
         return;
       }
@@ -104,7 +104,6 @@ const commandSpell: SlashCommand = {
       }
 
       const title = `${ spell.name.rus } [${ spell.name.eng }]`;
-      const thumbnail = `${ API_URL }/style/icons/192.png`;
       const spellUrl = `${ API_URL }${ spell.url }`;
       const footer = `TTG Club | ${ spell.source.name } ${ spell.source.page || '' }`.trim();
 
@@ -176,7 +175,6 @@ const commandSpell: SlashCommand = {
       embed
         .setTitle(title)
         .setURL(spellUrl)
-        .setThumbnail(thumbnail)
         .addFields([
           fields.level,
           fields.school,

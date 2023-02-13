@@ -1,5 +1,5 @@
 import type { SlashCommand } from '../types';
-import type { TRuleItem, TRuleLink } from '../types/Rules';
+import type { TGodItem, TGodLink } from '../types/God';
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import _ from 'lodash';
 import * as console from 'node:console';
@@ -12,20 +12,20 @@ const http = useAxios();
 const { API_URL } = useConfig();
 const { getDescriptionEmbeds, getPagination } = useMarkdown();
 
-const commandRule: SlashCommand = {
+const commandGod: SlashCommand = {
   command: new SlashCommandBuilder()
-    .setName('rule')
-    .setDescription('Правила и термины')
+    .setName('god')
+    .setDescription('Боги')
     .addStringOption(option => option
       .setName('name')
-      .setNameLocalization('ru', 'название')
-      .setDescription('Название правила или термина')
+      .setNameLocalization('ru', 'имя')
+      .setDescription('Имя бога')
       .setRequired(true)
       .setAutocomplete(true)),
   autocomplete: async interaction => {
     try {
       const resp = await http.post({
-        url: `/rules`,
+        url: `/gods`,
         payload: {
           page: 0,
           limit: 10,
@@ -48,11 +48,11 @@ const commandRule: SlashCommand = {
         return;
       }
 
-      const rules: TRuleLink[] = _.cloneDeep(resp.data);
+      const gods: TGodLink[] = _.cloneDeep(resp.data);
 
-      await interaction.respond(rules.map((rule: TRuleLink) => ({
-        name: rule.name.rus,
-        value: rule.url
+      await interaction.respond(gods.map((god: TGodLink) => ({
+        name: `[${ god.shortAlignment }] ${ god.name.rus }`,
+        value: god.url
       })));
     } catch (err) {
       console.error(err);
@@ -72,30 +72,12 @@ const commandRule: SlashCommand = {
         return;
       }
 
-      const rule: TRuleItem = _.cloneDeep(resp.data);
+      const god: TGodItem = _.cloneDeep(resp.data);
 
-      const title = `${ rule.name.rus } [${ rule.name.eng }]`;
-      const ruleUrl = `${ API_URL }${ url }`;
-      const footer = `TTG Club | ${ rule.source.name } ${ rule.source.page || '' }`.trim();
-      const description = getDescriptionEmbeds(rule.description);
-
-      const fields = {
-        category: {
-          name: 'Категория',
-          value: rule.type,
-          inline: true
-        },
-        source: {
-          name: 'Источник',
-          value: rule.source.shortName,
-          inline: true
-        },
-        url: {
-          name: 'Оригинал',
-          value: ruleUrl,
-          inline: false
-        }
-      };
+      const title = `${ god.name.rus } [${ god.name.eng }]`;
+      const godUrl = `${ API_URL }${ url }`;
+      const thumbnail = god.images?.length ? god.images[0] : null;
+      const footer = `TTG Club | ${ god.source.name } ${ god.source.page || '' }`.trim();
 
       const embeds: {
         main: EmbedBuilder,
@@ -107,11 +89,69 @@ const commandRule: SlashCommand = {
 
       embeds.main
         .setTitle(title)
-        .setURL(ruleUrl)
-        .addFields(fields.category)
-        .addFields(fields.source)
-        .addFields(fields.url)
+        .setURL(godUrl)
+        .addFields({
+          name: 'Источник',
+          value: god.source.shortName,
+          inline: false
+        })
+        .addFields({
+          name: 'Мировоззрение',
+          value: god.alignment,
+          inline: false
+        })
+        .addFields({
+          name: 'Ранг',
+          value: god.rank,
+          inline: false
+        })
+        .addFields({
+          name: 'Домены',
+          value: god.domains.join(', '),
+          inline: false
+        })
+        .addFields({
+          name: 'Пантеоны',
+          value: god.panteons.join(', '),
+          inline: false
+        })
         .setFooter({ text: footer });
+
+      if (god.titles?.length) {
+        embeds.main
+          .addFields({
+            name: 'Титулы',
+            value: god.titles.join(', '),
+            inline: false
+          });
+      }
+
+      if (god.symbol) {
+        embeds.main
+          .addFields({
+            name: 'Символы',
+            value: god.symbol,
+            inline: false
+          });
+      }
+
+      embeds.main
+        .addFields({
+          name: 'Оригинал',
+          value: godUrl,
+          inline: false
+        });
+
+      if (thumbnail) {
+        embeds.main
+          .setThumbnail(thumbnail);
+      }
+
+      await interaction.followUp({
+        embeds: [embeds.main]
+      });
+
+      const description = getDescriptionEmbeds(god.description);
 
       const descLength = description.length;
 
@@ -124,10 +164,6 @@ const commandRule: SlashCommand = {
         }
 
         return embed;
-      });
-
-      await interaction.followUp({
-        embeds: [embeds.main]
       });
 
       if (embeds.desc.length <= 2) {
@@ -147,4 +183,4 @@ const commandRule: SlashCommand = {
   cooldown: 10
 };
 
-export default commandRule;
+export default commandGod;

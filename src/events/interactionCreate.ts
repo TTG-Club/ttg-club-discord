@@ -6,17 +6,21 @@ const eventInteractionCreate: BotEvent = {
   name: 'interactionCreate',
   execute: async (interaction: Interaction) => {
     if (interaction.isChatInputCommand()) {
-      await interaction.deferReply();
-
       let command = interaction.client.slashCommands.get(interaction.commandName);
       let cooldown = interaction.client.cooldowns.get(`${ interaction.commandName }-${ interaction.user.username }`);
+
+      await interaction.deferReply();
+
       if (!command) return;
 
       if (command.cooldown && cooldown) {
         if (Date.now() < cooldown) {
-          interaction.reply(`You have to wait ${
-            Math.floor(Math.abs(Date.now() - cooldown) / 1000)
-          } second(s) to use this command again.`);
+          interaction.followUp({
+            content: `Тебе нужно подождать ${
+              Math.floor(Math.abs(Date.now() - cooldown) / 1000)
+            } секунд, чтобы использовать команды снова.`,
+            ephemeral: true
+          });
 
           setTimeout(() => interaction.deleteReply(), 5000);
 

@@ -17,7 +17,7 @@ const { getDescriptionEmbeds, getPagination } = useMarkdown();
 const commandScreen: SlashCommand = {
   command: new SlashCommandBuilder()
     .setName('screen')
-    .setDescription('Beta: Получение информации из ширмы')
+    .setDescription('Ширма (справочник)')
     .addStringOption(option => option
       .setName('name')
       .setNameLocalization('ru', 'название')
@@ -83,7 +83,7 @@ const commandScreen: SlashCommand = {
       const resp = await http.post({ url });
 
       if (resp.status !== 200) {
-        await interaction.reply('Произошла какая-то ошибка... попробуй еще раз');
+        await interaction.followUp('Произошла какая-то ошибка... попробуй еще раз');
 
         return;
       }
@@ -93,14 +93,12 @@ const commandScreen: SlashCommand = {
       const embed = new EmbedBuilder();
 
       const title = `${ screen.name.rus } [${ screen.name.eng }]`;
-      const thumbnail = `${ API_URL }/style/icons/192.png`;
       const screenUrl = `${ API_URL }${ screen.url }`;
       const footer = `TTG Club | ${ screen.source.name } ${ screen.source.page || '' }`.trim();
 
       embed
         .setTitle(title)
         .setURL(screenUrl)
-        .setThumbnail(thumbnail)
         .addFields({
           name: 'Источник',
           value: screen.source.shortName,
@@ -120,13 +118,19 @@ const commandScreen: SlashCommand = {
           text: footer
         });
 
+      const description = getDescriptionEmbeds(screen.description);
+      const descLength = description.length;
 
-      const embeds = getDescriptionEmbeds(screen.description)
-        .map(str => (
-          new EmbedBuilder()
-            .setTitle('Описание')
-            .setDescription(str)
-        ));
+      const embeds = description.map((str, index) => {
+        const embed = new EmbedBuilder()
+          .setDescription(str);
+
+        if (!index || descLength > 2) {
+          embed.setTitle('Описание');
+        }
+
+        return embed;
+      });
 
       await interaction.followUp({ embeds: [embed]});
 

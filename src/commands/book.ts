@@ -1,5 +1,5 @@
 import type { SlashCommand } from '../types';
-import type { TRuleItem, TRuleLink } from '../types/Rules';
+import type { TBookItem, TBookLink } from '../types/Book';
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import _ from 'lodash';
 import * as console from 'node:console';
@@ -12,20 +12,20 @@ const http = useAxios();
 const { API_URL } = useConfig();
 const { getDescriptionEmbeds, getPagination } = useMarkdown();
 
-const commandRule: SlashCommand = {
+const commandBook: SlashCommand = {
   command: new SlashCommandBuilder()
-    .setName('rule')
-    .setDescription('Правила и термины')
+    .setName('book')
+    .setDescription('Источники')
     .addStringOption(option => option
       .setName('name')
       .setNameLocalization('ru', 'название')
-      .setDescription('Название правила или термина')
+      .setDescription('Название источника')
       .setRequired(true)
       .setAutocomplete(true)),
   autocomplete: async interaction => {
     try {
       const resp = await http.post({
-        url: `/rules`,
+        url: `/books`,
         payload: {
           page: 0,
           limit: 10,
@@ -34,6 +34,10 @@ const commandRule: SlashCommand = {
             exact: false
           },
           order: [
+            {
+              field: 'year',
+              direction: 'asc'
+            },
             {
               field: 'name',
               direction: 'asc'
@@ -48,11 +52,11 @@ const commandRule: SlashCommand = {
         return;
       }
 
-      const rules: TRuleLink[] = _.cloneDeep(resp.data);
+      const books: TBookLink[] = _.cloneDeep(resp.data);
 
-      await interaction.respond(rules.map((rule: TRuleLink) => ({
-        name: rule.name.rus,
-        value: rule.url
+      await interaction.respond(books.map((book: TBookLink) => ({
+        name: book.name.rus,
+        value: book.url
       })));
     } catch (err) {
       console.error(err);
@@ -72,30 +76,11 @@ const commandRule: SlashCommand = {
         return;
       }
 
-      const rule: TRuleItem = _.cloneDeep(resp.data);
+      const book: TBookItem = _.cloneDeep(resp.data);
 
-      const title = `${ rule.name.rus } [${ rule.name.eng }]`;
-      const ruleUrl = `${ API_URL }${ url }`;
-      const footer = `TTG Club | ${ rule.source.name } ${ rule.source.page || '' }`.trim();
-      const description = getDescriptionEmbeds(rule.description);
-
-      const fields = {
-        category: {
-          name: 'Категория',
-          value: rule.type,
-          inline: true
-        },
-        source: {
-          name: 'Источник',
-          value: rule.source.shortName,
-          inline: true
-        },
-        url: {
-          name: 'Оригинал',
-          value: ruleUrl,
-          inline: false
-        }
-      };
+      const title = `${ book.name.rus } [${ book.name.eng }]`;
+      const bookUrl = `${ API_URL }${ url }`;
+      const footer = `TTG Club | ${ book.source.name } ${ book.source.page || '' }`.trim();
 
       const embeds: {
         main: EmbedBuilder,
@@ -107,38 +92,65 @@ const commandRule: SlashCommand = {
 
       embeds.main
         .setTitle(title)
-        .setURL(ruleUrl)
-        .addFields(fields.category)
-        .addFields(fields.source)
-        .addFields(fields.url)
+        .setURL(bookUrl)
+        .addFields({
+          name: 'Тип',
+          value: book.type.name,
+          inline: true
+        })
+        .addFields({
+          name: 'Аббревиатура',
+          value: book.source.shortName,
+          inline: true
+        })
         .setFooter({ text: footer });
 
-      const descLength = description.length;
+      if (book.year) {
+        embeds.main
+          .addFields({
+            name: 'Год',
+            value: String(book.year),
+            inline: true
+          });
+      }
 
-      embeds.desc = description.map((str, index) => {
-        const embed = new EmbedBuilder()
-          .setDescription(str);
-
-        if (!index || descLength > 2) {
-          embed.setTitle('Описание');
-        }
-
-        return embed;
-      });
+      embeds.main
+        .addFields({
+          name: 'Оригинал',
+          value: bookUrl,
+          inline: false
+        });
 
       await interaction.followUp({
         embeds: [embeds.main]
       });
 
-      if (embeds.desc.length <= 2) {
-        await interaction.followUp({ embeds: embeds.desc });
+      if (book.description) {
+        const description = getDescriptionEmbeds(book.description);
 
-        return;
+        const descLength = description.length;
+
+        embeds.desc = description.map((str, index) => {
+          const embed = new EmbedBuilder()
+            .setDescription(str);
+
+          if (!index || descLength > 2) {
+            embed.setTitle('Описание');
+          }
+
+          return embed;
+        });
+
+        if (embeds.desc.length <= 2) {
+          await interaction.followUp({ embeds: embeds.desc });
+
+          return;
+        }
+
+        const pagination = await getPagination(interaction, embeds.desc);
+
+        await pagination.paginate();
       }
-
-      const pagination = await getPagination(interaction, embeds.desc);
-
-      await pagination.paginate();
     } catch (err) {
       console.error(err);
       await interaction.followUp('Произошла какая-то ошибка... попробуй еще раз');
@@ -147,4 +159,4 @@ const commandRule: SlashCommand = {
   cooldown: 10
 };
 
-export default commandRule;
+export default commandBook;

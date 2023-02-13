@@ -9,8 +9,8 @@ export type colorType = 'text' | 'variable' | 'error';
 export const useHelpers = () => {
   const themeColors: { [key in colorType]: string } = {
     text: '#ff8e4d',
-    variable: '#ff624d',
-    error: '#f5426c'
+    variable: '#3567C9',
+    error: '#ff3333'
   };
 
   const getThemeColor = (color: colorType) => Number(`0x${ themeColors[color].substring(1) }`);
