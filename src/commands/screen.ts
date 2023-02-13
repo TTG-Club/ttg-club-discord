@@ -120,7 +120,6 @@ const commandScreen: SlashCommand = {
           text: footer
         });
 
-      await interaction.reply({ embeds: [embed]});
 
       const embeds = getDescriptionEmbeds(screen.description)
         .map(str => (
@@ -128,6 +127,8 @@ const commandScreen: SlashCommand = {
             .setTitle('Описание')
             .setDescription(str)
         ));
+
+      await interaction.followUp({ embeds: [embed]});
 
       if (embeds.length <= 2) {
         await interaction.followUp({ embeds });
@@ -140,7 +141,7 @@ const commandScreen: SlashCommand = {
       await pagination.paginate();
     } catch (err) {
       console.error(err);
-      await interaction.reply('Произошла какая-то ошибка... попробуй еще раз');
+      await interaction.followUp('Произошла какая-то ошибка... попробуй еще раз');
     }
   },
   cooldown: 10

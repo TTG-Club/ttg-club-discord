@@ -4,8 +4,10 @@ import type { Interaction } from 'discord.js';
 
 const eventInteractionCreate: BotEvent = {
   name: 'interactionCreate',
-  execute: (interaction: Interaction) => {
+  execute: async (interaction: Interaction) => {
     if (interaction.isChatInputCommand()) {
+      await interaction.deferReply();
+
       let command = interaction.client.slashCommands.get(interaction.commandName);
       let cooldown = interaction.client.cooldowns.get(`${ interaction.commandName }-${ interaction.user.username }`);
       if (!command) return;

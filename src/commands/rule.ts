@@ -121,7 +121,7 @@ const commandRule: SlashCommand = {
           .setDescription(str)
       ));
 
-      await interaction.reply({
+      await interaction.followUp({
         embeds: [embeds.main]
       });
 
@@ -136,7 +136,7 @@ const commandRule: SlashCommand = {
       await pagination.paginate();
     } catch (err) {
       console.error(err);
-      await interaction.reply('Произошла какая-то ошибка... попробуй еще раз');
+      await interaction.followUp('Произошла какая-то ошибка... попробуй еще раз');
     }
   },
   cooldown: 10

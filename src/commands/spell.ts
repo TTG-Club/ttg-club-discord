@@ -203,8 +203,6 @@ const commandSpell: SlashCommand = {
       embed
         .addFields(fields.url);
 
-      await interaction.reply({ embeds: [embed]});
-
       const embeds = getDescriptionEmbeds(spell.description)
         .map(str => (
           new EmbedBuilder()
@@ -221,6 +219,8 @@ const commandSpell: SlashCommand = {
           )));
       }
 
+      await interaction.followUp({ embeds: [embed]});
+
       if (embeds.length <= 2) {
         await interaction.followUp({ embeds });
 
@@ -232,7 +232,7 @@ const commandSpell: SlashCommand = {
       await pagination.paginate();
     } catch (err) {
       console.error(err);
-      await interaction.reply('Произошла какая-то ошибка... попробуй еще раз');
+      await interaction.followUp('Произошла какая-то ошибка... попробуй еще раз');
     }
   },
   cooldown: 10
