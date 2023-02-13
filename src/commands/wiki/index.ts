@@ -1,7 +1,6 @@
 import commandArmor from './armor';
 import commandArtifact from './artifact';
 import commandBook from './book';
-import commandDiceRoller from './diceRoller';
 import commandEquipment from './equipment';
 import commandGod from './god';
 import commandOption from './option';
@@ -14,7 +13,6 @@ import commandWeapon from './weapon';
 
 export default [
   commandSpell,
-  commandDiceRoller,
   commandScreen,
   commandRule,
   commandTrait,
