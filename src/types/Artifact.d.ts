@@ -1,11 +1,11 @@
 import type {
-  TName, TPrice, TSource
+  TName, TPrice, TSource, TType
 } from './BaseTypes';
 
 export type TArtifactLink = {
   name: TName;
   url: string;
-  type: TArtifactType;
+  type: TType;
   source: TSource;
   rarity: TArtifactRarity;
   homebrew?: boolean;
@@ -17,14 +17,9 @@ export type TArtifactRarity = {
   short: string;
 }
 
-export type TArtifactType = {
-  name: string;
-  order: number;
-}
-
 export type TArtifactItem = {
   name: TName;
-  type: TArtifactType;
+  type: TType;
   source: TSource;
   rarity: TArtifactRarity;
   description: string;

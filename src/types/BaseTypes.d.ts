@@ -31,3 +31,8 @@ export type TPrice = {
   dmg: string;
   xge: string;
 }
+
+export type TType = {
+  name: string;
+  order: number;
+}

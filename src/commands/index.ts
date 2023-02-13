@@ -1,3 +1,4 @@
+import commandArmor from './armor';
 import commandArtifact from './artifact';
 import commandBook from './book';
 import commandDiceRoller from './diceRoller';
@@ -8,6 +9,7 @@ import commandRule from './rule';
 import commandScreen from './screen';
 import commandSpell from './spell';
 import commandTrait from './trait';
+import commandWeapon from './weapon';
 
 export default [
   commandSpell,
@@ -19,5 +21,7 @@ export default [
   commandEquipment,
   commandArtifact,
   commandGod,
-  commandBook
+  commandBook,
+  commandWeapon,
+  commandArmor
 ];
