@@ -1,12 +1,12 @@
-import type { SlashCommand } from '../types';
-import type { TSpellItem, TSpellLink } from '../types/Spell';
+import type { SlashCommand } from '../../types';
+import type { TSpellItem, TSpellLink } from '../../types/Spell';
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import _ from 'lodash';
 import * as console from 'node:console';
 
-import { useAxios } from '../utils/useAxios';
-import { useConfig } from '../utils/useConfig';
-import { useMarkdown } from '../utils/useMarkdown';
+import { useAxios } from '../../utils/useAxios';
+import { useConfig } from '../../utils/useConfig';
+import { useMarkdown } from '../../utils/useMarkdown';
 
 const http = useAxios();
 const { API_URL } = useConfig();

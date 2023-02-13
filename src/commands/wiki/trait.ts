@@ -1,31 +1,31 @@
-import type { SlashCommand } from '../types';
-import type { TRuleItem, TRuleLink } from '../types/Rules';
+import type { SlashCommand } from '../../types';
+import type { TTraitItem, TTraitLink } from '../../types/Trait';
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import _ from 'lodash';
 import * as console from 'node:console';
 
-import { useAxios } from '../utils/useAxios';
-import { useConfig } from '../utils/useConfig';
-import { useMarkdown } from '../utils/useMarkdown';
+import { useAxios } from '../../utils/useAxios';
+import { useConfig } from '../../utils/useConfig';
+import { useMarkdown } from '../../utils/useMarkdown';
 
 const http = useAxios();
 const { API_URL } = useConfig();
 const { getDescriptionEmbeds, getPagination } = useMarkdown();
 
-const commandRule: SlashCommand = {
+const commandTrait: SlashCommand = {
   command: new SlashCommandBuilder()
-    .setName('rule')
-    .setDescription('Правила и термины')
+    .setName('trait')
+    .setDescription('Черты')
     .addStringOption(option => option
       .setName('name')
       .setNameLocalization('ru', 'название')
-      .setDescription('Название правила или термина')
+      .setDescription('Название черты')
       .setRequired(true)
       .setAutocomplete(true)),
   autocomplete: async interaction => {
     try {
       const resp = await http.post({
-        url: `/rules`,
+        url: `/traits`,
         payload: {
           page: 0,
           limit: 10,
@@ -48,11 +48,11 @@ const commandRule: SlashCommand = {
         return;
       }
 
-      const rules: TRuleLink[] = _.cloneDeep(resp.data);
+      const traits: TTraitLink[] = _.cloneDeep(resp.data);
 
-      await interaction.respond(rules.map((rule: TRuleLink) => ({
-        name: rule.name.rus,
-        value: rule.url
+      await interaction.respond(traits.map((trait: TTraitLink) => ({
+        name: trait.name.rus,
+        value: trait.url
       })));
     } catch (err) {
       console.error(err);
@@ -72,27 +72,27 @@ const commandRule: SlashCommand = {
         return;
       }
 
-      const rule: TRuleItem = _.cloneDeep(resp.data);
+      const trait: TTraitItem = _.cloneDeep(resp.data);
 
-      const title = `${ rule.name.rus } [${ rule.name.eng }]`;
-      const ruleUrl = `${ API_URL }${ url }`;
-      const footer = `TTG Club | ${ rule.source.name } ${ rule.source.page || '' }`.trim();
-      const description = getDescriptionEmbeds(rule.description);
+      const title = `${ trait.name.rus } [${ trait.name.eng }]`;
+      const traitUrl = `${ API_URL }${ url }`;
+      const footer = `TTG Club | ${ trait.source.name } ${ trait.source.page || '' }`.trim();
+      const description = getDescriptionEmbeds(trait.description);
 
       const fields = {
-        category: {
-          name: 'Категория',
-          value: rule.type,
-          inline: true
+        requirements: {
+          name: 'Требования',
+          value: trait.requirements,
+          inline: false
         },
         source: {
           name: 'Источник',
-          value: rule.source.shortName,
+          value: trait.source.shortName,
           inline: true
         },
         url: {
           name: 'Оригинал',
-          value: ruleUrl,
+          value: traitUrl,
           inline: false
         }
       };
@@ -107,9 +107,9 @@ const commandRule: SlashCommand = {
 
       embeds.main
         .setTitle(title)
-        .setURL(ruleUrl)
-        .addFields(fields.category)
+        .setURL(traitUrl)
         .addFields(fields.source)
+        .addFields(fields.requirements)
         .addFields(fields.url)
         .setFooter({ text: footer });
 
@@ -147,4 +147,4 @@ const commandRule: SlashCommand = {
   cooldown: 10
 };
 
-export default commandRule;
+export default commandTrait;
