@@ -1,4 +1,5 @@
 import commandDiceRoller from './diceRoller';
+import commandItem from './item';
 import commandOption from './option';
 import commandRule from './rule';
 import commandScreen from './screen';
@@ -11,5 +12,6 @@ export default [
   commandScreen,
   commandRule,
   commandTrait,
-  commandOption
+  commandOption,
+  commandItem
 ];

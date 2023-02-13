@@ -15,7 +15,7 @@ const { getDescriptionEmbeds, getPagination } = useMarkdown();
 const commandSpell: SlashCommand = {
   command: new SlashCommandBuilder()
     .setName('spell')
-    .setDescription('Описание заклинаний')
+    .setDescription('Заклинания')
     .addStringOption(option => option
       .setName('name')
       .setNameLocalization('ru', 'название')

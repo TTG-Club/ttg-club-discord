@@ -1,5 +1,5 @@
 import type { SlashCommand } from '../types';
-import type { TTraitItem, TTraitLink } from '../types/Trait';
+import type { TItemItem, TItemLink } from '../types/Item';
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import _ from 'lodash';
 import * as console from 'node:console';
@@ -12,20 +12,20 @@ const http = useAxios();
 const { API_URL } = useConfig();
 const { getDescriptionEmbeds, getPagination } = useMarkdown();
 
-const commandTrait: SlashCommand = {
+const commandItem: SlashCommand = {
   command: new SlashCommandBuilder()
-    .setName('trait')
-    .setDescription('Черты')
+    .setName('item')
+    .setDescription('Снаряжение')
     .addStringOption(option => option
       .setName('name')
       .setNameLocalization('ru', 'название')
-      .setDescription('Название черты')
+      .setDescription('Название предмета')
       .setRequired(true)
       .setAutocomplete(true)),
   autocomplete: async interaction => {
     try {
       const resp = await http.post({
-        url: `/traits`,
+        url: `/items`,
         payload: {
           page: 0,
           limit: 10,
@@ -48,11 +48,11 @@ const commandTrait: SlashCommand = {
         return;
       }
 
-      const traits: TTraitLink[] = _.cloneDeep(resp.data);
+      const items: TItemLink[] = _.cloneDeep(resp.data);
 
-      await interaction.respond(traits.map((trait: TTraitLink) => ({
-        name: trait.name.rus,
-        value: trait.url
+      await interaction.respond(items.map((item: TItemLink) => ({
+        name: item.name.rus,
+        value: item.url
       })));
     } catch (err) {
       console.error(err);
@@ -72,27 +72,36 @@ const commandTrait: SlashCommand = {
         return;
       }
 
-      const trait: TTraitItem = _.cloneDeep(resp.data);
+      const item: TItemItem = _.cloneDeep(resp.data);
 
-      const title = `${ trait.name.rus } [${ trait.name.eng }]`;
-      const traitUrl = `${ API_URL }${ url }`;
-      const footer = `TTG Club | ${ trait.source.name } ${ trait.source.page || '' }`.trim();
-      const description = getDescriptionEmbeds(trait.description);
+      const title = `${ item.name.rus } [${ item.name.eng }]`;
+      const itemUrl = `${ API_URL }${ url }`;
+      const footer = `TTG Club | ${ item.source.name } ${ item.source.page || '' }`.trim();
 
       const fields = {
-        requirements: {
-          name: 'Требования',
-          value: trait.requirements,
-          inline: false
+        price: {
+          name: 'Цена',
+          value: String(item.price),
+          inline: true
+        },
+        weight: {
+          name: 'Вес (в фунтах)',
+          value: String(item.weight),
+          inline: true
         },
         source: {
           name: 'Источник',
-          value: trait.source.shortName,
+          value: item.source.shortName,
           inline: true
         },
         url: {
           name: 'Оригинал',
-          value: traitUrl,
+          value: itemUrl,
+          inline: false
+        },
+        categories: {
+          name: 'Категории',
+          value: item.categories.join(', '),
           inline: false
         }
       };
@@ -107,31 +116,47 @@ const commandTrait: SlashCommand = {
 
       embeds.main
         .setTitle(title)
-        .setURL(traitUrl)
+        .setURL(itemUrl);
+
+      if (item.price) {
+        embeds.main
+          .addFields(fields.price);
+      }
+
+      if (item.weight) {
+        embeds.main
+          .addFields(fields.weight);
+      }
+
+      embeds.main
         .addFields(fields.source)
-        .addFields(fields.requirements)
+        .addFields(fields.categories)
         .addFields(fields.url)
         .setFooter({ text: footer });
-
-      embeds.desc = description.map(str => (
-        new EmbedBuilder()
-          .setTitle('Описание')
-          .setDescription(str)
-      ));
 
       await interaction.followUp({
         embeds: [embeds.main]
       });
 
-      if (embeds.desc.length <= 2) {
-        await interaction.followUp({ embeds: embeds.desc });
+      if (item.description) {
+        const description = getDescriptionEmbeds(item.description);
 
-        return;
+        embeds.desc = description.map(str => (
+          new EmbedBuilder()
+            .setTitle('Описание')
+            .setDescription(str)
+        ));
+
+        if (embeds.desc.length <= 2) {
+          await interaction.followUp({ embeds: embeds.desc });
+
+          return;
+        }
+
+        const pagination = await getPagination(interaction, embeds.desc);
+
+        await pagination.paginate();
       }
-
-      const pagination = await getPagination(interaction, embeds.desc);
-
-      await pagination.paginate();
     } catch (err) {
       console.error(err);
       await interaction.followUp('Произошла какая-то ошибка... попробуй еще раз');
@@ -140,4 +165,4 @@ const commandTrait: SlashCommand = {
   cooldown: 10
 };
 
-export default commandTrait;
+export default commandItem;
