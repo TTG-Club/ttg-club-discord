@@ -1,29 +1,4 @@
-import commandArmor from './armor';
-import commandArtifact from './artifact';
-import commandBook from './book';
-import commandDiceRoller from './diceRoller';
-import commandEquipment from './equipment';
-import commandGod from './god';
-import commandOption from './option';
-import commandRace from './race';
-import commandRule from './rule';
-import commandScreen from './screen';
-import commandSpell from './spell';
-import commandTrait from './trait';
-import commandWeapon from './weapon';
+import tools from './tools';
+import wiki from './wiki';
 
-export default [
-  commandSpell,
-  commandDiceRoller,
-  commandScreen,
-  commandRule,
-  commandTrait,
-  commandOption,
-  commandEquipment,
-  commandArtifact,
-  commandGod,
-  commandBook,
-  commandWeapon,
-  commandArmor,
-  commandRace
-];
+export default [wiki, tools];

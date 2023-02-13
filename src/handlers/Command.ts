@@ -12,10 +12,12 @@ export default (client: Client) => {
   const { color } = useHelpers();
   const slashCommands: SlashCommandBuilder[] = [];
 
-  commands.forEach(command => {
-    slashCommands.push(command.command);
-    client.slashCommands.set(command.command.name, command);
-  });
+  for (const group of commands) {
+    for (const command of group) {
+      slashCommands.push(command.command);
+      client.slashCommands.set(command.command.name, command);
+    }
+  }
 
   const rest = new REST({ version: '10' }).setToken(TOKEN);
 

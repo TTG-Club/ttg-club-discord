@@ -1,9 +1,9 @@
-import type { SlashCommand } from '../types';
-import type { TRollResult } from '../utils/useDiceRoller';
+import type { SlashCommand } from '../../types';
+import type { TRollResult } from '../../utils/useDiceRoller';
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import * as console from 'node:console';
 
-import { useDiceRoller } from '../utils/useDiceRoller';
+import { useDiceRoller } from '../../utils/useDiceRoller';
 
 const { getDiceMsg } = useDiceRoller();
 

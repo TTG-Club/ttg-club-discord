@@ -1,31 +1,31 @@
-import type { SlashCommand } from '../types';
-import type { TArmorItem, TArmorLink } from '../types/Armor';
+import type { SlashCommand } from '../../types';
+import type { TWeaponItem, TWeaponLink } from '../../types/Weapon';
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import _ from 'lodash';
 import * as console from 'node:console';
 
-import { useAxios } from '../utils/useAxios';
-import { useConfig } from '../utils/useConfig';
-import { useMarkdown } from '../utils/useMarkdown';
+import { useAxios } from '../../utils/useAxios';
+import { useConfig } from '../../utils/useConfig';
+import { useMarkdown } from '../../utils/useMarkdown';
 
 const http = useAxios();
 const { API_URL } = useConfig();
 const { getDescriptionEmbeds, getPagination } = useMarkdown();
 
-const commandArmor: SlashCommand = {
+const commandWeapon: SlashCommand = {
   command: new SlashCommandBuilder()
-    .setName('armor')
-    .setDescription('Доспехи')
+    .setName('weapon')
+    .setDescription('Оружие')
     .addStringOption(option => option
       .setName('name')
       .setNameLocalization('ru', 'название')
-      .setDescription('Название доспеха')
+      .setDescription('Название оружия')
       .setRequired(true)
       .setAutocomplete(true)),
   autocomplete: async interaction => {
     try {
       const resp = await http.post({
-        url: `/armors`,
+        url: `/weapons`,
         payload: {
           page: 0,
           limit: 10,
@@ -48,11 +48,11 @@ const commandArmor: SlashCommand = {
         return;
       }
 
-      const armors: TArmorLink[] = _.cloneDeep(resp.data);
+      const weapons: TWeaponLink[] = _.cloneDeep(resp.data);
 
-      await interaction.respond(armors.map((armor: TArmorLink) => ({
-        name: armor.name.rus,
-        value: armor.url
+      await interaction.respond(weapons.map((weapon: TWeaponLink) => ({
+        name: weapon.name.rus,
+        value: weapon.url
       })));
     } catch (err) {
       console.error(err);
@@ -72,11 +72,11 @@ const commandArmor: SlashCommand = {
         return;
       }
 
-      const armor: TArmorItem = _.cloneDeep(resp.data);
+      const weapon: TWeaponItem = _.cloneDeep(resp.data);
 
-      const title = `${ armor.name.rus } [${ armor.name.eng }]`;
-      const armorUrl = `${ API_URL }${ url }`;
-      const footer = `TTG Club | ${ armor.source.name } ${ armor.source.page || '' }`.trim();
+      const title = `${ weapon.name.rus } [${ weapon.name.eng }]`;
+      const weaponUrl = `${ API_URL }${ url }`;
+      const footer = `TTG Club | ${ weapon.source.name } ${ weapon.source.page || '' }`.trim();
 
       const embeds: {
         main: EmbedBuilder,
@@ -88,56 +88,46 @@ const commandArmor: SlashCommand = {
 
       embeds.main
         .setTitle(title)
-        .setURL(armorUrl)
-        .addFields({
-          name: 'Тип',
-          value: armor.type.name,
-          inline: false
-        })
-        .addFields({
-          name: 'Класс доспеха (АС)',
-          value: armor.armorClass,
-          inline: false
-        })
+        .setURL(weaponUrl)
         .addFields({
           name: 'Стоимость',
-          value: armor.price,
+          value: weapon.price,
+          inline: true
+        })
+        .addFields({
+          name: 'Урон',
+          value: `${ weapon.damage.dice } ${ weapon.damage.type }`,
           inline: true
         })
         .addFields({
           name: 'Вес (в фунтах)',
-          value: String(armor.weight),
+          value: String(weapon.weight),
           inline: true
         })
         .addFields({
-          name: 'Помеха на скрытность',
-          value: armor.disadvantage ? 'да' : 'нет',
+          name: 'Тип',
+          value: weapon.type.name,
           inline: false
-        });
-
-      if (armor.requirement) {
-        embeds.main
-          .addFields({
-            name: 'Требование к силе',
-            value: String(armor.requirement),
-            inline: false
-          });
-      }
-
-      embeds.main
+        })
         .addFields({
-          name: 'Надевание/Снятие',
-          value: armor.duration,
+          name: 'Свойства',
+          value: weapon.properties.map(prop => (
+            `${ prop.name }${
+            prop.twoHandDice ? ` (${ prop.twoHandDice })` : ''
+          }${
+            prop.distance ? ` (дис. ${ prop.distance }` : ''
+          }`
+          )).join(', '),
           inline: false
         })
         .addFields({
           name: 'Источник',
-          value: armor.source.shortName,
+          value: weapon.source.shortName,
           inline: false
         })
         .addFields({
           name: 'Оригинал',
-          value: armorUrl,
+          value: weaponUrl,
           inline: false
         })
         .setFooter({ text: footer });
@@ -146,12 +136,23 @@ const commandArmor: SlashCommand = {
         embeds: [embeds.main]
       });
 
-      embeds.desc = getDescriptionEmbeds(armor.description)
-        .map(str => (
-          new EmbedBuilder()
-            .setTitle('Описание')
-            .setDescription(str)
-        ));
+      if (weapon.description) {
+        embeds.desc = getDescriptionEmbeds(weapon.description)
+          .map(str => (
+            new EmbedBuilder()
+              .setTitle('Описание')
+              .setDescription(str)
+          ));
+      }
+
+      if (weapon.special) {
+        embeds.desc.push(...getDescriptionEmbeds(weapon.special)
+          .map(str => (
+            new EmbedBuilder()
+              .setTitle('Особое свойство')
+              .setDescription(str)
+          )));
+      }
 
       if (embeds.desc.length <= 2) {
         await interaction.followUp({ embeds: embeds.desc });
@@ -170,4 +171,4 @@ const commandArmor: SlashCommand = {
   cooldown: 10
 };
 
-export default commandArmor;
+export default commandWeapon;

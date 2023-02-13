@@ -1,7 +1,7 @@
-import type { SlashCommand } from '../types';
+import type { SlashCommand } from '../../types';
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 
-import { useHelpers } from '../utils/useHelpers';
+import { useHelpers } from '../../utils/useHelpers';
 
 const command: SlashCommand = {
   command: new SlashCommandBuilder().setName('ping')
