@@ -9,6 +9,7 @@ const eventReady: BotEvent = {
   execute: (client: Client) => {
     const { color } = useHelpers();
 
+    // eslint-disable-next-line no-console
     console.log(color('text', `💪 Logged in as ${ color('variable', client.user?.tag) }`));
   }
 };
