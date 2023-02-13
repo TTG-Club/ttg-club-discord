@@ -1,5 +1,5 @@
 import type { SlashCommand } from '../types';
-import type { TRuleItem, TRuleLink } from '../types/Rules';
+import type { TArtifactItem, TArtifactLink } from '../types/Artifact';
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import _ from 'lodash';
 import * as console from 'node:console';
@@ -12,20 +12,20 @@ const http = useAxios();
 const { API_URL } = useConfig();
 const { getDescriptionEmbeds, getPagination } = useMarkdown();
 
-const commandRule: SlashCommand = {
+const commandArtifact: SlashCommand = {
   command: new SlashCommandBuilder()
-    .setName('rule')
-    .setDescription('Правила и термины')
+    .setName('artifact')
+    .setDescription('Магические предметы')
     .addStringOption(option => option
       .setName('name')
       .setNameLocalization('ru', 'название')
-      .setDescription('Название правила или термина')
+      .setDescription('Название предмета')
       .setRequired(true)
       .setAutocomplete(true)),
   autocomplete: async interaction => {
     try {
       const resp = await http.post({
-        url: `/rules`,
+        url: `/items/magic`,
         payload: {
           page: 0,
           limit: 10,
@@ -34,6 +34,10 @@ const commandRule: SlashCommand = {
             exact: false
           },
           order: [
+            {
+              field: 'rarity',
+              direction: 'asc'
+            },
             {
               field: 'name',
               direction: 'asc'
@@ -48,11 +52,11 @@ const commandRule: SlashCommand = {
         return;
       }
 
-      const rules: TRuleLink[] = _.cloneDeep(resp.data);
+      const artifacts: TArtifactLink[] = _.cloneDeep(resp.data);
 
-      await interaction.respond(rules.map((rule: TRuleLink) => ({
-        name: rule.name.rus,
-        value: rule.url
+      await interaction.respond(artifacts.map((artifact: TArtifactLink) => ({
+        name: `[${ artifact.rarity.short }] ${ artifact.name.rus }`,
+        value: artifact.url
       })));
     } catch (err) {
       console.error(err);
@@ -72,30 +76,12 @@ const commandRule: SlashCommand = {
         return;
       }
 
-      const rule: TRuleItem = _.cloneDeep(resp.data);
+      const artifact: TArtifactItem = _.cloneDeep(resp.data);
 
-      const title = `${ rule.name.rus } [${ rule.name.eng }]`;
-      const ruleUrl = `${ API_URL }${ url }`;
-      const footer = `TTG Club | ${ rule.source.name } ${ rule.source.page || '' }`.trim();
-      const description = getDescriptionEmbeds(rule.description);
-
-      const fields = {
-        category: {
-          name: 'Категория',
-          value: rule.type,
-          inline: true
-        },
-        source: {
-          name: 'Источник',
-          value: rule.source.shortName,
-          inline: true
-        },
-        url: {
-          name: 'Оригинал',
-          value: ruleUrl,
-          inline: false
-        }
-      };
+      const title = `${ artifact.name.rus } [${ artifact.name.eng }]`;
+      const artifactUrl = `${ API_URL }${ url }`;
+      const thumbnail = artifact.images?.length ? artifact.images[0] : null;
+      const footer = `TTG Club | ${ artifact.source.name } ${ artifact.source.page || '' }`.trim();
 
       const embeds: {
         main: EmbedBuilder,
@@ -107,11 +93,61 @@ const commandRule: SlashCommand = {
 
       embeds.main
         .setTitle(title)
-        .setURL(ruleUrl)
-        .addFields(fields.category)
-        .addFields(fields.source)
-        .addFields(fields.url)
+        .setURL(artifactUrl)
+        .addFields({
+          name: 'Источник',
+          value: artifact.source.shortName,
+          inline: false
+        });
+
+      if (artifact.cost) {
+        embeds.main
+          .addFields({
+            name: 'Стоимость DMG',
+            value: artifact.cost.dmg,
+            inline: false
+          })
+          .addFields({
+            name: 'Стоимость XGE',
+            value: `${ artifact.cost.xge }${ artifact.cost.xge === 'невозможно купить' ? '' : ' зм.' }`,
+            inline: false
+          });
+      }
+
+      embeds.main
+        .addFields({
+          name: 'Тип',
+          value: `${ artifact.type.name }${
+            artifact.detailType?.length ? ` (${ artifact.detailType.join(', ') })` : ''
+          }`,
+          inline: false
+        })
+        .addFields({
+          name: 'Редкость',
+          value: artifact.rarity.name,
+          inline: false
+        })
+        .addFields({
+          name: 'Настройка',
+          value: `${
+            artifact.customization ? 'требуется настройка' : 'нет'
+          }${
+            artifact.detailCustamization?.length ? ` (${ artifact.detailCustamization.join(', ') })` : ''
+          }`,
+          inline: false
+        })
         .setFooter({ text: footer });
+
+      if (thumbnail) {
+        embeds.main
+          .setThumbnail(thumbnail);
+      }
+
+      await interaction.followUp({
+        embeds: [embeds.main]
+      });
+
+      const description = getDescriptionEmbeds(artifact.description);
 
       const descLength = description.length;
 
@@ -124,10 +160,6 @@ const commandRule: SlashCommand = {
         }
 
         return embed;
-      });
-
-      await interaction.followUp({
-        embeds: [embeds.main]
       });
 
       if (embeds.desc.length <= 2) {
@@ -147,4 +179,4 @@ const commandRule: SlashCommand = {
   cooldown: 10
 };
 
-export default commandRule;
+export default commandArtifact;

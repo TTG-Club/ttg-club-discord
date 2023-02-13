@@ -26,3 +26,8 @@ export type TRaceBadge = {
   name: string;
   url: string;
 }
+
+export type TPrice = {
+  dmg: string;
+  xge: string;
+}

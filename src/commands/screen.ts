@@ -118,13 +118,19 @@ const commandScreen: SlashCommand = {
           text: footer
         });
 
+      const description = getDescriptionEmbeds(screen.description);
+      const descLength = description.length;
 
-      const embeds = getDescriptionEmbeds(screen.description)
-        .map(str => (
-          new EmbedBuilder()
-            .setTitle('Описание')
-            .setDescription(str)
-        ));
+      const embeds = description.map((str, index) => {
+        const embed = new EmbedBuilder()
+          .setDescription(str);
+
+        if (!index || descLength > 2) {
+          embed.setTitle('Описание');
+        }
+
+        return embed;
+      });
 
       await interaction.followUp({ embeds: [embed]});
 

@@ -1,3 +1,4 @@
+import commandArtifact from './artifacts';
 import commandDiceRoller from './diceRoller';
 import commandEquipment from './equipment';
 import commandOption from './option';
@@ -13,5 +14,6 @@ export default [
   commandRule,
   commandTrait,
   commandOption,
-  commandEquipment
+  commandEquipment,
+  commandArtifact
 ];

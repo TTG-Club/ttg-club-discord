@@ -122,11 +122,18 @@ const commandOption: SlashCommand = {
         .addFields(fields.url)
         .setFooter({ text: footer });
 
-      embeds.desc = description.map(str => (
-        new EmbedBuilder()
-          .setTitle('Описание')
-          .setDescription(str)
-      ));
+      const descLength = description.length;
+
+      embeds.desc = description.map((str, index) => {
+        const embed = new EmbedBuilder()
+          .setDescription(str);
+
+        if (!index || descLength > 2) {
+          embed.setTitle('Описание');
+        }
+
+        return embed;
+      });
 
       await interaction.followUp({
         embeds: [embeds.main]
