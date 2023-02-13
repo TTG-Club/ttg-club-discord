@@ -14,7 +14,7 @@ const eventInteractionCreate: BotEvent = {
 
       if (command.cooldown && cooldown) {
         if (Date.now() < cooldown) {
-          interaction.reply(`You have to wait ${
+          interaction.followUp(`You have to wait ${
             Math.floor(Math.abs(Date.now() - cooldown) / 1000)
           } second(s) to use this command again.`);
 

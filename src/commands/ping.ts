@@ -9,7 +9,7 @@ const command: SlashCommand = {
   execute: async interaction => {
     const { getThemeColor } = useHelpers();
 
-    await interaction.reply({
+    await interaction.followUp({
       embeds: [
         new EmbedBuilder()
           .setAuthor({ name: 'MRC License' })

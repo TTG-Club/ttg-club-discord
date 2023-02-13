@@ -24,7 +24,7 @@ const commandDiceRoller: SlashCommand = {
       const roll: TRollResult | null = await getDiceMsg(formula);
 
       if (!roll) {
-        await interaction.reply('Произошла какая-то ошибка... попробуй еще раз');
+        await interaction.followUp('Произошла какая-то ошибка... попробуй еще раз');
 
         return;
       }
@@ -61,10 +61,10 @@ const commandDiceRoller: SlashCommand = {
         });
       }
 
-      await interaction.reply({ embeds: [embed]});
+      await interaction.followUp({ embeds: [embed]});
     } catch (err) {
       console.error(err);
-      await interaction.reply('Произошла какая-то ошибка... попробуй еще раз');
+      await interaction.followUp('Произошла какая-то ошибка... попробуй еще раз');
     }
   },
   cooldown: 10

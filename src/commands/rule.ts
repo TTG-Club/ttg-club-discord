@@ -67,7 +67,7 @@ const commandRule: SlashCommand = {
       const resp = await http.post({ url });
 
       if (resp.status !== 200) {
-        await interaction.reply('Произошла какая-то ошибка... попробуй еще раз');
+        await interaction.followUp('Произошла какая-то ошибка... попробуй еще раз');
 
         return;
       }
