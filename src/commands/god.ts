@@ -1,5 +1,5 @@
 import type { SlashCommand } from '../types';
-import type { TArtifactItem, TArtifactLink } from '../types/Artifact';
+import type { TGodItem, TGodLink } from '../types/God';
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import _ from 'lodash';
 import * as console from 'node:console';
@@ -12,20 +12,20 @@ const http = useAxios();
 const { API_URL } = useConfig();
 const { getDescriptionEmbeds, getPagination } = useMarkdown();
 
-const commandArtifact: SlashCommand = {
+const commandGod: SlashCommand = {
   command: new SlashCommandBuilder()
-    .setName('artifact')
-    .setDescription('Магические предметы')
+    .setName('god')
+    .setDescription('Боги')
     .addStringOption(option => option
       .setName('name')
-      .setNameLocalization('ru', 'название')
-      .setDescription('Название предмета')
+      .setNameLocalization('ru', 'имя')
+      .setDescription('Имя бога')
       .setRequired(true)
       .setAutocomplete(true)),
   autocomplete: async interaction => {
     try {
       const resp = await http.post({
-        url: `/items/magic`,
+        url: `/gods`,
         payload: {
           page: 0,
           limit: 10,
@@ -34,10 +34,6 @@ const commandArtifact: SlashCommand = {
             exact: false
           },
           order: [
-            {
-              field: 'rarity',
-              direction: 'asc'
-            },
             {
               field: 'name',
               direction: 'asc'
@@ -52,11 +48,11 @@ const commandArtifact: SlashCommand = {
         return;
       }
 
-      const artifacts: TArtifactLink[] = _.cloneDeep(resp.data);
+      const gods: TGodLink[] = _.cloneDeep(resp.data);
 
-      await interaction.respond(artifacts.map((artifact: TArtifactLink) => ({
-        name: `[${ artifact.rarity.short }] ${ artifact.name.rus }`,
-        value: artifact.url
+      await interaction.respond(gods.map((god: TGodLink) => ({
+        name: `[${ god.shortAlignment }] ${ god.name.rus }`,
+        value: god.url
       })));
     } catch (err) {
       console.error(err);
@@ -76,12 +72,12 @@ const commandArtifact: SlashCommand = {
         return;
       }
 
-      const artifact: TArtifactItem = _.cloneDeep(resp.data);
+      const god: TGodItem = _.cloneDeep(resp.data);
 
-      const title = `${ artifact.name.rus } [${ artifact.name.eng }]`;
+      const title = `${ god.name.rus } [${ god.name.eng }]`;
       const artifactUrl = `${ API_URL }${ url }`;
-      const thumbnail = artifact.images?.length ? artifact.images[0] : null;
-      const footer = `TTG Club | ${ artifact.source.name } ${ artifact.source.page || '' }`.trim();
+      const thumbnail = god.images?.length ? god.images[0] : null;
+      const footer = `TTG Club | ${ god.source.name } ${ god.source.page || '' }`.trim();
 
       const embeds: {
         main: EmbedBuilder,
@@ -96,47 +92,48 @@ const commandArtifact: SlashCommand = {
         .setURL(artifactUrl)
         .addFields({
           name: 'Источник',
-          value: artifact.source.shortName,
+          value: god.source.shortName,
           inline: false
-        });
+        })
+        .addFields({
+          name: 'Мировоззрение',
+          value: god.alignment,
+          inline: false
+        })
+        .addFields({
+          name: 'Ранг',
+          value: god.rank,
+          inline: false
+        })
+        .addFields({
+          name: 'Домены',
+          value: god.domains.join(', '),
+          inline: false
+        })
+        .addFields({
+          name: 'Пантеоны',
+          value: god.panteons.join(', '),
+          inline: false
+        })
+        .setFooter({ text: footer });
 
-      if (artifact.cost) {
+      if (god.titles?.length) {
         embeds.main
           .addFields({
-            name: 'Стоимость DMG',
-            value: artifact.cost.dmg,
-            inline: false
-          })
-          .addFields({
-            name: 'Стоимость XGE',
-            value: `${ artifact.cost.xge }${ artifact.cost.xge === 'невозможно купить' ? '' : ' зм.' }`,
+            name: 'Титулы',
+            value: god.titles.join(', '),
             inline: false
           });
       }
 
-      embeds.main
-        .addFields({
-          name: 'Тип',
-          value: `${ artifact.type.name }${
-            artifact.detailType?.length ? ` (${ artifact.detailType.join(', ') })` : ''
-          }`,
-          inline: false
-        })
-        .addFields({
-          name: 'Редкость',
-          value: artifact.rarity.name,
-          inline: false
-        })
-        .addFields({
-          name: 'Настройка',
-          value: `${
-            artifact.customization ? 'требуется настройка' : 'нет'
-          }${
-            artifact.detailCustamization?.length ? ` (${ artifact.detailCustamization.join(', ') })` : ''
-          }`,
-          inline: false
-        })
-        .setFooter({ text: footer });
+      if (god.symbol) {
+        embeds.main
+          .addFields({
+            name: 'Символы',
+            value: god.symbol,
+            inline: false
+          });
+      }
 
       if (thumbnail) {
         embeds.main
@@ -147,7 +144,7 @@ const commandArtifact: SlashCommand = {
         embeds: [embeds.main]
       });
 
-      const description = getDescriptionEmbeds(artifact.description);
+      const description = getDescriptionEmbeds(god.description);
 
       const descLength = description.length;
 
@@ -179,4 +176,4 @@ const commandArtifact: SlashCommand = {
   cooldown: 10
 };
 
-export default commandArtifact;
+export default commandGod;

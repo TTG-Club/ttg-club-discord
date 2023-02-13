@@ -1,6 +1,7 @@
-import commandArtifact from './artifacts';
+import commandArtifact from './artifact';
 import commandDiceRoller from './diceRoller';
 import commandEquipment from './equipment';
+import commandGod from './god';
 import commandOption from './option';
 import commandRule from './rule';
 import commandScreen from './screen';
@@ -15,5 +16,6 @@ export default [
   commandTrait,
   commandOption,
   commandEquipment,
-  commandArtifact
+  commandArtifact,
+  commandGod
 ];
