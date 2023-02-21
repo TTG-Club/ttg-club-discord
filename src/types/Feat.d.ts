@@ -1,13 +1,13 @@
 import type { TName, TSource } from './BaseTypes';
 
-export type TTraitLink = {
+export type TFeatLink = {
   name: TName;
   url: string;
   requirements: string;
   homebrew?: boolean;
 }
 
-export type TTraitItem = {
+export type TFeatItem = {
   name: TName;
   requirements: string;
   description: string;

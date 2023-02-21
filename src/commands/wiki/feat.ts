@@ -1,5 +1,5 @@
 import type { SlashCommand } from '../../types';
-import type { TTraitItem, TTraitLink } from '../../types/Trait';
+import type { TFeatItem, TFeatLink } from '../../types/Feat';
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import _ from 'lodash';
 import * as console from 'node:console';
@@ -12,9 +12,9 @@ const http = useAxios();
 const { API_URL } = useConfig();
 const { getDescriptionEmbeds, getPagination } = useMarkdown();
 
-const commandTrait: SlashCommand = {
+const commandFeat: SlashCommand = {
   command: new SlashCommandBuilder()
-    .setName('trait')
+    .setName('feat')
     .setDescription('Черты')
     .addStringOption(option => option
       .setName('name')
@@ -48,11 +48,11 @@ const commandTrait: SlashCommand = {
         return;
       }
 
-      const traits: TTraitLink[] = _.cloneDeep(resp.data);
+      const feats: TFeatLink[] = _.cloneDeep(resp.data);
 
-      await interaction.respond(traits.map((trait: TTraitLink) => ({
-        name: trait.name.rus,
-        value: trait.url
+      await interaction.respond(feats.map((feat: TFeatLink) => ({
+        name: feat.name.rus,
+        value: feat.url
       })));
     } catch (err) {
       console.error(err);
@@ -72,27 +72,27 @@ const commandTrait: SlashCommand = {
         return;
       }
 
-      const trait: TTraitItem = _.cloneDeep(resp.data);
+      const feat: TFeatItem = _.cloneDeep(resp.data);
 
-      const title = `${ trait.name.rus } [${ trait.name.eng }]`;
-      const traitUrl = `${ API_URL }${ url }`;
-      const footer = `TTG Club | ${ trait.source.name } ${ trait.source.page || '' }`.trim();
-      const description = getDescriptionEmbeds(trait.description);
+      const title = `${ feat.name.rus } [${ feat.name.eng }]`;
+      const featUrl = `${ API_URL }${ url }`;
+      const footer = `TTG Club | ${ feat.source.name } ${ feat.source.page || '' }`.trim();
+      const description = getDescriptionEmbeds(feat.description);
 
       const fields = {
         requirements: {
           name: 'Требования',
-          value: trait.requirements,
+          value: feat.requirements,
           inline: false
         },
         source: {
           name: 'Источник',
-          value: trait.source.shortName,
+          value: feat.source.shortName,
           inline: true
         },
         url: {
           name: 'Оригинал',
-          value: traitUrl,
+          value: featUrl,
           inline: false
         }
       };
@@ -107,7 +107,7 @@ const commandTrait: SlashCommand = {
 
       embeds.main
         .setTitle(title)
-        .setURL(traitUrl)
+        .setURL(featUrl)
         .addFields(fields.source)
         .addFields(fields.requirements)
         .addFields(fields.url)
@@ -147,4 +147,4 @@ const commandTrait: SlashCommand = {
   cooldown: 10
 };
 
-export default commandTrait;
+export default commandFeat;
