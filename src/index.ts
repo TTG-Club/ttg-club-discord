@@ -1,29 +1,14 @@
-import type { Command, SlashCommand } from './types';
-import {
-  Client, Collection, GatewayIntentBits
-} from 'discord.js';
+import type { SlashCommand } from './types';
+import { Client, Collection } from 'discord.js';
 
 import handlers from './handlers';
 import { useConfig } from './utils/useConfig';
 
-const {
-  Guilds,
-  MessageContent,
-  GuildMessages,
-  GuildMembers
-} = GatewayIntentBits;
-
 const client = new Client({
-  intents: [
-    Guilds,
-    MessageContent,
-    GuildMessages,
-    GuildMembers
-  ]
+  intents: []
 });
 
 client.slashCommands = new Collection<string, SlashCommand>();
-client.commands = new Collection<string, Command>();
 client.cooldowns = new Collection<string, number>();
 
 for (let handler of handlers) {

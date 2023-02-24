@@ -12,7 +12,6 @@ if (error !== undefined || parsed === undefined) {
 export const useConfig = (): {
   CLIENT_ID: string
   TOKEN: string
-  PREFIX: string
   API_URL: string
 } => {
   if (!parsed.CLIENT_ID) {
@@ -23,10 +22,6 @@ export const useConfig = (): {
     throw new Error('TOKEN is not defined');
   }
 
-  if (!parsed.PREFIX) {
-    throw new Error('PREFIX is not defined');
-  }
-
   if (!parsed.API_URL) {
     throw new Error('API_URL is not defined');
   }
@@ -34,7 +29,6 @@ export const useConfig = (): {
   return {
     CLIENT_ID: parsed.CLIENT_ID,
     TOKEN: parsed.TOKEN,
-    PREFIX: parsed.PREFIX,
     API_URL: parsed.API_URL
   };
 };
