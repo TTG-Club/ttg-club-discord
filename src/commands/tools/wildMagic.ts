@@ -93,7 +93,7 @@ const commandWildMagic: SlashCommand = {
       const embeds = results
         .map(result => (
           new EmbedBuilder()
-            .setColor('#2552a5')
+            .setColor('#5865F2')
             .setDescription(result.description ? getMarkdown(result.description) : '')
             .setFooter({ text: `TTG Club | ${ result.source.name }` })
         ));
