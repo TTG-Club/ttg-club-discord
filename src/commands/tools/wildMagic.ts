@@ -10,30 +10,31 @@ const http = useAxios();
 
 const { getPagination, getMarkdown } = useMarkdown();
 
-interface IDuration {
+interface ISource {
+  shortName: string;
   name: string;
-  value: string;
-  additional?: string;
+  homebrew?: true;
+  page?: number;
 }
 
-const commandMadness: SlashCommand = {
+const commandWildMagic: SlashCommand = {
   command: new SlashCommandBuilder()
-    .setName('madness')
-    .setDescription('Генератор безумия')
+    .setName('wild-magic')
+    .setDescription('Генератор дикой магии')
     .addIntegerOption(option => option
       .setName('count')
       .setNameLocalization('ru', 'количество')
-      .setDescription('Количество сгенерированных безумий')
+      .setDescription('Количество сгенерированной дикой магии')
       .setMinValue(1)
       .setMaxValue(15))
     .addStringOption(option => option
-      .setName('duration')
-      .setNameLocalization('ru', 'длительность')
-      .setDescription('Длительность безумия')
+      .setName('source')
+      .setNameLocalization('ru', 'источник')
+      .setDescription('Источник таблиц для генерации')
       .setAutocomplete(true)),
   autocomplete: async interaction => {
     try {
-      const resp = await http.get({ url: `/tools/madness` });
+      const resp = await http.get({ url: `/tools/wildmagic` });
 
       if (resp.status !== 200) {
         await interaction.respond([]);
@@ -41,9 +42,12 @@ const commandMadness: SlashCommand = {
         return;
       }
 
-      const durations = _.cloneDeep(resp.data) as Array<IDuration>;
+      const sources = _.cloneDeep(resp.data).map((item: ISource) => ({
+        name: `[${ item.shortName }]${ item.homebrew ? ' [HB]' : '' } ${ item.name }`,
+        value: item.shortName
+      }));
 
-      await interaction.respond(durations);
+      await interaction.respond(sources);
     } catch (err) {
       console.error(err);
 
@@ -53,22 +57,25 @@ const commandMadness: SlashCommand = {
   execute: async interaction => {
     try {
       // @ts-ignore
-      const duration = interaction.options.getString('duration') as IDuration['value'] || null;
+      const source = interaction.options.getString('source') as string || null;
 
       // @ts-ignore
-      const count = interaction.options.addIntegerOption('count') || 1;
+      const count = interaction.options.getInteger('count') as number || 1;
 
       const payload: {
         count: number,
-        type?: IDuration['value']
-      } = { count };
+        sources: Array<ISource['shortName']>
+      } = {
+        count,
+        sources: ['PHB']
+      };
 
-      if (duration) {
-        payload.type = duration;
+      if (source) {
+        payload.sources = [source];
       }
 
       const resp = await http.post({
-        url: `/tools/madness`,
+        url: `/tools/wildmagic`,
         payload
       });
 
@@ -80,31 +87,15 @@ const commandMadness: SlashCommand = {
 
       const results: Array<{
         description: string;
-        type: IDuration
+        source: ISource
       }> = _.cloneDeep(resp.data);
 
       const embeds = results
         .map(result => (
           new EmbedBuilder()
-            .setColor('#D84613')
-            .addFields({
-              name: 'Тип',
-              value: result.type.name,
-              inline: true
-            })
-            .addFields({
-              name: 'Длительность',
-              value: result.type.additional || '',
-              inline: true
-            })
-            .addFields({
-              name: 'Описание',
-              value: result.description
-                ? getMarkdown(result.description)
-                : '',
-              inline: false
-            })
-            .setFooter({ text: 'TTG Club' })
+            .setColor('#2552a5')
+            .setDescription(result.description ? getMarkdown(result.description) : '')
+            .setFooter({ text: `TTG Club | ${ result.source.name }` })
         ));
 
       if (embeds.length < 2) {
@@ -124,4 +115,4 @@ const commandMadness: SlashCommand = {
   cooldown: 10
 };
 
-export default commandMadness;
+export default commandWildMagic;
