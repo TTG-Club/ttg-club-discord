@@ -56,7 +56,7 @@ const commandMadness: SlashCommand = {
       const duration = interaction.options.getString('duration') as IDuration['value'] || null;
 
       // @ts-ignore
-      const count = interaction.options.addIntegerOption('count') || 1;
+      const count = interaction.options.getInteger('count') || 1;
 
       const payload: {
         count: number,
