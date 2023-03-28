@@ -1,3 +1,4 @@
 import commandDiceRoller from './diceRoller';
+import commandRollStats from './rollStats';
 
-export default [commandDiceRoller];
+export default [commandDiceRoller, commandRollStats];
