@@ -69,6 +69,7 @@ const commandRollStats: SlashCommand = {
       }
 
       embed
+        .setColor('#3567C9')
         .addFields({
           name: 'Броски характеристик',
           value: str,
