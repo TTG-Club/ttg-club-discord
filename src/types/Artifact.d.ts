@@ -11,10 +11,22 @@ export type TArtifactLink = {
   homebrew?: boolean;
 }
 
+export type TArtifactRarityEnum =
+  'common'
+  | 'uncommon'
+  | 'rare'
+  | 'very-rare'
+  | 'legendary'
+  | 'artifact'
+  | 'unknown'
+  | 'varies';
+
+export type TArtifactRarityShortEnum = 'O' | 'Н' | 'Р' | 'OР' | 'Л' | 'А' | '~';
+
 export type TArtifactRarity = {
-  type: string;
+  type: TArtifactRarityEnum;
   name: string;
-  short: string;
+  short: TArtifactRarityShortEnum;
 }
 
 export type TArtifactItem = {
