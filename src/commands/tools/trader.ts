@@ -75,13 +75,27 @@ const commandTrader: SlashCommand = {
       const persuasion = interaction.options.getInteger('persuasion') as number || 1;
 
       // @ts-ignore
-      const magicLevel = interaction.options.getInteger('magic-level') as number || null;
+      const magicLevel = interaction.options.getInteger('magic-level');
+
+      if (typeof magicLevel !== 'number') {
+        await interaction.followUp('Поле "Количество магии" обязательно для заполнения');
+
+        return;
+      }
 
       // @ts-ignore
       const unique = interaction.options.getBoolean('unique') as boolean || true;
 
-      if (!magicLevel) {
-        await interaction.followUp('Поле "Количество магии" обязательно для заполнения');
+      const levels = await http.get({ url: `/tools/trader` });
+
+      if (levels.status !== 200) {
+        await interaction.followUp('Произошла какая-то ошибка... попробуй еще раз');
+
+        return;
+      }
+
+      if (!levels.data.find((level: { name: string; value: number; }) => level.value === magicLevel)) {
+        await interaction.followUp('Поле "Количество магии" заполнено неверно');
 
         return;
       }
@@ -103,8 +117,14 @@ const commandTrader: SlashCommand = {
         return;
       }
 
-      if (!(resp.data instanceof Array) || !resp.data.length) {
+      if (!(resp.data instanceof Array)) {
         await interaction.followUp('Произошла какая-то ошибка... попробуй еще раз');
+
+        return;
+      }
+
+      if (!resp.data.length) {
+        await interaction.followUp('Список товаров пуст...');
 
         return;
       }
