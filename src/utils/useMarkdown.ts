@@ -3,23 +3,88 @@ import type {
 } from 'discord.js';
 import { ButtonStyle } from 'discord.js';
 import { Pagination } from 'discordjs-button-embed-pagination';
-import type sanitize from 'sanitize-html';
 import sanitizeHtml from 'sanitize-html';
 import TurndownService from 'turndown';
 import { gfm } from 'turndown-plugin-gfm';
 
+import { useConfig } from './useConfig';
 import { useJSDom } from './useJSDom';
+
+const { API_URL } = useConfig();
 
 export const useMarkdown = () => {
   const turndownService = new TurndownService({
     bulletListMarker: '-'
   });
 
+  const cleanAttribute = (attribute: string | null) => {
+    return attribute ? attribute.replace(/(\n+\s*)+/g, '\n') : '';
+  };
+
   turndownService.use(gfm);
 
   turndownService.addRule('paragraph', {
     filter: 'p',
     replacement: content => `\n\n${ content }\n\n`
+  });
+
+  turndownService.addRule('diceRoller', {
+    filter: node => (node.nodeName === 'DICE-ROLLER'),
+    replacement: (content, node, options) => {
+      let text = '';
+
+      if ('getAttribute' in node && node.getAttribute('formula')) {
+        text = `${ options.strongDelimiter }${ node.getAttribute('formula') }${ options.strongDelimiter }`;
+      }
+
+      if ('getAttribute' in node && node.getAttribute(':formula')) {
+        text = `${ options.strongDelimiter }${ node.getAttribute('formula') }${ options.strongDelimiter }`;
+      }
+
+      if (content) {
+        text = `${ options.strongDelimiter }${ content }${ options.strongDelimiter }`;
+      }
+
+      return text;
+    }
+  });
+
+  turndownService.addRule('inlineLink', {
+    filter: (node, options) => {
+      return (
+        options.linkStyle === 'inlined'
+        && node.nodeName === 'A'
+        && !!node.getAttribute('href')
+      );
+    },
+
+    replacement: (content, node) => {
+      const getUpdatedHref = (href: string) => {
+        if (href.startsWith('http')) {
+          return href;
+        }
+
+        return `${ API_URL || 'http://localhost:8080' }${ href }`;
+      };
+
+      let href: string | null = null;
+      let title: string | null = null;
+
+      if ('getAttribute' in node) {
+        href = node.getAttribute('href');
+        title = cleanAttribute(node.getAttribute('title'));
+      }
+
+      if (href) {
+        href = getUpdatedHref(href);
+      }
+
+      if (title) {
+        title = ' "' + title + '"';
+      }
+
+      return `[${ content }](${ href }${ title || '' })`;
+    }
   });
 
   const getSanitized = (html: string) => {
@@ -58,28 +123,9 @@ export const useMarkdown = () => {
         'thead',
         'tr',
         'u',
-        'ul'
-      ],
-      transformTags: {
-        'dice-roller': (_tagName, attribs) => {
-          const newTag: sanitize.Tag = {
-            attribs,
-            tagName: 'b'
-          };
-
-          const attributes = Object.keys(attribs);
-
-          if (attributes.includes('formula')) {
-            newTag.text = attribs.formula;
-          }
-
-          if (attributes.includes(':formula')) {
-            newTag.text = attribs[':formula'];
-          }
-
-          return newTag;
-        }
-      }
+        'ul',
+        'dice-roller'
+      ]
     });
   };
 
@@ -90,7 +136,9 @@ export const useMarkdown = () => {
 
     const sanitized = getSanitized(html);
 
-    return turndownService.turndown(sanitized);
+    return turndownService.turndown(sanitized)
+      .replace(/\\\[/g, '[')
+      .replace(/\\]/g, ']');
   };
 
   const getMarkdownParagraphs = (html: string) => {
