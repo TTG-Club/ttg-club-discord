@@ -8,18 +8,51 @@ import sanitizeHtml from 'sanitize-html';
 import TurndownService from 'turndown';
 import { gfm } from 'turndown-plugin-gfm';
 
+import { useConfig } from './useConfig';
 import { useJSDom } from './useJSDom';
+
+const { API_URL } = useConfig();
 
 export const useMarkdown = () => {
   const turndownService = new TurndownService({
     bulletListMarker: '-'
   });
 
+  const cleanAttribute = (attribute: string | null) => {
+    return attribute ? attribute.replace(/(\n+\s*)+/g, '\n') : '';
+  };
+
   turndownService.use(gfm);
 
   turndownService.addRule('paragraph', {
     filter: 'p',
     replacement: content => `\n\n${ content }\n\n`
+  });
+
+  turndownService.addRule('inlineLink', {
+    filter: (node, options) => {
+      return (
+        options.linkStyle === 'inlined'
+        && node.nodeName === 'A'
+        && !!node.getAttribute('href')
+      );
+    },
+
+    replacement: (content, node) => {
+      let href: string | null = null;
+      let title: string | null = null;
+
+      if ('getAttribute' in node) {
+        href = node.getAttribute('href');
+        title = cleanAttribute(node.getAttribute('title'));
+      }
+
+      if (title) {
+        title = ' "' + title + '"';
+      }
+
+      return `[${ content }](${ href }${ title || '' })`;
+    }
   });
 
   const getSanitized = (html: string) => {
@@ -78,6 +111,28 @@ export const useMarkdown = () => {
           }
 
           return newTag;
+        },
+        'a': (_tagName, attribs) => {
+          const getUpdatedHref = (href: string) => {
+            if (href.startsWith('http')) {
+              return href;
+            }
+
+            return `${ API_URL || 'http://localhost:8080' }${ href }`;
+          };
+
+          const attributes = { ...attribs };
+
+          if (attributes.href) {
+            attributes.href = getUpdatedHref(attributes.href);
+          }
+
+          const newTag: sanitize.Tag = {
+            tagName: 'a',
+            attribs: attributes
+          };
+
+          return newTag;
         }
       }
     });
@@ -90,7 +145,9 @@ export const useMarkdown = () => {
 
     const sanitized = getSanitized(html);
 
-    return turndownService.turndown(sanitized);
+    return turndownService.turndown(sanitized)
+      .replace(/\\\[/g, '[')
+      .replace(/\\]/g, ']');
   };
 
   const getMarkdownParagraphs = (html: string) => {
