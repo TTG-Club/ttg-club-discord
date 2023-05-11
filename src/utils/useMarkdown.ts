@@ -3,7 +3,6 @@ import type {
 } from 'discord.js';
 import { ButtonStyle } from 'discord.js';
 import { Pagination } from 'discordjs-button-embed-pagination';
-import type sanitize from 'sanitize-html';
 import sanitizeHtml from 'sanitize-html';
 import TurndownService from 'turndown';
 import { gfm } from 'turndown-plugin-gfm';
@@ -29,6 +28,27 @@ export const useMarkdown = () => {
     replacement: content => `\n\n${ content }\n\n`
   });
 
+  turndownService.addRule('diceRoller', {
+    filter: node => (node.nodeName === 'DICE-ROLLER'),
+    replacement: (content, node, options) => {
+      let text = '';
+
+      if ('getAttribute' in node && node.getAttribute('formula')) {
+        text = `${ options.strongDelimiter }${ node.getAttribute('formula') }${ options.strongDelimiter }`;
+      }
+
+      if ('getAttribute' in node && node.getAttribute(':formula')) {
+        text = `${ options.strongDelimiter }${ node.getAttribute('formula') }${ options.strongDelimiter }`;
+      }
+
+      if (content) {
+        text = `${ options.strongDelimiter }${ content }${ options.strongDelimiter }`;
+      }
+
+      return text;
+    }
+  });
+
   turndownService.addRule('inlineLink', {
     filter: (node, options) => {
       return (
@@ -39,12 +59,24 @@ export const useMarkdown = () => {
     },
 
     replacement: (content, node) => {
+      const getUpdatedHref = (href: string) => {
+        if (href.startsWith('http')) {
+          return href;
+        }
+
+        return `${ API_URL || 'http://localhost:8080' }${ href }`;
+      };
+
       let href: string | null = null;
       let title: string | null = null;
 
       if ('getAttribute' in node) {
         href = node.getAttribute('href');
         title = cleanAttribute(node.getAttribute('title'));
+      }
+
+      if (href) {
+        href = getUpdatedHref(href);
       }
 
       if (title) {
@@ -91,50 +123,9 @@ export const useMarkdown = () => {
         'thead',
         'tr',
         'u',
-        'ul'
-      ],
-      transformTags: {
-        'dice-roller': (_tagName, attribs) => {
-          const newTag: sanitize.Tag = {
-            attribs,
-            tagName: 'b'
-          };
-
-          const attributes = Object.keys(attribs);
-
-          if (attributes.includes('formula')) {
-            newTag.text = attribs.formula;
-          }
-
-          if (attributes.includes(':formula')) {
-            newTag.text = attribs[':formula'];
-          }
-
-          return newTag;
-        },
-        'a': (_tagName, attribs) => {
-          const getUpdatedHref = (href: string) => {
-            if (href.startsWith('http')) {
-              return href;
-            }
-
-            return `${ API_URL || 'http://localhost:8080' }${ href }`;
-          };
-
-          const attributes = { ...attribs };
-
-          if (attributes.href) {
-            attributes.href = getUpdatedHref(attributes.href);
-          }
-
-          const newTag: sanitize.Tag = {
-            tagName: 'a',
-            attribs: attributes
-          };
-
-          return newTag;
-        }
-      }
+        'ul',
+        'dice-roller'
+      ]
     });
   };
 
