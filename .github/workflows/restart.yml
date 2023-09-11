@@ -1,0 +1,51 @@
+name: Restart
+
+on:
+  workflow_dispatch:
+    inputs:
+      is_dev:
+        type: boolean
+        default: false
+        required: false
+
+permissions:
+  deployments: write
+  contents: read
+  pages: write
+  actions: write
+  id-token: write
+
+concurrency:
+  group: restart
+  cancel-in-progress: false
+
+jobs:
+  restart-dev:
+    name: Restart Develop
+    if: ${{ inputs.is_dev }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            cd ${{ secrets.SSH_PATH }}/dev
+            pm2 restart ttg-club-discord-dev
+
+  restart-prod:
+    name: Restart Production
+    if: ${{ !inputs.is_dev }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            cd ${{ secrets.SSH_PATH }}/prod
+            pm2 restart ttg-club-discord
