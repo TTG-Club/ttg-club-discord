@@ -2,11 +2,6 @@ name: Restart
 
 on:
   workflow_dispatch:
-    inputs:
-      is_dev:
-        type: boolean
-        default: false
-        required: false
 
 permissions:
   deployments: write
@@ -21,8 +16,7 @@ concurrency:
 
 jobs:
   restart-dev:
-    name: Restart Develop
-    if: ${{ inputs.is_dev }}
+    name: Restart Job
     runs-on: ubuntu-latest
     steps:
       - uses: appleboy/ssh-action@v0.1.7
@@ -32,20 +26,8 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            cd ${{ secrets.SSH_PATH }}/dev
-            pm2 restart ttg-club-discord-dev
-
-  restart-prod:
-    name: Restart Production
-    if: ${{ !inputs.is_dev }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: appleboy/ssh-action@v0.1.7
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_KEY }}
-          port: ${{ secrets.SSH_PORT }}
-          script: |
-            cd ${{ secrets.SSH_PATH }}/prod
-            pm2 restart ttg-club-discord
+            cd ${{ secrets.SSH_PATH }}/${{ github.ref_name == 'dev' && 'dev' || 'prod' }}
+            git pull
+            npm ci
+            npm run build
+            pm2 restart ${{ github.ref_name == 'dev' && 'ttg-club-discord-dev' || 'ttg-club-discord' }}
