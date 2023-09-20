@@ -4,7 +4,10 @@ import { cloneDeep, sortBy } from 'lodash-es';
 import { useAxios } from '../../utils/useAxios.js';
 import { useConfig } from '../../utils/useConfig.js';
 
-import type { TArtifactLink, TArtifactRarity } from '../../types/Artifact.js';
+import type {
+  TArtifactLink,
+  TArtifactRarityEnum
+} from '../../types/Artifact.js';
 import type { TNameValue, TSource } from '../../types/BaseTypes.js';
 import type { TSpellLink } from '../../types/Spell.js';
 import type { SlashCommand } from '../../types.js';
@@ -25,9 +28,9 @@ interface IResponseData extends TArtifactLink {
 }
 
 const colors: {
-  [key in TArtifactRarity['type']]: HexColorString;
+  [key in TArtifactRarityEnum]: HexColorString;
 } = {
-  'common': '#fff',
+  'common': '#ffffff',
   'uncommon': '#8aff91',
   'rare': '#a5f1ff',
   'very-rare': '#e770ff',
@@ -49,6 +52,13 @@ const commandTrader: SlashCommand = {
         .setAutocomplete(true)
         .setRequired(true)
     )
+    .addStringOption(option =>
+      option
+        .setName('source')
+        .setNameLocalization('ru', 'источник')
+        .setDescription('Источник цены')
+        .setAutocomplete(true)
+    )
     .addIntegerOption(option =>
       option
         .setName('persuasion')
@@ -63,16 +73,46 @@ const commandTrader: SlashCommand = {
         .setDescription('Только уникальные предметы')
     ),
   autocomplete: async interaction => {
+    const { name } = interaction.options.getFocused(true);
+
     try {
       const { data } = await http.get<IConfig>({ url: `/tools/trader` });
 
-      if (!data.magicLevels?.length) {
-        await interaction.respond([]);
+      switch (name) {
+        case 'source':
+          if (!data.sources?.length) {
+            await interaction.respond([]);
 
-        return;
+            return;
+          }
+
+          await interaction.respond(
+            data.sources.map(source => ({
+              name: `[${source.shortName}]${source.homebrew ? ' [HB]' : ''} ${
+                source.name
+              }`,
+              value: source.shortName
+            }))
+          );
+
+          break;
+
+        case 'magic-level':
+          if (!data.magicLevels?.length) {
+            await interaction.respond([]);
+
+            return;
+          }
+
+          await interaction.respond(data.magicLevels);
+
+          break;
+
+        default:
+          await interaction.respond([]);
+
+          break;
       }
-
-      await interaction.respond(data.magicLevels);
     } catch (err) {
       console.error(err);
 
@@ -87,6 +127,10 @@ const commandTrader: SlashCommand = {
 
       // @ts-ignore
       const magicLevel = interaction.options.getInteger('magic-level');
+
+      const source =
+        // @ts-ignore
+        interaction.options.getString('source')?.toLowerCase() || 'dmg';
 
       if (typeof magicLevel !== 'number') {
         await interaction.followUp(
@@ -128,7 +172,7 @@ const commandTrader: SlashCommand = {
         unique
       };
 
-      const resp = await http.post({
+      const resp = await http.post<Array<IResponseData>>({
         url: `/tools/trader`,
         payload
       });
@@ -156,7 +200,7 @@ const commandTrader: SlashCommand = {
       }
 
       const order: {
-        [key in TArtifactLink['rarity']['type']]: number;
+        [key in TArtifactRarityEnum]: number;
       } = {
         'common': 0,
         'uncommon': 1,
@@ -168,10 +212,7 @@ const commandTrader: SlashCommand = {
         'varies': 7
       };
 
-      const results: Array<IResponseData> = sortBy(
-        cloneDeep<Array<IResponseData>>(resp.data),
-        [o => order[o.rarity.type]]
-      );
+      const results = sortBy(cloneDeep(resp.data), [o => order[o.rarity.type]]);
 
       const chunkSize = 5;
 
@@ -192,7 +233,7 @@ const commandTrader: SlashCommand = {
             })
             .addFields({
               name: 'Стоимость',
-              value: `${artifact.price} зм`,
+              value: `${artifact.price[source]} зм`,
               inline: true
             })
             .addFields({

@@ -1,3 +1,5 @@
+import * as process from 'process';
+
 import { Client, Collection } from 'discord.js';
 
 import handlers from './handlers/index.js';
@@ -18,4 +20,10 @@ for (const handler of handlers) {
 
 const { TOKEN } = useConfig();
 
-client.login(TOKEN).then();
+try {
+  await client.login(TOKEN);
+} catch (err) {
+  console.error(err);
+
+  process.exit(1);
+}

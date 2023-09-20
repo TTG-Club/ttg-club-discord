@@ -1,6 +1,7 @@
 import {
   AutocompleteInteraction,
-  ChatInputCommandInteraction
+  ChatInputCommandInteraction,
+  Events
 } from 'discord.js';
 
 import type { BotEvent } from '../types.js';
@@ -76,7 +77,7 @@ const autocompleteInteraction = (interaction: AutocompleteInteraction) => {
 };
 
 const eventInteractionCreate: BotEvent = {
-  name: 'interactionCreate',
+  name: Events.InteractionCreate,
   execute: async (interaction: Interaction) => {
     if (interaction.isChatInputCommand()) {
       await chatInputCommandInteraction(interaction);

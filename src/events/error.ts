@@ -1,7 +1,9 @@
+import { Events } from 'discord.js';
+
 import type { BotEvent } from '../types.js';
 
 const eventError: BotEvent = {
-  name: 'error',
+  name: Events.Error,
   once: false,
   execute: (err: ErrorEvent) => {
     // eslint-disable-next-line no-console
