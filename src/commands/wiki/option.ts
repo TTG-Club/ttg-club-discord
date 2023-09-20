@@ -1,30 +1,33 @@
-import type { SlashCommand } from '../../types';
-import type { TOptionItem, TOptionLink } from '../../types/Option';
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
-import _ from 'lodash';
-import * as console from 'node:console';
+import { cloneDeep } from 'lodash-es';
 
-import { useAxios } from '../../utils/useAxios';
-import { useConfig } from '../../utils/useConfig';
-import { useMarkdown } from '../../utils/useMarkdown';
+import { useAxios } from '../../utils/useAxios.js';
+import { useConfig } from '../../utils/useConfig.js';
+import { useMarkdown } from '../../utils/useMarkdown.js';
+
+import type { TOptionItem, TOptionLink } from '../../types/Option.js';
+import type { SlashCommand } from '../../types.js';
 
 const http = useAxios();
 const { API_URL } = useConfig();
+
 const { getDescriptionEmbeds, getPagination } = useMarkdown();
 
 const commandOption: SlashCommand = {
   command: new SlashCommandBuilder()
     .setName('option')
     .setDescription('Особенности классов')
-    .addStringOption(option => option
-      .setName('name')
-      .setNameLocalization('ru', 'название')
-      .setDescription('Название особенности класса')
-      .setRequired(true)
-      .setAutocomplete(true)),
+    .addStringOption(option =>
+      option
+        .setName('name')
+        .setNameLocalization('ru', 'название')
+        .setDescription('Название особенности класса')
+        .setRequired(true)
+        .setAutocomplete(true)
+    ),
   autocomplete: async interaction => {
     try {
-      const resp = await http.post({
+      const resp = await http.post<TOptionLink[]>({
         url: `/options`,
         payload: {
           page: 0,
@@ -48,12 +51,14 @@ const commandOption: SlashCommand = {
         return;
       }
 
-      const options: TOptionLink[] = _.cloneDeep(resp.data);
+      const options = cloneDeep(resp.data);
 
-      await interaction.respond(options.map((option: TOptionLink) => ({
-        name: option.name.rus,
-        value: option.url
-      })));
+      await interaction.respond(
+        options.map((option: TOptionLink) => ({
+          name: option.name.rus,
+          value: option.url
+        }))
+      );
     } catch (err) {
       console.error(err);
       await interaction.respond([]);
@@ -64,19 +69,25 @@ const commandOption: SlashCommand = {
       // @ts-ignore
       const url = interaction.options.getString('name');
 
-      const resp = await http.post({ url });
+      const resp = await http.post<TOptionItem>({ url });
 
       if (resp.status !== 200) {
-        await interaction.followUp('Произошла какая-то ошибка... попробуй еще раз');
+        await interaction.followUp(
+          'Произошла какая-то ошибка... попробуй еще раз'
+        );
 
         return;
       }
 
-      const option: TOptionItem = _.cloneDeep(resp.data);
+      const option = cloneDeep(resp.data);
 
-      const title = `${ option.name.rus } [${ option.name.eng }]`;
-      const optionUrl = `${ API_URL }${ url }`;
-      const footer = `TTG Club | ${ option.source.name } ${ option.source.page || '' }`.trim();
+      const title = `${option.name.rus} [${option.name.eng}]`;
+      const optionUrl = `${API_URL}${url}`;
+
+      const footer = `TTG Club | ${option.source.name} ${
+        option.source.page || ''
+      }`.trim();
+
       const description = getDescriptionEmbeds(option.description);
 
       const fields = {
@@ -98,16 +109,15 @@ const commandOption: SlashCommand = {
         classes: {
           name: 'Классы',
           value: option.classes?.length
-            ? option.classes.map((classItem: any) => classItem.name)
-              .join(', ')
+            ? option.classes.map((classItem: any) => classItem.name).join(', ')
             : '',
           inline: false
         }
       };
 
       const embeds: {
-        main: EmbedBuilder,
-        desc: EmbedBuilder[]
+        main: EmbedBuilder;
+        desc: EmbedBuilder[];
       } = {
         main: new EmbedBuilder(),
         desc: []
@@ -125,8 +135,7 @@ const commandOption: SlashCommand = {
       const descLength = description.length;
 
       embeds.desc = description.map((str, index) => {
-        const embed = new EmbedBuilder()
-          .setDescription(str);
+        const embed = new EmbedBuilder().setDescription(str);
 
         if (!index || descLength > 2) {
           embed.setTitle('Описание');
@@ -150,7 +159,10 @@ const commandOption: SlashCommand = {
       await pagination.paginate();
     } catch (err) {
       console.error(err);
-      await interaction.followUp('Произошла какая-то ошибка... попробуй еще раз');
+
+      await interaction.followUp(
+        'Произошла какая-то ошибка... попробуй еще раз'
+      );
     }
   },
   cooldown: 10

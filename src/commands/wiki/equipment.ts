@@ -1,30 +1,33 @@
-import type { SlashCommand } from '../../types';
-import type { TEquipmentItem, TEquipmentLink } from '../../types/Equipment';
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
-import _ from 'lodash';
-import * as console from 'node:console';
+import { cloneDeep } from 'lodash-es';
 
-import { useAxios } from '../../utils/useAxios';
-import { useConfig } from '../../utils/useConfig';
-import { useMarkdown } from '../../utils/useMarkdown';
+import { useAxios } from '../../utils/useAxios.js';
+import { useConfig } from '../../utils/useConfig.js';
+import { useMarkdown } from '../../utils/useMarkdown.js';
+
+import type { TEquipmentItem, TEquipmentLink } from '../../types/Equipment.js';
+import type { SlashCommand } from '../../types.js';
 
 const http = useAxios();
 const { API_URL } = useConfig();
+
 const { getDescriptionEmbeds, getPagination } = useMarkdown();
 
 const commandEquipment: SlashCommand = {
   command: new SlashCommandBuilder()
     .setName('equipment')
     .setDescription('Снаряжение')
-    .addStringOption(option => option
-      .setName('name')
-      .setNameLocalization('ru', 'название')
-      .setDescription('Название предмета')
-      .setRequired(true)
-      .setAutocomplete(true)),
+    .addStringOption(option =>
+      option
+        .setName('name')
+        .setNameLocalization('ru', 'название')
+        .setDescription('Название предмета')
+        .setRequired(true)
+        .setAutocomplete(true)
+    ),
   autocomplete: async interaction => {
     try {
-      const resp = await http.post({
+      const resp = await http.post<TEquipmentLink[]>({
         url: `/items`,
         payload: {
           page: 0,
@@ -48,12 +51,14 @@ const commandEquipment: SlashCommand = {
         return;
       }
 
-      const equipments: TEquipmentLink[] = _.cloneDeep(resp.data);
+      const equipments = cloneDeep(resp.data);
 
-      await interaction.respond(equipments.map((item: TEquipmentLink) => ({
-        name: item.name.rus,
-        value: item.url
-      })));
+      await interaction.respond(
+        equipments.map((item: TEquipmentLink) => ({
+          name: item.name.rus,
+          value: item.url
+        }))
+      );
     } catch (err) {
       console.error(err);
       await interaction.respond([]);
@@ -64,19 +69,24 @@ const commandEquipment: SlashCommand = {
       // @ts-ignore
       const url = interaction.options.getString('name');
 
-      const resp = await http.post({ url });
+      const resp = await http.post<TEquipmentItem>({ url });
 
       if (resp.status !== 200) {
-        await interaction.followUp('Произошла какая-то ошибка... попробуй еще раз');
+        await interaction.followUp(
+          'Произошла какая-то ошибка... попробуй еще раз'
+        );
 
         return;
       }
 
-      const equipment: TEquipmentItem = _.cloneDeep(resp.data);
+      const equipment = cloneDeep(resp.data);
 
-      const title = `${ equipment.name.rus } [${ equipment.name.eng }]`;
-      const itemUrl = `${ API_URL }${ url }`;
-      const footer = `TTG Club | ${ equipment.source.name } ${ equipment.source.page || '' }`.trim();
+      const title = `${equipment.name.rus} [${equipment.name.eng}]`;
+      const itemUrl = `${API_URL}${url}`;
+
+      const footer = `TTG Club | ${equipment.source.name} ${
+        equipment.source.page || ''
+      }`.trim();
 
       const fields = {
         price: {
@@ -107,25 +117,21 @@ const commandEquipment: SlashCommand = {
       };
 
       const embeds: {
-        main: EmbedBuilder,
-        desc: EmbedBuilder[]
+        main: EmbedBuilder;
+        desc: EmbedBuilder[];
       } = {
         main: new EmbedBuilder(),
         desc: []
       };
 
-      embeds.main
-        .setTitle(title)
-        .setURL(itemUrl);
+      embeds.main.setTitle(title).setURL(itemUrl);
 
       if (equipment.price) {
-        embeds.main
-          .addFields(fields.price);
+        embeds.main.addFields(fields.price);
       }
 
       if (equipment.weight) {
-        embeds.main
-          .addFields(fields.weight);
+        embeds.main.addFields(fields.weight);
       }
 
       embeds.main
@@ -144,8 +150,7 @@ const commandEquipment: SlashCommand = {
         const descLength = description.length;
 
         embeds.desc = description.map((str, index) => {
-          const embed = new EmbedBuilder()
-            .setDescription(str);
+          const embed = new EmbedBuilder().setDescription(str);
 
           if (!index || descLength > 2) {
             embed.setTitle('Описание');
@@ -166,7 +171,10 @@ const commandEquipment: SlashCommand = {
       }
     } catch (err) {
       console.error(err);
-      await interaction.followUp('Произошла какая-то ошибка... попробуй еще раз');
+
+      await interaction.followUp(
+        'Произошла какая-то ошибка... попробуй еще раз'
+      );
     }
   },
   cooldown: 10

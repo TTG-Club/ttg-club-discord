@@ -1,11 +1,6 @@
-import eventError from './error';
-import eventInteractionCreate from './interactionCreate';
-import eventReady from './ready';
-import eventShardError from './shardError';
+import eventError from './error.js';
+import eventInteractionCreate from './interactionCreate.js';
+import eventReady from './ready.js';
+import eventWarn from './warn.js';
 
-export default [
-  eventReady,
-  eventInteractionCreate,
-  eventError,
-  eventShardError
-];
+export default [eventWarn, eventReady, eventError, eventInteractionCreate];

@@ -1,8 +1,11 @@
 import chalk from 'chalk';
-import type {
-  GuildMember, PermissionResolvable, TextChannel
-} from 'discord.js';
 import { PermissionFlagsBits } from 'discord.js';
+
+import type {
+  GuildMember,
+  PermissionResolvable,
+  TextChannel
+} from 'discord.js';
 
 export type colorType = 'text' | 'variable' | 'error';
 
@@ -13,36 +16,46 @@ export const useHelpers = () => {
     error: '#ff3333'
   };
 
-  const getThemeColor = (color: colorType) => Number(`0x${ themeColors[color].substring(1) }`);
+  const getThemeColor = (color: colorType) =>
+    Number(`0x${themeColors[color].substring(1)}`);
 
-  const color = (color: colorType, message: any) => {
-    return chalk.hex(themeColors[color])(message);
-  };
+  const color = (colorName: colorType, message: any) =>
+    chalk.hex(themeColors[colorName])(message);
 
-  const checkPermissions = (member: GuildMember, permissions: Array<PermissionResolvable>) => {
-    let neededPermissions: PermissionResolvable[] = [];
+  const checkPermissions = (
+    member: GuildMember,
+    permissions: Array<PermissionResolvable>
+  ) => {
+    const neededPermissions: PermissionResolvable[] = [];
 
     permissions.forEach(permission => {
-      if (!member.permissions.has(permission)) neededPermissions.push(permission);
+      if (!member.permissions.has(permission))
+        neededPermissions.push(permission);
     });
     if (neededPermissions.length === 0) return null;
 
     return neededPermissions.map(p => {
-      if (typeof p === 'string') return p.split(/(?=[A-Z])/)
+      if (typeof p === 'string') return p.split(/(?=[A-Z])/).join(' ');
+
+      return Object.keys(PermissionFlagsBits)
+        .find(k => Object(PermissionFlagsBits)[k] === p)
+        ?.split(/(?=[A-Z])/)
         .join(' ');
-      else
-        return Object.keys(PermissionFlagsBits)
-          .find(k => Object(PermissionFlagsBits)[k] === p)
-          ?.split(/(?=[A-Z])/)
-          .join(' ');
     });
   };
 
-  const sendTimedMessage = (message: string, channel: TextChannel, duration: number) => {
-    channel.send(message)
-      .then(m => setTimeout(async () => await (await channel.messages.fetch(m)).delete(), duration));
+  const sendTimedMessage = (
+    message: string,
+    channel: TextChannel,
+    duration: number
+  ) => {
+    channel.send(message).then(m =>
+      setTimeout(async () => {
+        const resp = await channel.messages.fetch(m);
 
-    return;
+        return resp.delete();
+      }, duration)
+    );
   };
 
   return {

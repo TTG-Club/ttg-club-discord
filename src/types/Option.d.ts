@@ -1,6 +1,4 @@
-import type {
-  TClassBadge, TName, TSource
-} from './BaseTypes';
+import type { TClassBadge, TName, TSource } from './BaseTypes.js';
 
 export type TOptionItem = {
   name: TName;
@@ -9,10 +7,10 @@ export type TOptionItem = {
   source: TSource;
   classes: TClassBadge[];
   homebrew?: boolean;
-}
+};
 
 export type TOptionLink = {
   name: TName;
   url: string;
   homebrew?: boolean;
-}
+};

@@ -1,8 +1,8 @@
-import commandDiceRoller from './diceRoller';
-import commandMadness from './madness';
-import commandRollStats from './rollStats';
-import commandTrader from './trader';
-import commandWildMagic from './wildMagic';
+import commandDiceRoller from './diceRoller.js';
+import commandMadness from './madness.js';
+import commandRollStats from './rollStats.js';
+import commandTrader from './trader.js';
+import commandWildMagic from './wildMagic.js';
 
 export default [
   commandDiceRoller,

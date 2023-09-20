@@ -1,30 +1,33 @@
-import type { SlashCommand } from '../../types';
-import type { TBookItem, TBookLink } from '../../types/Book';
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
-import _ from 'lodash';
-import * as console from 'node:console';
+import { cloneDeep } from 'lodash-es';
 
-import { useAxios } from '../../utils/useAxios';
-import { useConfig } from '../../utils/useConfig';
-import { useMarkdown } from '../../utils/useMarkdown';
+import { useAxios } from '../../utils/useAxios.js';
+import { useConfig } from '../../utils/useConfig.js';
+import { useMarkdown } from '../../utils/useMarkdown.js';
+
+import type { TBookItem, TBookLink } from '../../types/Book.js';
+import type { SlashCommand } from '../../types.js';
 
 const http = useAxios();
 const { API_URL } = useConfig();
+
 const { getDescriptionEmbeds, getPagination } = useMarkdown();
 
 const commandBook: SlashCommand = {
   command: new SlashCommandBuilder()
     .setName('book')
     .setDescription('Источники')
-    .addStringOption(option => option
-      .setName('name')
-      .setNameLocalization('ru', 'название')
-      .setDescription('Название источника')
-      .setRequired(true)
-      .setAutocomplete(true)),
+    .addStringOption(option =>
+      option
+        .setName('name')
+        .setNameLocalization('ru', 'название')
+        .setDescription('Название источника')
+        .setRequired(true)
+        .setAutocomplete(true)
+    ),
   autocomplete: async interaction => {
     try {
-      const resp = await http.post({
+      const resp = await http.post<TBookLink[]>({
         url: `/books`,
         payload: {
           page: 0,
@@ -52,12 +55,14 @@ const commandBook: SlashCommand = {
         return;
       }
 
-      const books: TBookLink[] = _.cloneDeep(resp.data);
+      const books = cloneDeep(resp.data);
 
-      await interaction.respond(books.map((book: TBookLink) => ({
-        name: book.name.rus,
-        value: book.url
-      })));
+      await interaction.respond(
+        books.map((book: TBookLink) => ({
+          name: book.name.rus,
+          value: book.url
+        }))
+      );
     } catch (err) {
       console.error(err);
       await interaction.respond([]);
@@ -68,23 +73,28 @@ const commandBook: SlashCommand = {
       // @ts-ignore
       const url = interaction.options.getString('name');
 
-      const resp = await http.post({ url });
+      const resp = await http.post<TBookItem>({ url });
 
       if (resp.status !== 200) {
-        await interaction.followUp('Произошла какая-то ошибка... попробуй еще раз');
+        await interaction.followUp(
+          'Произошла какая-то ошибка... попробуй еще раз'
+        );
 
         return;
       }
 
-      const book: TBookItem = _.cloneDeep(resp.data);
+      const book = cloneDeep(resp.data);
 
-      const title = `${ book.name.rus } [${ book.name.eng }]`;
-      const bookUrl = `${ API_URL }${ url }`;
-      const footer = `TTG Club | ${ book.source.name } ${ book.source.page || '' }`.trim();
+      const title = `${book.name.rus} [${book.name.eng}]`;
+      const bookUrl = `${API_URL}${url}`;
+
+      const footer = `TTG Club | ${book.source.name} ${
+        book.source.page || ''
+      }`.trim();
 
       const embeds: {
-        main: EmbedBuilder,
-        desc: EmbedBuilder[]
+        main: EmbedBuilder;
+        desc: EmbedBuilder[];
       } = {
         main: new EmbedBuilder(),
         desc: []
@@ -106,20 +116,18 @@ const commandBook: SlashCommand = {
         .setFooter({ text: footer });
 
       if (book.year) {
-        embeds.main
-          .addFields({
-            name: 'Год',
-            value: String(book.year),
-            inline: true
-          });
+        embeds.main.addFields({
+          name: 'Год',
+          value: String(book.year),
+          inline: true
+        });
       }
 
-      embeds.main
-        .addFields({
-          name: 'Оригинал',
-          value: bookUrl,
-          inline: false
-        });
+      embeds.main.addFields({
+        name: 'Оригинал',
+        value: bookUrl,
+        inline: false
+      });
 
       await interaction.followUp({
         embeds: [embeds.main]
@@ -131,8 +139,7 @@ const commandBook: SlashCommand = {
         const descLength = description.length;
 
         embeds.desc = description.map((str, index) => {
-          const embed = new EmbedBuilder()
-            .setDescription(str);
+          const embed = new EmbedBuilder().setDescription(str);
 
           if (!index || descLength > 2) {
             embed.setTitle('Описание');
@@ -153,7 +160,10 @@ const commandBook: SlashCommand = {
       }
     } catch (err) {
       console.error(err);
-      await interaction.followUp('Произошла какая-то ошибка... попробуй еще раз');
+
+      await interaction.followUp(
+        'Произошла какая-то ошибка... попробуй еще раз'
+      );
     }
   },
   cooldown: 10

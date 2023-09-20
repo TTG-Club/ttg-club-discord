@@ -1,98 +1,68 @@
-import type { AxiosInstance, AxiosRequestConfig } from 'axios';
 import axios from 'axios';
 
-import { useConfig } from './useConfig';
+import { useConfig } from './useConfig.js';
+
+import type { AxiosInstance, AxiosRequestConfig } from 'axios';
 
 export type RequestConfig = {
-  url: AxiosRequestConfig['url'],
-  payload?: AxiosRequestConfig['params'] | AxiosRequestConfig['data'],
-  signal?: AbortSignal
-}
-
+  url: AxiosRequestConfig['url'];
+  payload?: AxiosRequestConfig['params'] | AxiosRequestConfig['data'];
+};
 
 const { API_URL } = useConfig();
 
 class HTTPService {
   protected instance: AxiosInstance;
 
-  protected instanceRaw: AxiosInstance;
-
   constructor() {
     axios.defaults.withCredentials = true;
 
     this.instance = axios.create({
-      baseURL: `${ API_URL || 'http://localhost:8080' }/api/v1`,
+      baseURL: `${API_URL || 'http://localhost:8080'}/api/v1`,
       withCredentials: true,
       headers: {}
     });
-
-    this.instanceRaw = axios.create({
-      baseURL: '',
-      withCredentials: true
-    });
   }
 
-  get(config: RequestConfig) {
-    // @ts-ignore
-    return this.instance({
+  get<T>(config: RequestConfig) {
+    return this.instance<T>({
       method: 'get',
       url: config.url,
-      params: config.payload,
-      signal: config.signal
+      params: config.payload
     });
   }
 
-  post(config: RequestConfig) {
-    // @ts-ignore
-    return this.instance({
+  post<T>(config: RequestConfig) {
+    return this.instance<T>({
       method: 'post',
       url: config.url,
-      data: config.payload,
-      signal: config.signal
+      data: config.payload
     });
   }
 
-  put(config: RequestConfig) {
-    // @ts-ignore
-    return this.instance({
+  put<T>(config: RequestConfig) {
+    return this.instance<T>({
       method: 'put',
       url: config.url,
-      data: config.payload,
-      signal: config.signal
+      data: config.payload
     });
   }
 
-  patch(config: RequestConfig) {
-    // @ts-ignore
-    return this.instance({
+  patch<T>(config: RequestConfig) {
+    return this.instance<T>({
       method: 'patch',
       url: config.url,
-      data: config.payload,
-      signal: config.signal
+      data: config.payload
     });
   }
 
-  delete(config: RequestConfig) {
-    // @ts-ignore
-    return this.instance({
+  delete<T>(config: RequestConfig) {
+    return this.instance<T>({
       method: 'delete',
       url: config.url,
-      data: config.payload,
-      signal: config.signal
-    });
-  }
-
-  rawGet(config: RequestConfig) {
-    // @ts-ignore
-    return this.instanceRaw({
-      method: 'get',
-      url: config.url,
-      params: config.payload,
-      signal: config.signal
+      params: config.payload
     });
   }
 }
 
-export const useAxios = () => {
-  return new HTTPService();
-};
+export const useAxios = () => new HTTPService();

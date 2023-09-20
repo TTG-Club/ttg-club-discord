@@ -1,87 +1,59 @@
-import { DiceRoll } from '@dice-roller/rpg-dice-roller';
-import _ from 'lodash';
+import DiceRollerParser from 'dice-roller-parser';
+import { orderBy } from 'lodash-es';
 
-export type TRollResult = {
-  result: string
-  full: string
-  highest?: string
-  lowest?: string
+import type { DiceRollResult } from 'dice-roller-parser/dist/rollTypes.js';
+
+export interface IRollResult {
+  result: number;
+  full: string;
+  highest?: number;
+  lowest?: number;
 }
 
 export function useDiceRoller() {
-  const getDiceMsg = async (str: string): Promise<TRollResult | null> => {
-    try {
-      const formula = str.replace(/к/g, 'd');
+  const { DiceRoller, DiscordRollRenderer } = DiceRollerParser;
 
-      let msg: TRollResult | null;
+  const roller = new DiceRoller();
+  const renderer = new DiscordRollRenderer();
 
-      switch (formula) {
-        case '2d20':
-        case '2d20kh1':
-        case '2d20kl1':
-          msg = await getDropOrKeepMsg(formula);
+  const getDropOrKeepMsg = (notation: string): IRollResult => {
+    const roll = roller.roll(notation) as DiceRollResult;
+    const [highest, lowest] = orderBy(roll.rolls, ['value'], ['desc']);
 
-          break;
-        default:
-          msg = await getDefaultDiceMsg(formula);
-
-          break;
-      }
-
-      if (!msg) {
-        return null;
-      }
-
-      return msg;
-    } catch (err) {
-      return await Promise.reject(err);
-    }
+    return {
+      result: roll.value,
+      highest: highest!.value,
+      lowest: lowest!.value,
+      full: renderer.render(roll)
+    };
   };
 
-  const getDropOrKeepMsg = (str: string): Promise<TRollResult | null> => {
-    try {
-      let formula = '2d20';
+  const getDefaultDiceMsg = (notation: string): IRollResult => {
+    const roll = roller.roll(notation);
 
-      if (str === '2d20kh1' || str === '2d20kl1') {
-        formula = str;
-      }
-
-      const roll = new DiceRoll(formula);
-      const resultStr = roll.export();
-
-      if (!resultStr) {
-        return Promise.resolve(null);
-      }
-
-      const result = JSON.parse(resultStr);
-      const { rolls } = result.rolls[0];
-      const [highest, lowest] = _.orderBy(rolls, ['value'], ['desc']);
-
-      return Promise.resolve({
-        result: String(roll.total),
-        highest: String(highest.value),
-        lowest: String(lowest.value),
-        full: String(roll.output)
-      });
-    } catch (err) {
-      return Promise.reject(err);
-    }
+    return {
+      result: roll.value,
+      full: renderer.render(roll)
+    };
   };
 
-  const getDefaultDiceMsg = (notation: string): Promise<TRollResult | null> => {
-    try {
-      const roll = new DiceRoll(notation);
+  const getDiceMsg = (notation: string): IRollResult => {
+    const formula = notation.replace(/к/g, 'd');
 
-      return Promise.resolve({
-        result: String(roll.total),
-        full: String(roll.output)
-      });
-    } catch (err) {
-      return Promise.reject(err);
+    switch (formula) {
+      case '2d20':
+      case '2d20kh1':
+      case '2d20kl1':
+        return getDropOrKeepMsg(formula);
+
+      default:
+        return getDefaultDiceMsg(formula);
     }
   };
 
   return {
-    getDiceMsg
+    getDiceMsg,
+    getDropOrKeepMsg,
+    getDefaultDiceMsg
   };
 }

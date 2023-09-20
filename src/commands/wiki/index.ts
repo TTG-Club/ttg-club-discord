@@ -1,15 +1,15 @@
-import commandArmor from './armor';
-import commandArtifact from './artifact';
-import commandBook from './book';
-import commandEquipment from './equipment';
-import commandFeat from './feat';
-import commandGod from './god';
-import commandOption from './option';
-import commandRace from './race';
-import commandRule from './rule';
-import commandScreen from './screen';
-import commandSpell from './spell';
-import commandWeapon from './weapon';
+import commandArmor from './armor.js';
+import commandArtifact from './artifact.js';
+import commandBook from './book.js';
+import commandEquipment from './equipment.js';
+import commandFeat from './feat.js';
+import commandGod from './god.js';
+import commandOption from './option.js';
+import commandRace from './race.js';
+import commandRule from './rule.js';
+import commandScreen from './screen.js';
+import commandSpell from './spell.js';
+import commandWeapon from './weapon.js';
 
 export default [
   commandSpell,

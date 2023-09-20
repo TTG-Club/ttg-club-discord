@@ -1,6 +1,4 @@
-import type {
-  TName, TSource, TType
-} from './BaseTypes';
+import type { TName, TSource, TType } from './BaseTypes.js';
 
 export type TWeaponLink = {
   name: TName;
@@ -9,12 +7,12 @@ export type TWeaponLink = {
   damage: TWeaponDamage;
   price: string;
   homebrew?: boolean;
-}
+};
 
 export type TWeaponDamage = {
   dice?: string;
   type: string;
-}
+};
 
 export type TWeaponItem = {
   name: TName;
@@ -27,7 +25,7 @@ export type TWeaponItem = {
   properties: TWeaponProperty[];
   homebrew?: boolean;
   special?: string;
-}
+};
 
 export type TWeaponProperty = {
   name: string;
@@ -35,4 +33,4 @@ export type TWeaponProperty = {
   description: string;
   distance?: string;
   twoHandDice?: string;
-}
+};

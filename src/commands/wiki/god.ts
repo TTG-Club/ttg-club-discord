@@ -1,30 +1,33 @@
-import type { SlashCommand } from '../../types';
-import type { TGodItem, TGodLink } from '../../types/God';
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
-import _ from 'lodash';
-import * as console from 'node:console';
+import { cloneDeep } from 'lodash-es';
 
-import { useAxios } from '../../utils/useAxios';
-import { useConfig } from '../../utils/useConfig';
-import { useMarkdown } from '../../utils/useMarkdown';
+import { useAxios } from '../../utils/useAxios.js';
+import { useConfig } from '../../utils/useConfig.js';
+import { useMarkdown } from '../../utils/useMarkdown.js';
+
+import type { TGodItem, TGodLink } from '../../types/God.js';
+import type { SlashCommand } from '../../types.js';
 
 const http = useAxios();
 const { API_URL } = useConfig();
+
 const { getDescriptionEmbeds, getPagination } = useMarkdown();
 
 const commandGod: SlashCommand = {
   command: new SlashCommandBuilder()
     .setName('god')
     .setDescription('Боги')
-    .addStringOption(option => option
-      .setName('name')
-      .setNameLocalization('ru', 'имя')
-      .setDescription('Имя бога')
-      .setRequired(true)
-      .setAutocomplete(true)),
+    .addStringOption(option =>
+      option
+        .setName('name')
+        .setNameLocalization('ru', 'имя')
+        .setDescription('Имя бога')
+        .setRequired(true)
+        .setAutocomplete(true)
+    ),
   autocomplete: async interaction => {
     try {
-      const resp = await http.post({
+      const resp = await http.post<TGodLink[]>({
         url: `/gods`,
         payload: {
           page: 0,
@@ -48,12 +51,14 @@ const commandGod: SlashCommand = {
         return;
       }
 
-      const gods: TGodLink[] = _.cloneDeep(resp.data);
+      const gods = cloneDeep(resp.data);
 
-      await interaction.respond(gods.map((god: TGodLink) => ({
-        name: `[${ god.shortAlignment }] ${ god.name.rus }`,
-        value: god.url
-      })));
+      await interaction.respond(
+        gods.map((god: TGodLink) => ({
+          name: `[${god.shortAlignment}] ${god.name.rus}`,
+          value: god.url
+        }))
+      );
     } catch (err) {
       console.error(err);
       await interaction.respond([]);
@@ -64,24 +69,29 @@ const commandGod: SlashCommand = {
       // @ts-ignore
       const url = interaction.options.getString('name');
 
-      const resp = await http.post({ url });
+      const resp = await http.post<TGodItem>({ url });
 
       if (resp.status !== 200) {
-        await interaction.followUp('Произошла какая-то ошибка... попробуй еще раз');
+        await interaction.followUp(
+          'Произошла какая-то ошибка... попробуй еще раз'
+        );
 
         return;
       }
 
-      const god: TGodItem = _.cloneDeep(resp.data);
+      const god = cloneDeep(resp.data);
 
-      const title = `${ god.name.rus } [${ god.name.eng }]`;
-      const godUrl = `${ API_URL }${ url }`;
+      const title = `${god.name.rus} [${god.name.eng}]`;
+      const godUrl = `${API_URL}${url}`;
       const thumbnail = god.images?.length ? god.images[0] : null;
-      const footer = `TTG Club | ${ god.source.name } ${ god.source.page || '' }`.trim();
+
+      const footer = `TTG Club | ${god.source.name} ${
+        god.source.page || ''
+      }`.trim();
 
       const embeds: {
-        main: EmbedBuilder,
-        desc: EmbedBuilder[]
+        main: EmbedBuilder;
+        desc: EmbedBuilder[];
       } = {
         main: new EmbedBuilder(),
         desc: []
@@ -118,33 +128,29 @@ const commandGod: SlashCommand = {
         .setFooter({ text: footer });
 
       if (god.titles?.length) {
-        embeds.main
-          .addFields({
-            name: 'Титулы',
-            value: god.titles.join(', '),
-            inline: false
-          });
+        embeds.main.addFields({
+          name: 'Титулы',
+          value: god.titles.join(', '),
+          inline: false
+        });
       }
 
       if (god.symbol) {
-        embeds.main
-          .addFields({
-            name: 'Символы',
-            value: god.symbol,
-            inline: false
-          });
-      }
-
-      embeds.main
-        .addFields({
-          name: 'Оригинал',
-          value: godUrl,
+        embeds.main.addFields({
+          name: 'Символы',
+          value: god.symbol,
           inline: false
         });
+      }
+
+      embeds.main.addFields({
+        name: 'Оригинал',
+        value: godUrl,
+        inline: false
+      });
 
       if (thumbnail) {
-        embeds.main
-          .setThumbnail(thumbnail);
+        embeds.main.setThumbnail(thumbnail);
       }
 
       await interaction.followUp({
@@ -156,8 +162,7 @@ const commandGod: SlashCommand = {
       const descLength = description.length;
 
       embeds.desc = description.map((str, index) => {
-        const embed = new EmbedBuilder()
-          .setDescription(str);
+        const embed = new EmbedBuilder().setDescription(str);
 
         if (!index || descLength > 2) {
           embed.setTitle('Описание');
@@ -177,7 +182,10 @@ const commandGod: SlashCommand = {
       await pagination.paginate();
     } catch (err) {
       console.error(err);
-      await interaction.followUp('Произошла какая-то ошибка... попробуй еще раз');
+
+      await interaction.followUp(
+        'Произошла какая-то ошибка... попробуй еще раз'
+      );
     }
   },
   cooldown: 10

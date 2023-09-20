@@ -1,6 +1,4 @@
-import type {
-  TName, TSource, TType
-} from './BaseTypes';
+import type { TName, TSource, TType } from './BaseTypes.js';
 
 export type TArmorLink = {
   name: TName;
@@ -9,7 +7,7 @@ export type TArmorLink = {
   type: TType;
   armorClass: string;
   price: string;
-}
+};
 
 export type TArmorItem = {
   name: TName;
@@ -23,4 +21,4 @@ export type TArmorItem = {
   disadvantage?: boolean;
   duration: string;
   requirement?: number;
-}
+};

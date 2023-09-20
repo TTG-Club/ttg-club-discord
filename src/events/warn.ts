@@ -2,15 +2,15 @@ import { Events } from 'discord.js';
 
 import type { BotEvent } from '../types.js';
 
-const eventError: BotEvent = {
-  name: Events.Error,
+const eventWarn: BotEvent = {
+  name: Events.Warn,
   once: false,
-  execute: (err: ErrorEvent) => {
+  execute: (warn: ErrorEvent) => {
     // eslint-disable-next-line no-console
-    console.error('Error:', err);
+    console.warn('Warn:', warn);
 
     process.exit(1);
   }
 };
 
-export default eventError;
+export default eventWarn;

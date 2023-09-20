@@ -1,6 +1,4 @@
-import type {
-  TName, TSource, TType
-} from './BaseTypes';
+import type { TBookType, TName, TSource, TType } from './BaseTypes.js';
 
 export type TBookLink = {
   name: TName;
@@ -8,7 +6,7 @@ export type TBookLink = {
   type: TBookType;
   source: TSource;
   year?: number;
-}
+};
 
 export type TBookItem = {
   name: TName;
@@ -17,4 +15,4 @@ export type TBookItem = {
   description?: string;
   source: TSource;
   year?: number;
-}
+};

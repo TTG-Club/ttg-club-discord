@@ -1,30 +1,33 @@
-import type { SlashCommand } from '../../types';
-import type { TSpellItem, TSpellLink } from '../../types/Spell';
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
-import _ from 'lodash';
-import * as console from 'node:console';
+import { cloneDeep } from 'lodash-es';
 
-import { useAxios } from '../../utils/useAxios';
-import { useConfig } from '../../utils/useConfig';
-import { useMarkdown } from '../../utils/useMarkdown';
+import { useAxios } from '../../utils/useAxios.js';
+import { useConfig } from '../../utils/useConfig.js';
+import { useMarkdown } from '../../utils/useMarkdown.js';
+
+import type { TSpellItem, TSpellLink } from '../../types/Spell.js';
+import type { SlashCommand } from '../../types.js';
 
 const http = useAxios();
 const { API_URL } = useConfig();
+
 const { getDescriptionEmbeds, getPagination } = useMarkdown();
 
 const commandSpell: SlashCommand = {
   command: new SlashCommandBuilder()
     .setName('spell')
     .setDescription('Заклинания')
-    .addStringOption(option => option
-      .setName('name')
-      .setNameLocalization('ru', 'название')
-      .setDescription('Название заклинания')
-      .setRequired(true)
-      .setAutocomplete(true)),
+    .addStringOption(option =>
+      option
+        .setName('name')
+        .setNameLocalization('ru', 'название')
+        .setDescription('Название заклинания')
+        .setRequired(true)
+        .setAutocomplete(true)
+    ),
   autocomplete: async interaction => {
     try {
-      const resp = await http.post({
+      const resp = await http.post<TSpellLink[]>({
         url: `/spells`,
         payload: {
           limit: 10,
@@ -51,24 +54,26 @@ const commandSpell: SlashCommand = {
         return;
       }
 
-      const spells: TSpellLink[] = _.cloneDeep(resp.data);
+      const spells = cloneDeep(resp.data);
 
-      await interaction.respond(spells.map((spell: TSpellLink) => {
-        let name = spell.name.rus;
+      await interaction.respond(
+        spells.map((spell: TSpellLink) => {
+          let name = spell.name.rus;
 
-        if (spell.concentration) {
-          name = `${ name } [К]`;
-        }
+          if (spell.concentration) {
+            name = `${name} [К]`;
+          }
 
-        if (spell.ritual) {
-          name = `${ name } [Р]`;
-        }
+          if (spell.ritual) {
+            name = `${name} [Р]`;
+          }
 
-        return {
-          name: `[${ spell.level || '-' }] ${ name }`,
-          value: spell.url
-        };
-      }));
+          return {
+            name: `[${spell.level || '-'}] ${name}`,
+            value: spell.url
+          };
+        })
+      );
     } catch (err) {
       console.error(err);
       await interaction.respond([]);
@@ -79,15 +84,17 @@ const commandSpell: SlashCommand = {
       // @ts-ignore
       const url = interaction.options.getString('name');
 
-      const resp = await http.post({ url });
+      const resp = await http.post<TSpellItem>({ url });
 
       if (resp.status !== 200) {
-        await interaction.followUp('Произошла какая-то ошибка... попробуй еще раз');
+        await interaction.followUp(
+          'Произошла какая-то ошибка... попробуй еще раз'
+        );
 
         return;
       }
 
-      const spell: TSpellItem = _.cloneDeep(resp.data);
+      const spell = cloneDeep(resp.data);
 
       const components = [];
 
@@ -103,16 +110,17 @@ const commandSpell: SlashCommand = {
         components.push(spell.components.m);
       }
 
-      const title = `${ spell.name.rus } [${ spell.name.eng }]`;
-      const spellUrl = `${ API_URL }${ spell.url }`;
-      const footer = `TTG Club | ${ spell.source.name } ${ spell.source.page || '' }`.trim();
+      const title = `${spell.name.rus} [${spell.name.eng}]`;
+      const spellUrl = `${API_URL}${spell.url}`;
+
+      const footer = `TTG Club | ${spell.source.name} ${
+        spell.source.page || ''
+      }`.trim();
 
       const fields = {
         time: {
           name: 'Время накладывания',
-          value: spell.ritual
-            ? `${ spell.time } (ритуал)`
-            : spell.time,
+          value: spell.ritual ? `${spell.time} (ритуал)` : spell.time,
           inline: false
         },
         range: {
@@ -127,9 +135,7 @@ const commandSpell: SlashCommand = {
         },
         level: {
           name: 'Уровень',
-          value: !spell.level
-            ? 'Заговор'
-            : spell.level.toString(),
+          value: !spell.level ? 'Заговор' : spell.level.toString(),
           inline: true
         },
         source: {
@@ -155,16 +161,16 @@ const commandSpell: SlashCommand = {
         classes: {
           name: 'Классы',
           value: spell.classes?.length
-            ? spell.classes.map((classItem: any) => classItem.name)
-              .join(', ')
+            ? spell.classes.map((classItem: any) => classItem.name).join(', ')
             : '',
           inline: false
         },
         subclasses: {
           name: 'Подклассы',
           value: spell.subclasses?.length
-            ? spell.subclasses.map((classItem: any) => classItem.name)
-              .join(', ')
+            ? spell.subclasses
+                .map((classItem: any) => classItem.name)
+                .join(', ')
             : '',
           inline: false
         }
@@ -189,35 +195,30 @@ const commandSpell: SlashCommand = {
         });
 
       if (spell.classes?.length) {
-        embed
-          .addFields(fields.classes);
+        embed.addFields(fields.classes);
       }
 
       if (spell.subclasses?.length) {
-        embed
-          .addFields(fields.subclasses);
+        embed.addFields(fields.subclasses);
       }
 
-      embed
-        .addFields(fields.url);
+      embed.addFields(fields.url);
 
-      const embeds = getDescriptionEmbeds(spell.description)
-        .map(str => (
-          new EmbedBuilder()
-            .setTitle('Описание')
-            .setDescription(str)
-        ));
+      const embeds = getDescriptionEmbeds(spell.description).map(str =>
+        new EmbedBuilder().setTitle('Описание').setDescription(str)
+      );
 
       if (spell.upper) {
-        embeds.push(...getDescriptionEmbeds(spell.upper)
-          .map(str => (
+        embeds.push(
+          ...getDescriptionEmbeds(spell.upper).map(str =>
             new EmbedBuilder()
               .setTitle('На более высоких уровнях')
               .setDescription(str)
-          )));
+          )
+        );
       }
 
-      await interaction.followUp({ embeds: [embed]});
+      await interaction.followUp({ embeds: [embed] });
 
       if (embeds.length <= 2) {
         await interaction.followUp({ embeds });
@@ -230,7 +231,10 @@ const commandSpell: SlashCommand = {
       await pagination.paginate();
     } catch (err) {
       console.error(err);
-      await interaction.followUp('Произошла какая-то ошибка... попробуй еще раз');
+
+      await interaction.followUp(
+        'Произошла какая-то ошибка... попробуй еще раз'
+      );
     }
   },
   cooldown: 10

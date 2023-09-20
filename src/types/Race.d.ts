@@ -1,6 +1,4 @@
-import type {
-  TName, TSource, TType
-} from './BaseTypes';
+import type { TName, TSource, TType } from './BaseTypes.js';
 
 export type TRaceLink = {
   name: TName;
@@ -10,14 +8,14 @@ export type TRaceLink = {
   source: TSource;
   image: string;
   subraces?: TRaceLinkSubrace[];
-}
+};
 
 export type TRaceAbility = {
   key: string;
   name: string;
   shortName: string;
   value: number;
-}
+};
 
 export type TRaceLinkSubrace = {
   name: TName;
@@ -26,7 +24,7 @@ export type TRaceLinkSubrace = {
   type: TType;
   source: TSource;
   image: string;
-}
+};
 
 export type TRaceItem = {
   name: TName;
@@ -41,18 +39,18 @@ export type TRaceItem = {
   skills: TRaceItemSkill[];
   subraces?: TRaceItemSubrace[];
   darkvision?: number;
-}
+};
 
 export type TRaceItemSkill = {
   name: string;
   description: string;
   opened?: boolean;
-}
+};
 
 export type TRaceItemSpeed = {
   name?: string;
   value: number;
-}
+};
 
 export type TRaceItemSubrace = {
   name: TName;
@@ -65,11 +63,11 @@ export type TRaceItemSubrace = {
   speed: TRaceItemSpeed[];
   darkvision?: number;
   skills: TRaceItemSubraceSkill[];
-}
+};
 
 export type TRaceItemSubraceSkill = {
   name: string;
   description: string;
   opened?: boolean;
   subrace?: boolean;
-}
+};

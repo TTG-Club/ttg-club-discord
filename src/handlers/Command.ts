@@ -1,10 +1,11 @@
 import { REST } from '@discordjs/rest';
-import type { Client, SlashCommandBuilder } from 'discord.js';
 import { Routes } from 'discord.js';
 
-import commands from '../commands';
-import { useConfig } from '../utils/useConfig';
-import { useHelpers } from '../utils/useHelpers';
+import commands from '../commands/index.js';
+import { useConfig } from '../utils/useConfig.js';
+import { useHelpers } from '../utils/useHelpers.js';
+
+import type { Client, SlashCommandBuilder } from 'discord.js';
 
 const { TOKEN, CLIENT_ID } = useConfig();
 
@@ -27,7 +28,15 @@ export default (client: Client) => {
     })
     .then((data: any) => {
       // eslint-disable-next-line no-console
-      console.log(color('text', `🔥 Successfully loaded ${ color('variable', data.length) } slash command(s)`));
+      console.log(
+        color(
+          'text',
+          `🔥 Successfully loaded ${color(
+            'variable',
+            data.length
+          )} slash command(s)`
+        )
+      );
 
       // console.log(color('text', `🔥 Successfully loaded ${ color('variable', commands.length) } command(s)`));
     })
