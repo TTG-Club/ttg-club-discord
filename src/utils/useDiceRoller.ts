@@ -24,7 +24,7 @@ export function useDiceRoller() {
       result: roll.value,
       highest: highest!.value,
       lowest: lowest!.value,
-      full: renderer.render(roll)
+      full: `**[${notation}]**: ${renderer.render(roll)}`
     };
   };
 
@@ -33,7 +33,7 @@ export function useDiceRoller() {
 
     return {
       result: roll.value,
-      full: renderer.render(roll)
+      full: `**[${notation}]**: ${renderer.render(roll)}`
     };
   };
 
