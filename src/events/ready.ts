@@ -1,7 +1,7 @@
-import type { BotEvent } from '../types';
-import type { Client } from 'discord.js';
+import { useHelpers } from '../utils/useHelpers.js';
 
-import { useHelpers } from '../utils/useHelpers';
+import type { BotEvent } from '../types.js';
+import type { Client } from 'discord.js';
 
 const eventReady: BotEvent = {
   name: 'ready',
@@ -10,7 +10,9 @@ const eventReady: BotEvent = {
     const { color } = useHelpers();
 
     // eslint-disable-next-line no-console
-    console.log(color('text', `💪 Logged in as ${ color('variable', client.user?.tag) }`));
+    console.log(
+      color('text', `💪 Logged in as ${color('variable', client.user?.tag)}`)
+    );
   }
 };
 

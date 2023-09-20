@@ -1,4 +1,4 @@
-import type { TName, TSource } from './BaseTypes';
+import type { TName, TSource } from './BaseTypes.js';
 
 export type TScreenGroupLink = {
   name: TName;
@@ -6,14 +6,14 @@ export type TScreenGroupLink = {
   order: number;
   source: TSource;
   group?: string;
-}
+};
 
 export type TScreenGroup = {
   name: TName;
   url: string;
   order: number;
   chields: TScreenLink[];
-}
+};
 
 export type TScreenLink = {
   name: TName;
@@ -22,7 +22,7 @@ export type TScreenLink = {
   source: TSource;
   icon: string;
   group: string;
-}
+};
 
 export type TScreenItem = {
   name: TName;
@@ -31,10 +31,10 @@ export type TScreenItem = {
   source: TSource;
   description: string;
   parent: TScreenLinkParent;
-}
+};
 
 export type TScreenLinkParent = {
   name: TName;
   url: string;
   order: number;
-}
+};

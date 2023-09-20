@@ -1,14 +1,14 @@
 import type { BotEvent } from '../types.js';
 
-const eventError: BotEvent = {
-  name: 'error',
+const eventShardDisconnect: BotEvent = {
+  name: 'shardDisconnect',
   once: false,
   execute: (err: ErrorEvent) => {
     // eslint-disable-next-line no-console
-    console.error('Error:', err);
+    console.error('Shard Disconnect:', err);
 
     process.exit(1);
   }
 };
 
-export default eventError;
+export default eventShardDisconnect;

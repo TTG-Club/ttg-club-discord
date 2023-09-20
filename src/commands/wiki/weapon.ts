@@ -1,30 +1,33 @@
-import type { SlashCommand } from '../../types';
-import type { TWeaponItem, TWeaponLink } from '../../types/Weapon';
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
-import _ from 'lodash';
-import * as console from 'node:console';
+import { cloneDeep } from 'lodash-es';
 
-import { useAxios } from '../../utils/useAxios';
-import { useConfig } from '../../utils/useConfig';
-import { useMarkdown } from '../../utils/useMarkdown';
+import { useAxios } from '../../utils/useAxios.js';
+import { useConfig } from '../../utils/useConfig.js';
+import { useMarkdown } from '../../utils/useMarkdown.js';
+
+import type { TWeaponItem, TWeaponLink } from '../../types/Weapon.js';
+import type { SlashCommand } from '../../types.js';
 
 const http = useAxios();
 const { API_URL } = useConfig();
+
 const { getDescriptionEmbeds, getPagination } = useMarkdown();
 
 const commandWeapon: SlashCommand = {
   command: new SlashCommandBuilder()
     .setName('weapon')
     .setDescription('Оружие')
-    .addStringOption(option => option
-      .setName('name')
-      .setNameLocalization('ru', 'название')
-      .setDescription('Название оружия')
-      .setRequired(true)
-      .setAutocomplete(true)),
+    .addStringOption(option =>
+      option
+        .setName('name')
+        .setNameLocalization('ru', 'название')
+        .setDescription('Название оружия')
+        .setRequired(true)
+        .setAutocomplete(true)
+    ),
   autocomplete: async interaction => {
     try {
-      const resp = await http.post({
+      const resp = await http.post<TWeaponLink[]>({
         url: `/weapons`,
         payload: {
           page: 0,
@@ -48,12 +51,14 @@ const commandWeapon: SlashCommand = {
         return;
       }
 
-      const weapons: TWeaponLink[] = _.cloneDeep(resp.data);
+      const weapons = cloneDeep(resp.data);
 
-      await interaction.respond(weapons.map((weapon: TWeaponLink) => ({
-        name: weapon.name.rus,
-        value: weapon.url
-      })));
+      await interaction.respond(
+        weapons.map((weapon: TWeaponLink) => ({
+          name: weapon.name.rus,
+          value: weapon.url
+        }))
+      );
     } catch (err) {
       console.error(err);
       await interaction.respond([]);
@@ -64,23 +69,28 @@ const commandWeapon: SlashCommand = {
       // @ts-ignore
       const url = interaction.options.getString('name');
 
-      const resp = await http.post({ url });
+      const resp = await http.post<TWeaponItem>({ url });
 
       if (resp.status !== 200) {
-        await interaction.followUp('Произошла какая-то ошибка... попробуй еще раз');
+        await interaction.followUp(
+          'Произошла какая-то ошибка... попробуй еще раз'
+        );
 
         return;
       }
 
-      const weapon: TWeaponItem = _.cloneDeep(resp.data);
+      const weapon = cloneDeep(resp.data);
 
-      const title = `${ weapon.name.rus } [${ weapon.name.eng }]`;
-      const weaponUrl = `${ API_URL }${ url }`;
-      const footer = `TTG Club | ${ weapon.source.name } ${ weapon.source.page || '' }`.trim();
+      const title = `${weapon.name.rus} [${weapon.name.eng}]`;
+      const weaponUrl = `${API_URL}${url}`;
+
+      const footer = `TTG Club | ${weapon.source.name} ${
+        weapon.source.page || ''
+      }`.trim();
 
       const embeds: {
-        main: EmbedBuilder,
-        desc: EmbedBuilder[]
+        main: EmbedBuilder;
+        desc: EmbedBuilder[];
       } = {
         main: new EmbedBuilder(),
         desc: []
@@ -96,7 +106,7 @@ const commandWeapon: SlashCommand = {
         })
         .addFields({
           name: 'Урон',
-          value: `${ weapon.damage.dice } ${ weapon.damage.type }`,
+          value: `${weapon.damage.dice} ${weapon.damage.type}`,
           inline: true
         })
         .addFields({
@@ -111,13 +121,14 @@ const commandWeapon: SlashCommand = {
         })
         .addFields({
           name: 'Свойства',
-          value: weapon.properties.map(prop => (
-            `${ prop.name }${
-            prop.twoHandDice ? ` (${ prop.twoHandDice })` : ''
-          }${
-            prop.distance ? ` (дис. ${ prop.distance }` : ''
-          }`
-          )).join(', '),
+          value: weapon.properties
+            .map(
+              prop =>
+                `${prop.name}${
+                  prop.twoHandDice ? ` (${prop.twoHandDice})` : ''
+                }${prop.distance ? ` (дис. ${prop.distance}` : ''}`
+            )
+            .join(', '),
           inline: false
         })
         .addFields({
@@ -137,21 +148,17 @@ const commandWeapon: SlashCommand = {
       });
 
       if (weapon.description) {
-        embeds.desc = getDescriptionEmbeds(weapon.description)
-          .map(str => (
-            new EmbedBuilder()
-              .setTitle('Описание')
-              .setDescription(str)
-          ));
+        embeds.desc = getDescriptionEmbeds(weapon.description).map(str =>
+          new EmbedBuilder().setTitle('Описание').setDescription(str)
+        );
       }
 
       if (weapon.special) {
-        embeds.desc.push(...getDescriptionEmbeds(weapon.special)
-          .map(str => (
-            new EmbedBuilder()
-              .setTitle('Особое свойство')
-              .setDescription(str)
-          )));
+        embeds.desc.push(
+          ...getDescriptionEmbeds(weapon.special).map(str =>
+            new EmbedBuilder().setTitle('Особое свойство').setDescription(str)
+          )
+        );
       }
 
       if (embeds.desc.length <= 2) {
@@ -165,7 +172,10 @@ const commandWeapon: SlashCommand = {
       await pagination.paginate();
     } catch (err) {
       console.error(err);
-      await interaction.followUp('Произошла какая-то ошибка... попробуй еще раз');
+
+      await interaction.followUp(
+        'Произошла какая-то ошибка... попробуй еще раз'
+      );
     }
   },
   cooldown: 10

@@ -1,6 +1,4 @@
-import type {
-  TName, TPrice, TSource, TType
-} from './BaseTypes';
+import type { TName, TPrice, TSource, TType } from './BaseTypes.js';
 
 export type TArtifactLink = {
   name: TName;
@@ -9,10 +7,10 @@ export type TArtifactLink = {
   source: TSource;
   rarity: TArtifactRarity;
   homebrew?: boolean;
-}
+};
 
 export type TArtifactRarityEnum =
-  'common'
+  | 'common'
   | 'uncommon'
   | 'rare'
   | 'very-rare'
@@ -27,7 +25,7 @@ export type TArtifactRarity = {
   type: TArtifactRarityEnum;
   name: string;
   short: TArtifactRarityShortEnum;
-}
+};
 
 export type TArtifactItem = {
   name: TName;
@@ -41,4 +39,4 @@ export type TArtifactItem = {
   images?: string[];
   detailType?: string[];
   homebrew?: boolean;
-}
+};

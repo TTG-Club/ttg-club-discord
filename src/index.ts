@@ -1,8 +1,9 @@
-import type { SlashCommand } from './types';
 import { Client, Collection } from 'discord.js';
 
-import handlers from './handlers';
-import { useConfig } from './utils/useConfig';
+import handlers from './handlers/index.js';
+import { useConfig } from './utils/useConfig.js';
+
+import type { SlashCommand } from './types.js';
 
 const client = new Client({
   intents: []
@@ -11,11 +12,10 @@ const client = new Client({
 client.slashCommands = new Collection<string, SlashCommand>();
 client.cooldowns = new Collection<string, number>();
 
-for (let handler of handlers) {
+for (const handler of handlers) {
   handler(client);
 }
 
 const { TOKEN } = useConfig();
 
-client.login(TOKEN)
-  .then();
+client.login(TOKEN).then();

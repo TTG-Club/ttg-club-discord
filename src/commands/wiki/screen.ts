@@ -1,29 +1,34 @@
-import type { SlashCommand } from '../../types';
-import type {
-  TScreenGroupLink, TScreenItem, TScreenLink
-} from '../../types/Screen';
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
-import _ from 'lodash';
-import * as console from 'node:console';
+import { cloneDeep } from 'lodash-es';
 
-import { useAxios } from '../../utils/useAxios';
-import { useConfig } from '../../utils/useConfig';
-import { useMarkdown } from '../../utils/useMarkdown';
+import { useAxios } from '../../utils/useAxios.js';
+import { useConfig } from '../../utils/useConfig.js';
+import { useMarkdown } from '../../utils/useMarkdown.js';
+
+import type {
+  TScreenGroupLink,
+  TScreenItem,
+  TScreenLink
+} from '../../types/Screen.js';
+import type { SlashCommand } from '../../types.js';
 
 const http = useAxios();
 const { API_URL } = useConfig();
+
 const { getDescriptionEmbeds, getPagination } = useMarkdown();
 
 const commandScreen: SlashCommand = {
   command: new SlashCommandBuilder()
     .setName('screen')
     .setDescription('Ширма (справочник)')
-    .addStringOption(option => option
-      .setName('name')
-      .setNameLocalization('ru', 'название')
-      .setDescription('Название записи в ширме')
-      .setRequired(true)
-      .setAutocomplete(true)),
+    .addStringOption(option =>
+      option
+        .setName('name')
+        .setNameLocalization('ru', 'название')
+        .setDescription('Название записи в ширме')
+        .setRequired(true)
+        .setAutocomplete(true)
+    ),
   autocomplete: async interaction => {
     try {
       const search = interaction.options.getString('name') || '';
@@ -34,7 +39,7 @@ const commandScreen: SlashCommand = {
         return;
       }
 
-      const resp = await http.post({
+      const resp = await http.post<TScreenGroupLink[] | TScreenLink[]>({
         url: `/screens`,
         payload: {
           page: 0,
@@ -62,14 +67,18 @@ const commandScreen: SlashCommand = {
         return;
       }
 
-      const screens: TScreenGroupLink[] | TScreenLink[] = search
-        ? _.cloneDeep(resp.data).filter((item: TScreenGroupLink | TScreenLink) => 'icon' in item)
-        : _.cloneDeep(resp.data);
+      const screens = search
+        ? cloneDeep(resp.data).filter(
+            (item: TScreenGroupLink | TScreenLink) => 'icon' in item
+          )
+        : cloneDeep(resp.data);
 
-      await interaction.respond(screens.map((screen: TScreenGroupLink | TScreenLink) => ({
-        name: screen.name.rus,
-        value: screen.url
-      })));
+      await interaction.respond(
+        screens.map((screen: TScreenGroupLink | TScreenLink) => ({
+          name: screen.name.rus,
+          value: screen.url
+        }))
+      );
     } catch (err) {
       console.error(err);
       await interaction.respond([]);
@@ -80,21 +89,26 @@ const commandScreen: SlashCommand = {
       // @ts-ignore
       const url = interaction.options.getString('name');
 
-      const resp = await http.post({ url });
+      const resp = await http.post<TScreenItem>({ url });
 
       if (resp.status !== 200) {
-        await interaction.followUp('Произошла какая-то ошибка... попробуй еще раз');
+        await interaction.followUp(
+          'Произошла какая-то ошибка... попробуй еще раз'
+        );
 
         return;
       }
 
-      const screen: TScreenItem = _.cloneDeep(resp.data);
+      const screen = cloneDeep(resp.data);
 
       const embed = new EmbedBuilder();
 
-      const title = `${ screen.name.rus } [${ screen.name.eng }]`;
-      const screenUrl = `${ API_URL }${ screen.url }`;
-      const footer = `TTG Club | ${ screen.source.name } ${ screen.source.page || '' }`.trim();
+      const title = `${screen.name.rus} [${screen.name.eng}]`;
+      const screenUrl = `${API_URL}${screen.url}`;
+
+      const footer = `TTG Club | ${screen.source.name} ${
+        screen.source.page || ''
+      }`.trim();
 
       embed
         .setTitle(title)
@@ -122,17 +136,16 @@ const commandScreen: SlashCommand = {
       const descLength = description.length;
 
       const embeds = description.map((str, index) => {
-        const embed = new EmbedBuilder()
-          .setDescription(str);
+        const embedItem = new EmbedBuilder().setDescription(str);
 
         if (!index || descLength > 2) {
-          embed.setTitle('Описание');
+          embedItem.setTitle('Описание');
         }
 
-        return embed;
+        return embedItem;
       });
 
-      await interaction.followUp({ embeds: [embed]});
+      await interaction.followUp({ embeds: [embed] });
 
       if (embeds.length <= 2) {
         await interaction.followUp({ embeds });
@@ -145,7 +158,10 @@ const commandScreen: SlashCommand = {
       await pagination.paginate();
     } catch (err) {
       console.error(err);
-      await interaction.followUp('Произошла какая-то ошибка... попробуй еще раз');
+
+      await interaction.followUp(
+        'Произошла какая-то ошибка... попробуй еще раз'
+      );
     }
   },
   cooldown: 10

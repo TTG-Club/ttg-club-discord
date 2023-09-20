@@ -1,4 +1,4 @@
-import type { TName, TSource } from './BaseTypes';
+import type { TName, TSource } from './BaseTypes.js';
 
 export type TGodLink = {
   name: TName;
@@ -6,7 +6,7 @@ export type TGodLink = {
   alignment: string;
   shortAlignment: string;
   homebrew?: boolean;
-}
+};
 
 export type TGodItem = {
   name: TName;
@@ -21,4 +21,4 @@ export type TGodItem = {
   images?: string[];
   source: TSource;
   homebrew?: boolean;
-}
+};

@@ -1,9 +1,9 @@
 import { JSDOM } from 'jsdom';
 
 export type TPairs = {
-  name: string
-  value: string
-}
+  name: string;
+  value: string;
+};
 
 export const useJSDom = () => {
   const getArrayParagraphs = (html: string): string[] => {
@@ -21,20 +21,22 @@ export const useJSDom = () => {
     });
   };
 
-  const getHTMLArrayFromPairs = (array: TPairs[]): string => {
-    return array
+  const getHTMLArrayFromPairs = (array: TPairs[]): string =>
+    array
       .map(pair => {
         const dom = new JSDOM();
         const { window } = dom;
         const { document } = window;
-        const fragment = JSDOM.fragment(`<p><strong>${ pair.name }.</strong> ${ pair.value }</p>`);
+
+        const fragment = JSDOM.fragment(
+          `<p><strong>${pair.name}.</strong> ${pair.value}</p>`
+        );
 
         document.body.append(fragment);
 
         return document.body.innerHTML;
       })
       .join('');
-  };
 
   return {
     getArrayParagraphs,

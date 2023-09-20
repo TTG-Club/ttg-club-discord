@@ -1,9 +1,8 @@
-import type { SlashCommand } from '../../types';
-import type { TRollResult } from '../../utils/useDiceRoller';
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
-import * as console from 'node:console';
 
-import { useDiceRoller } from '../../utils/useDiceRoller';
+import { useDiceRoller } from '../../utils/useDiceRoller.js';
+
+import type { SlashCommand } from '../../types.js';
 
 const { getDiceMsg } = useDiceRoller();
 
@@ -11,20 +10,24 @@ const commandDiceRoller: SlashCommand = {
   command: new SlashCommandBuilder()
     .setName('roll')
     .setDescription('Бросок кубиков')
-    .addStringOption(option => option
-      .setName('formula')
-      .setNameLocalization('ru', 'формула')
-      .setDescription('Формула броска')
-      .setRequired(true)),
+    .addStringOption(option =>
+      option
+        .setName('formula')
+        .setNameLocalization('ru', 'формула')
+        .setDescription('Формула броска')
+        .setRequired(true)
+    ),
   execute: async interaction => {
     try {
       // @ts-ignore
       const formula = interaction.options.getString('formula');
 
-      const roll: TRollResult | null = await getDiceMsg(formula);
+      const roll = getDiceMsg(formula);
 
       if (!roll) {
-        await interaction.followUp('Произошла какая-то ошибка... попробуй еще раз');
+        await interaction.followUp(
+          'Произошла какая-то ошибка... попробуй еще раз'
+        );
 
         return;
       }
@@ -40,7 +43,7 @@ const commandDiceRoller: SlashCommand = {
       if (roll.highest) {
         embed.addFields({
           name: 'Лучший бросок',
-          value: roll.highest,
+          value: roll.highest.toString(),
           inline: false
         });
       }
@@ -48,7 +51,7 @@ const commandDiceRoller: SlashCommand = {
       if (roll.lowest) {
         embed.addFields({
           name: 'Худший бросок',
-          value: roll.lowest,
+          value: roll.lowest.toString(),
           inline: false
         });
       }
@@ -56,15 +59,18 @@ const commandDiceRoller: SlashCommand = {
       if (formula !== '2d20' && formula !== '2к20') {
         embed.addFields({
           name: 'Результат',
-          value: roll.result,
+          value: roll.result.toString(),
           inline: false
         });
       }
 
-      await interaction.followUp({ embeds: [embed]});
+      await interaction.followUp({ embeds: [embed] });
     } catch (err) {
       console.error(err);
-      await interaction.followUp('Произошла какая-то ошибка... попробуй еще раз');
+
+      await interaction.followUp(
+        'Произошла какая-то ошибка... попробуй еще раз'
+      );
     }
   },
   cooldown: 10

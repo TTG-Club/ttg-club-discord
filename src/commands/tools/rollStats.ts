@@ -1,10 +1,9 @@
-import type { SlashCommand } from '../../types';
-import type { TRollResult } from '../../utils/useDiceRoller';
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
-import { isNumber } from 'lodash';
-import * as console from 'node:console';
+import { isNumber } from 'lodash-es';
 
-import { useDiceRoller } from '../../utils/useDiceRoller';
+import { type IRollResult, useDiceRoller } from '../../utils/useDiceRoller.js';
+
+import type { SlashCommand } from '../../types.js';
 
 const { getDiceMsg } = useDiceRoller();
 
@@ -15,16 +14,18 @@ const commandRollStats: SlashCommand = {
   execute: async interaction => {
     try {
       const embed = new EmbedBuilder();
-      const rolls: TRollResult[] = [];
+      const rolls: IRollResult[] = [];
 
       let total = 0;
 
       for (let i = 0; i < 6; i++) {
-        const roll: TRollResult | null = await getDiceMsg('4d6kh3');
+        const roll = getDiceMsg('4d6kh3');
         const result = Number(roll?.result);
 
         if (!roll || !isNumber(result)) {
-          await interaction.followUp('Произошла какая-то ошибка... попробуй еще раз');
+          await interaction.followUp(
+            'Произошла какая-то ошибка... попробуй еще раз'
+          );
 
           return;
         }
@@ -39,33 +40,42 @@ const commandRollStats: SlashCommand = {
         const roll = rolls[i];
 
         if (!roll) {
-          await interaction.followUp('Произошла какая-то ошибка... попробуй еще раз');
+          await interaction.followUp(
+            'Произошла какая-то ошибка... попробуй еще раз'
+          );
 
           return;
         }
 
         const match = roll.full.match(/(?<formula>.+?):\s\[(?<rolls>.+?)]/);
 
-        const result = match?.groups as {
-          formula: string;
-          rolls: string;
-        } | undefined;
+        const result = match?.groups as
+          | {
+              formula: string;
+              rolls: string;
+            }
+          | undefined;
 
         if (!result) {
-          await interaction.followUp('Произошла какая-то ошибка... попробуй еще раз');
+          await interaction.followUp(
+            'Произошла какая-то ошибка... попробуй еще раз'
+          );
 
           return;
         }
 
         const rollsParsed = result.rolls
           .split(', ')
-          .map(roll => (
-            roll.endsWith('d')
-              ? `~~${ roll.replace('d', '') }~~`
-              : `**${ roll }**`))
+          .map(rollItem =>
+            rollItem.endsWith('d')
+              ? `~~${rollItem.replace('d', '')}~~`
+              : `**${rollItem}**`
+          )
           .join(', ');
 
-        str += `**${ i + 1 }.** ${ result.formula }: [${ rollsParsed }] = \`${ roll.result }\`\n`;
+        str += `**${i + 1}.** ${result.formula}: [${rollsParsed}] = \`${
+          roll.result
+        }\`\n`;
       }
 
       embed
@@ -81,11 +91,13 @@ const commandRollStats: SlashCommand = {
           inline: false
         });
 
-      await interaction.followUp({ embeds: [embed]});
+      await interaction.followUp({ embeds: [embed] });
     } catch (err) {
       console.error(err);
 
-      await interaction.followUp('Произошла какая-то ошибка... попробуй еще раз');
+      await interaction.followUp(
+        'Произошла какая-то ошибка... попробуй еще раз'
+      );
     }
   },
   cooldown: 10

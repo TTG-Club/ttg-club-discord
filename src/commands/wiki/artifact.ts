@@ -1,30 +1,33 @@
-import type { SlashCommand } from '../../types';
-import type { TArtifactItem, TArtifactLink } from '../../types/Artifact';
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
-import _ from 'lodash';
-import * as console from 'node:console';
+import { cloneDeep } from 'lodash-es';
 
-import { useAxios } from '../../utils/useAxios';
-import { useConfig } from '../../utils/useConfig';
-import { useMarkdown } from '../../utils/useMarkdown';
+import { useAxios } from '../../utils/useAxios.js';
+import { useConfig } from '../../utils/useConfig.js';
+import { useMarkdown } from '../../utils/useMarkdown.js';
+
+import type { TArtifactItem, TArtifactLink } from '../../types/Artifact.js';
+import type { SlashCommand } from '../../types.js';
 
 const http = useAxios();
 const { API_URL } = useConfig();
+
 const { getDescriptionEmbeds, getPagination } = useMarkdown();
 
 const commandArtifact: SlashCommand = {
   command: new SlashCommandBuilder()
     .setName('artifact')
     .setDescription('Магические предметы')
-    .addStringOption(option => option
-      .setName('name')
-      .setNameLocalization('ru', 'название')
-      .setDescription('Название предмета')
-      .setRequired(true)
-      .setAutocomplete(true)),
+    .addStringOption(option =>
+      option
+        .setName('name')
+        .setNameLocalization('ru', 'название')
+        .setDescription('Название предмета')
+        .setRequired(true)
+        .setAutocomplete(true)
+    ),
   autocomplete: async interaction => {
     try {
-      const resp = await http.post({
+      const resp = await http.post<TArtifactLink[]>({
         url: `/items/magic`,
         payload: {
           page: 0,
@@ -52,12 +55,14 @@ const commandArtifact: SlashCommand = {
         return;
       }
 
-      const artifacts: TArtifactLink[] = _.cloneDeep(resp.data);
+      const artifacts = cloneDeep(resp.data);
 
-      await interaction.respond(artifacts.map((artifact: TArtifactLink) => ({
-        name: `[${ artifact.rarity.short }] ${ artifact.name.rus }`,
-        value: artifact.url
-      })));
+      await interaction.respond(
+        artifacts.map((artifact: TArtifactLink) => ({
+          name: `[${artifact.rarity.short}] ${artifact.name.rus}`,
+          value: artifact.url
+        }))
+      );
     } catch (err) {
       console.error(err);
       await interaction.respond([]);
@@ -68,37 +73,39 @@ const commandArtifact: SlashCommand = {
       // @ts-ignore
       const url = interaction.options.getString('name');
 
-      const resp = await http.post({ url });
+      const resp = await http.post<TArtifactItem>({ url });
 
       if (resp.status !== 200) {
-        await interaction.followUp('Произошла какая-то ошибка... попробуй еще раз');
+        await interaction.followUp(
+          'Произошла какая-то ошибка... попробуй еще раз'
+        );
 
         return;
       }
 
-      const artifact: TArtifactItem = _.cloneDeep(resp.data);
+      const artifact = cloneDeep(resp.data);
 
-      const title = `${ artifact.name.rus } [${ artifact.name.eng }]`;
-      const artifactUrl = `${ API_URL }${ url }`;
+      const title = `${artifact.name.rus} [${artifact.name.eng}]`;
+      const artifactUrl = `${API_URL}${url}`;
       const thumbnail = artifact.images?.length ? artifact.images[0] : null;
-      const footer = `TTG Club | ${ artifact.source.name } ${ artifact.source.page || '' }`.trim();
+
+      const footer = `TTG Club | ${artifact.source.name} ${
+        artifact.source.page || ''
+      }`.trim();
 
       const embeds: {
-        main: EmbedBuilder,
-        desc: EmbedBuilder[]
+        main: EmbedBuilder;
+        desc: EmbedBuilder[];
       } = {
         main: new EmbedBuilder(),
         desc: []
       };
 
-      embeds.main
-        .setTitle(title)
-        .setURL(artifactUrl)
-        .addFields({
-          name: 'Источник',
-          value: artifact.source.shortName,
-          inline: false
-        });
+      embeds.main.setTitle(title).setURL(artifactUrl).addFields({
+        name: 'Источник',
+        value: artifact.source.shortName,
+        inline: false
+      });
 
       if (artifact.cost) {
         embeds.main
@@ -109,7 +116,9 @@ const commandArtifact: SlashCommand = {
           })
           .addFields({
             name: 'Стоимость XGE',
-            value: `${ artifact.cost.xge }${ artifact.cost.xge === 'невозможно купить' ? '' : ' зм.' }`,
+            value: `${artifact.cost.xge}${
+              artifact.cost.xge === 'невозможно купить' ? '' : ' зм.'
+            }`,
             inline: false
           });
       }
@@ -117,8 +126,10 @@ const commandArtifact: SlashCommand = {
       embeds.main
         .addFields({
           name: 'Тип',
-          value: `${ artifact.type.name }${
-            artifact.detailType?.length ? ` (${ artifact.detailType.join(', ') })` : ''
+          value: `${artifact.type.name}${
+            artifact.detailType?.length
+              ? ` (${artifact.detailType.join(', ')})`
+              : ''
           }`,
           inline: false
         })
@@ -129,10 +140,10 @@ const commandArtifact: SlashCommand = {
         })
         .addFields({
           name: 'Настройка',
-          value: `${
-            artifact.customization ? 'требуется настройка' : 'нет'
-          }${
-            artifact.detailCustamization?.length ? ` (${ artifact.detailCustamization.join(', ') })` : ''
+          value: `${artifact.customization ? 'требуется настройка' : 'нет'}${
+            artifact.detailCustamization?.length
+              ? ` (${artifact.detailCustamization.join(', ')})`
+              : ''
           }`,
           inline: false
         })
@@ -144,8 +155,7 @@ const commandArtifact: SlashCommand = {
         .setFooter({ text: footer });
 
       if (thumbnail) {
-        embeds.main
-          .setThumbnail(thumbnail);
+        embeds.main.setThumbnail(thumbnail);
       }
 
       await interaction.followUp({
@@ -157,8 +167,7 @@ const commandArtifact: SlashCommand = {
       const descLength = description.length;
 
       embeds.desc = description.map((str, index) => {
-        const embed = new EmbedBuilder()
-          .setDescription(str);
+        const embed = new EmbedBuilder().setDescription(str);
 
         if (!index || descLength > 2) {
           embed.setTitle('Описание');
@@ -178,7 +187,10 @@ const commandArtifact: SlashCommand = {
       await pagination.paginate();
     } catch (err) {
       console.error(err);
-      await interaction.followUp('Произошла какая-то ошибка... попробуй еще раз');
+
+      await interaction.followUp(
+        'Произошла какая-то ошибка... попробуй еще раз'
+      );
     }
   },
   cooldown: 10
