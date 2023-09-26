@@ -36,7 +36,7 @@ const commandDiceRoller: SlashCommand = {
 
       embed.addFields({
         name: 'Формула броска',
-        value: roll.notation,
+        value: `\`${roll.notation}\``,
         inline: false
       });
 
