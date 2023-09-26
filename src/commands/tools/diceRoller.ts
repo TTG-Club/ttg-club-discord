@@ -22,7 +22,7 @@ const commandDiceRoller: SlashCommand = {
       // @ts-ignore
       const formula = interaction.options.getString('formula');
 
-      const roll = getDiceMsg(formula);
+      const roll = await getDiceMsg(formula);
 
       if (!roll) {
         await interaction.followUp(
@@ -35,8 +35,14 @@ const commandDiceRoller: SlashCommand = {
       const embed = new EmbedBuilder();
 
       embed.addFields({
+        name: 'Формула броска',
+        value: roll.notation,
+        inline: false
+      });
+
+      embed.addFields({
         name: 'Развернутый результат',
-        value: roll.full,
+        value: roll.rendered,
         inline: false
       });
 
@@ -59,7 +65,7 @@ const commandDiceRoller: SlashCommand = {
       if (formula !== '2d20' && formula !== '2к20') {
         embed.addFields({
           name: 'Результат',
-          value: roll.result.toString(),
+          value: roll.value.toString(),
           inline: false
         });
       }

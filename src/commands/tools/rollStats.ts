@@ -1,10 +1,11 @@
+import { colord } from 'colord';
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
-import { isNumber } from 'lodash-es';
 
-import { type IRollResult, useDiceRoller } from '../../utils/useDiceRoller.js';
+import { useDiceRoller } from '../../utils/useDiceRoller.js';
 
 import type { SlashCommand } from '../../types.js';
 
+const COLOR_COEFFICIENT = 1.2;
 const { getDiceMsg } = useDiceRoller();
 
 const commandRollStats: SlashCommand = {
@@ -14,75 +15,26 @@ const commandRollStats: SlashCommand = {
   execute: async interaction => {
     try {
       const embed = new EmbedBuilder();
-      const rolls: IRollResult[] = [];
 
-      let total = 0;
+      const rolls = await Promise.all(
+        Array.from(Array(6), () => getDiceMsg('4d6kh3'))
+      );
 
-      for (let i = 0; i < 6; i++) {
-        const roll = getDiceMsg('4d6kh3');
-        const result = Number(roll?.result);
+      const total = rolls.reduce((result, roll) => result + roll.value, 0);
+      const totalPercent = Math.round((total / 108) * 100);
 
-        if (!roll || !isNumber(result)) {
-          await interaction.followUp(
-            'Произошла какая-то ошибка... попробуй еще раз'
-          );
+      const hue = Math.round((totalPercent * COLOR_COEFFICIENT) / 10) * 10;
+      const color = colord(`hsl(${hue},100%,50%)`).toRgb();
 
-          return;
-        }
-
-        rolls.push(roll);
-        total += result;
-      }
-
-      let str = '';
-
-      for (let i = 0; i < rolls.length; i++) {
-        const roll = rolls[i];
-
-        if (!roll) {
-          await interaction.followUp(
-            'Произошла какая-то ошибка... попробуй еще раз'
-          );
-
-          return;
-        }
-
-        const match = roll.full.match(/(?<formula>.+?):\s\[(?<rolls>.+?)]/);
-
-        const result = match?.groups as
-          | {
-              formula: string;
-              rolls: string;
-            }
-          | undefined;
-
-        if (!result) {
-          await interaction.followUp(
-            'Произошла какая-то ошибка... попробуй еще раз'
-          );
-
-          return;
-        }
-
-        const rollsParsed = result.rolls
-          .split(', ')
-          .map(rollItem =>
-            rollItem.endsWith('d')
-              ? `~~${rollItem.replace('d', '')}~~`
-              : `**${rollItem}**`
-          )
-          .join(', ');
-
-        str += `**${i + 1}.** ${result.formula}: [${rollsParsed}] = \`${
-          roll.result
-        }\`\n`;
-      }
+      const results = rolls.map(
+        (roll, index) => `${index + 1}. [${roll.notation}]: ${roll.rendered}`
+      );
 
       embed
-        .setColor('#3567C9')
+        .setColor([color.r, color.g, color.b])
         .addFields({
           name: 'Броски характеристик',
-          value: str,
+          value: results.join('\n'),
           inline: false
         })
         .addFields({
