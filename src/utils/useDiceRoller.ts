@@ -4,8 +4,10 @@ import { orderBy } from 'lodash-es';
 import type { DiceRollResult } from 'dice-roller-parser/dist/rollTypes.js';
 
 export interface IRollResult {
-  result: number;
   full: string;
+  rendered: string;
+  notation: string;
+  value: number;
   highest?: number;
   lowest?: number;
 }
@@ -16,28 +18,42 @@ export function useDiceRoller() {
   const roller = new DiceRoller();
   const renderer = new DiscordRollRenderer();
 
-  const getDropOrKeepMsg = (notation: string): IRollResult => {
-    const roll = roller.roll(notation) as DiceRollResult;
-    const [highest, lowest] = orderBy(roll.rolls, ['value'], ['desc']);
+  const getDropOrKeepMsg = (notation: string): Promise<IRollResult> => {
+    try {
+      const roll = roller.roll(notation) as DiceRollResult;
+      const rendered = renderer.render(roll);
+      const [highest, lowest] = orderBy(roll.rolls, ['value'], ['desc']);
 
-    return {
-      result: roll.value,
-      highest: highest!.value,
-      lowest: lowest!.value,
-      full: `**[${notation}]:** ${renderer.render(roll)}`
-    };
+      return Promise.resolve({
+        full: `**[${notation}]:** ${rendered}`,
+        rendered,
+        notation,
+        value: roll.value,
+        highest: highest!.value,
+        lowest: lowest!.value
+      });
+    } catch (err) {
+      return Promise.reject(err);
+    }
   };
 
-  const getDefaultDiceMsg = (notation: string): IRollResult => {
-    const roll = roller.roll(notation);
+  const getDefaultDiceMsg = (notation: string): Promise<IRollResult> => {
+    try {
+      const roll = roller.roll(notation);
+      const rendered = renderer.render(roll);
 
-    return {
-      result: roll.value,
-      full: `**[${notation}]:** ${renderer.render(roll)}`
-    };
+      return Promise.resolve({
+        full: `**[${notation}]:** ${rendered}`,
+        rendered,
+        notation,
+        value: roll.value
+      });
+    } catch (err) {
+      return Promise.reject(err);
+    }
   };
 
-  const getDiceMsg = (notation: string): IRollResult => {
+  const getDiceMsg = (notation: string): Promise<IRollResult> => {
     const formula = notation.replace(/к/g, 'd');
 
     switch (formula) {
@@ -52,8 +68,6 @@ export function useDiceRoller() {
   };
 
   return {
-    getDiceMsg,
-    getDropOrKeepMsg,
-    getDefaultDiceMsg
+    getDiceMsg
   };
 }
