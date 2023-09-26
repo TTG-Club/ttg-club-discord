@@ -23,10 +23,8 @@ const commandRollStats: SlashCommand = {
       const total = rolls.reduce((result, roll) => result + roll.value, 0);
       const totalPercent = Math.round((total / 108) * 100);
 
-      const hueCorrected =
-        Math.round((totalPercent * COLOR_COEFFICIENT) / 10) * 10;
-
-      const color = colord(`hsl(${hueCorrected},100%,50%)`).toRgb();
+      const hue = Math.round((totalPercent * COLOR_COEFFICIENT) / 10) * 10;
+      const color = colord(`hsl(${hue},100%,50%)`).toRgb();
 
       const results = rolls.map(
         (roll, index) => `${index + 1}. [${roll.notation}]: ${roll.rendered}`
