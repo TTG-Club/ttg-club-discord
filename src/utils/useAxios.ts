@@ -25,41 +25,25 @@ class HTTPService {
   }
 
   get<T>(config: RequestConfig) {
-    return this.instance<T>({
-      method: 'get',
-      url: config.url,
+    return this.instance.get<T>(config.url || '', {
       params: config.payload
     });
   }
 
   post<T>(config: RequestConfig) {
-    return this.instance<T>({
-      method: 'post',
-      url: config.url,
-      data: config.payload
-    });
+    return this.instance.post<T>(config.url || '', config.payload);
   }
 
   put<T>(config: RequestConfig) {
-    return this.instance<T>({
-      method: 'put',
-      url: config.url,
-      data: config.payload
-    });
+    return this.instance.put<T>(config.url || '', config.payload);
   }
 
   patch<T>(config: RequestConfig) {
-    return this.instance<T>({
-      method: 'patch',
-      url: config.url,
-      data: config.payload
-    });
+    return this.instance.patch<T>(config.url || '', config.payload);
   }
 
   delete<T>(config: RequestConfig) {
-    return this.instance<T>({
-      method: 'delete',
-      url: config.url,
+    return this.instance.delete<T>(config.url || '', {
       params: config.payload
     });
   }

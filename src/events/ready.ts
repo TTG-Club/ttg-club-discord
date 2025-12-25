@@ -10,7 +10,8 @@ import type { Client } from 'discord.js';
 const eventReady: BotEvent = {
   name: Events.ClientReady,
   once: true,
-  execute: (client: Client) => {
+  execute: (...args: unknown[]) => {
+    const client = args[0] as Client;
     const { color } = useHelpers();
 
     process.once('unhandledRejection', error => {
@@ -27,7 +28,10 @@ const eventReady: BotEvent = {
 
     // eslint-disable-next-line no-console
     console.log(
-      color('text', `💪 Logged in as ${color('variable', client.user?.tag)}`)
+      color(
+        'text',
+        `💪 Logged in as ${color('variable', client.user?.tag ?? 'Unknown')}`
+      )
     );
   }
 };

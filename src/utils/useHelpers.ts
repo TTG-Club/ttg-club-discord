@@ -19,7 +19,7 @@ export const useHelpers = () => {
   const getThemeColor = (color: colorType) =>
     Number(`0x${themeColors[color].substring(1)}`);
 
-  const color = (colorName: colorType, message: any) =>
+  const color = (colorName: colorType, message: string) =>
     chalk.hex(themeColors[colorName])(message);
 
   const checkPermissions = (

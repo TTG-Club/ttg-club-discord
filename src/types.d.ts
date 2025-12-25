@@ -2,11 +2,12 @@ import type {
   AutocompleteInteraction,
   Collection,
   CommandInteraction,
-  SlashCommandBuilder
+  SlashCommandBuilder,
+  SlashCommandOptionsOnlyBuilder
 } from 'discord.js';
 
 export interface SlashCommand {
-  command: SlashCommandBuilder | any;
+  command: SlashCommandBuilder | SlashCommandOptionsOnlyBuilder;
   execute: (interaction: CommandInteraction) => void;
   autocomplete?: (interaction: AutocompleteInteraction) => void;
   cooldown?: number;
@@ -15,7 +16,7 @@ export interface SlashCommand {
 export interface BotEvent {
   name: string;
   once?: boolean | false;
-  execute: (...args) => void;
+  execute: (...args: unknown[]) => void | Promise<void>;
 }
 
 declare global {

@@ -109,7 +109,7 @@ const commandOption: SlashCommand = {
         classes: {
           name: 'Классы',
           value: option.classes?.length
-            ? option.classes.map((classItem: any) => classItem.name).join(', ')
+            ? option.classes.map(classItem => classItem.name).join(', ')
             : '',
           inline: false
         }

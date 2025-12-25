@@ -161,16 +161,14 @@ const commandSpell: SlashCommand = {
         classes: {
           name: 'Классы',
           value: spell.classes?.length
-            ? spell.classes.map((classItem: any) => classItem.name).join(', ')
+            ? spell.classes.map(classItem => classItem.name).join(', ')
             : '',
           inline: false
         },
         subclasses: {
           name: 'Подклассы',
           value: spell.subclasses?.length
-            ? spell.subclasses
-                .map((classItem: any) => classItem.name)
-                .join(', ')
+            ? spell.subclasses.map(classItem => classItem.name).join(', ')
             : '',
           inline: false
         }

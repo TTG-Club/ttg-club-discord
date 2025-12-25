@@ -2,12 +2,13 @@ import { ButtonStyle } from 'discord.js';
 import { Pagination } from 'discordjs-button-embed-pagination';
 import sanitizeHtml from 'sanitize-html';
 import TurndownService from 'turndown';
+// @ts-ignore - типы определены в src/types/gfm.d.ts
 import { gfm } from 'turndown-plugin-gfm';
 
 import { useConfig } from './useConfig.js';
 import { useJSDom } from './useJSDom.js';
 
-import type { CommandInteraction, EmbedBuilder, TextChannel } from 'discord.js';
+import type { CommandInteraction, EmbedBuilder } from 'discord.js';
 
 const { API_URL } = useConfig();
 
@@ -181,7 +182,7 @@ export const useMarkdown = () => {
       (await interaction.client.channels.fetch(interaction.channelId));
 
     return new Pagination(
-      channel as TextChannel,
+      channel as any,
       embeds,
       `Страница`,
       1000 * 60 * 5,
@@ -207,7 +208,8 @@ export const useMarkdown = () => {
           style: ButtonStyle.Secondary
         }
       ],
-      interaction.user
+
+      interaction.user as any
     );
   };
 

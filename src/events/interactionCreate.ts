@@ -58,7 +58,6 @@ const autocompleteInteraction = (interaction: AutocompleteInteraction) => {
   const command = interaction.client.slashCommands.get(interaction.commandName);
 
   if (!command) {
-    // eslint-disable-next-line no-console
     console.error(`No command matching ${interaction.commandName} was found.`);
 
     return;
@@ -71,14 +70,15 @@ const autocompleteInteraction = (interaction: AutocompleteInteraction) => {
 
     command.autocomplete(interaction);
   } catch (error) {
-    // eslint-disable-next-line no-console
     console.error(error);
   }
 };
 
 const eventInteractionCreate: BotEvent = {
   name: Events.InteractionCreate,
-  execute: async (interaction: Interaction) => {
+  execute: async (...args: unknown[]) => {
+    const interaction = args[0] as Interaction;
+
     if (interaction.isChatInputCommand()) {
       await chatInputCommandInteraction(interaction);
 
