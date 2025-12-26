@@ -7,18 +7,18 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const { error, parsed } = dotenv.config({
-  path: resolve(__dirname, '../../.env')
+  path: resolve(__dirname, '../../.env'),
 });
 
-if (error !== undefined || parsed === undefined) {
-  throw error;
-}
-
-export const useConfig = (): {
+export function useConfig(): {
   CLIENT_ID: string;
   TOKEN: string;
   API_URL: string;
-} => {
+} {
+  if (error !== undefined || parsed === undefined) {
+    throw error;
+  }
+
   if (!parsed.CLIENT_ID) {
     throw new Error('CLIENT_ID is not defined');
   }
@@ -34,6 +34,6 @@ export const useConfig = (): {
   return {
     CLIENT_ID: parsed.CLIENT_ID,
     TOKEN: parsed.TOKEN,
-    API_URL: parsed.API_URL
+    API_URL: parsed.API_URL,
   };
-};
+}

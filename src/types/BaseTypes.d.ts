@@ -1,43 +1,43 @@
-export type TNameValue<T = string> = {
+export interface TNameValue<T = string> {
   name: string;
   value: T;
-};
+}
 
-export type TName = {
+export interface TName {
   rus: string;
   eng: string;
-};
+}
 
-export type TSource = {
+export interface TSource {
   shortName: string;
   name: string;
   homebrew?: boolean;
   page?: number;
-};
+}
 
-export type TClassBadge = {
+export interface TClassBadge {
   name: string;
   url: string;
   icon: string;
-};
+}
 
-export type TSubclassBadge = {
+export interface TSubclassBadge {
   name: string;
   url: string;
   class: string;
-};
+}
 
-export type TRaceBadge = {
+export interface TRaceBadge {
   name: string;
   url: string;
-};
+}
 
-export type TPrice = {
+export interface TPrice {
   dmg: string;
   xge: string;
-};
+}
 
-export type TType = {
+export interface TType {
   name: string;
   order: number;
-};
+}

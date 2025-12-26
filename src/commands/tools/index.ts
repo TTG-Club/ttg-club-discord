@@ -9,5 +9,5 @@ export default [
   commandRollStats,
   commandMadness,
   commandWildMagic,
-  commandTrader
+  commandTrader,
 ];

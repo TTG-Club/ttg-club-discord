@@ -4,16 +4,16 @@ import { PermissionFlagsBits } from 'discord.js';
 import type {
   GuildMember,
   PermissionResolvable,
-  TextChannel
+  TextChannel,
 } from 'discord.js';
 
 export type colorType = 'text' | 'variable' | 'error';
 
-export const useHelpers = () => {
+export function useHelpers() {
   const themeColors: { [key in colorType]: string } = {
     text: '#ff8e4d',
     variable: '#3567C9',
-    error: '#ff3333'
+    error: '#ff3333',
   };
 
   const getThemeColor = (color: colorType) =>
@@ -24,37 +24,44 @@ export const useHelpers = () => {
 
   const checkPermissions = (
     member: GuildMember,
-    permissions: Array<PermissionResolvable>
+    permissions: Array<PermissionResolvable>,
   ) => {
     const neededPermissions: PermissionResolvable[] = [];
 
-    permissions.forEach(permission => {
-      if (!member.permissions.has(permission))
+    permissions.forEach((permission) => {
+      if (!member.permissions.has(permission)) {
         neededPermissions.push(permission);
+      }
     });
-    if (neededPermissions.length === 0) return null;
 
-    return neededPermissions.map(p => {
-      if (typeof p === 'string') return p.split(/(?=[A-Z])/).join(' ');
+    if (neededPermissions.length === 0) {
+      return null;
+    }
 
-      return Object.keys(PermissionFlagsBits)
-        .find(k => Object(PermissionFlagsBits)[k] === p)
-        ?.split(/(?=[A-Z])/)
-        .join(' ');
+    return neededPermissions.map((p) => {
+      if (typeof p === 'string') {
+        return p.split(/(?=[A-Z])/).join(' ');
+      }
+
+      const entry = Object.entries(PermissionFlagsBits).find(
+        ([_, v]) => v === p,
+      );
+
+      return entry?.[0].split(/(?=[A-Z])/).join(' ');
     });
   };
 
   const sendTimedMessage = (
     message: string,
     channel: TextChannel,
-    duration: number
+    duration: number,
   ) => {
-    channel.send(message).then(m =>
+    channel.send(message).then((m) =>
       setTimeout(async () => {
         const resp = await channel.messages.fetch(m);
 
         return resp.delete();
-      }, duration)
+      }, duration),
     );
   };
 
@@ -64,6 +71,6 @@ export const useHelpers = () => {
     getThemeColor,
     color,
     checkPermissions,
-    sendTimedMessage
+    sendTimedMessage,
   };
-};
+}

@@ -1,7 +1,7 @@
+import type { Client } from 'discord.js';
+
 import events from '../events/index.js';
 import { useHelpers } from '../utils/useHelpers.js';
-
-import type { Client } from 'discord.js';
 
 export default (client: Client) => {
   const { color } = useHelpers();
@@ -17,8 +17,8 @@ export default (client: Client) => {
     console.log(
       color(
         'text',
-        `🌠 Successfully loaded event ${color('variable', event.name)}`
-      )
+        `🌠 Successfully loaded event ${color('variable', event.name)}`,
+      ),
     );
   }
 };

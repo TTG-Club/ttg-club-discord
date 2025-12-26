@@ -11,7 +11,7 @@ const eventWarn: BotEvent = {
     console.warn('Warn:', warn);
 
     process.exit(1);
-  }
+  },
 };
 
 export default eventWarn;

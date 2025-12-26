@@ -11,7 +11,7 @@ const eventError: BotEvent = {
     console.error('Error:', err);
 
     process.exit(1);
-  }
+  },
 };
 
 export default eventError;

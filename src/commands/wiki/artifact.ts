@@ -5,8 +5,8 @@ import { useAxios } from '../../utils/useAxios.js';
 import { useConfig } from '../../utils/useConfig.js';
 import { useMarkdown } from '../../utils/useMarkdown.js';
 
-import type { TArtifactItem, TArtifactLink } from '../../types/Artifact.js';
 import type { SlashCommand } from '../../types.js';
+import type { TArtifactItem, TArtifactLink } from '../../types/Artifact.js';
 
 const http = useAxios();
 const { API_URL } = useConfig();
@@ -17,15 +17,15 @@ const commandArtifact: SlashCommand = {
   command: new SlashCommandBuilder()
     .setName('artifact')
     .setDescription('Магические предметы')
-    .addStringOption(option =>
+    .addStringOption((option) =>
       option
         .setName('name')
         .setNameLocalization('ru', 'название')
         .setDescription('Название предмета')
         .setRequired(true)
-        .setAutocomplete(true)
+        .setAutocomplete(true),
     ),
-  autocomplete: async interaction => {
+  autocomplete: async (interaction) => {
     try {
       const resp = await http.post<TArtifactLink[]>({
         url: `/items/magic`,
@@ -34,19 +34,19 @@ const commandArtifact: SlashCommand = {
           limit: 10,
           search: {
             value: interaction.options.getString('name'),
-            exact: false
+            exact: false,
           },
           order: [
             {
               field: 'rarity',
-              direction: 'asc'
+              direction: 'asc',
             },
             {
               field: 'name',
-              direction: 'asc'
-            }
-          ]
-        }
+              direction: 'asc',
+            },
+          ],
+        },
       });
 
       if (resp.status !== 200) {
@@ -60,24 +60,23 @@ const commandArtifact: SlashCommand = {
       await interaction.respond(
         artifacts.map((artifact: TArtifactLink) => ({
           name: `[${artifact.rarity.short}] ${artifact.name.rus}`,
-          value: artifact.url
-        }))
+          value: artifact.url,
+        })),
       );
     } catch (err) {
       console.error(err);
       await interaction.respond([]);
     }
   },
-  execute: async interaction => {
+  execute: async (interaction) => {
     try {
-      // @ts-ignore
       const url = interaction.options.getString('name');
 
       const resp = await http.post<TArtifactItem>({ url });
 
       if (resp.status !== 200) {
         await interaction.followUp(
-          'Произошла какая-то ошибка... попробуй еще раз'
+          'Произошла какая-то ошибка... попробуй еще раз',
         );
 
         return;
@@ -98,13 +97,13 @@ const commandArtifact: SlashCommand = {
         desc: EmbedBuilder[];
       } = {
         main: new EmbedBuilder(),
-        desc: []
+        desc: [],
       };
 
       embeds.main.setTitle(title).setURL(artifactUrl).addFields({
         name: 'Источник',
         value: artifact.source.shortName,
-        inline: false
+        inline: false,
       });
 
       if (artifact.cost) {
@@ -112,14 +111,14 @@ const commandArtifact: SlashCommand = {
           .addFields({
             name: 'Стоимость DMG',
             value: artifact.cost.dmg,
-            inline: false
+            inline: false,
           })
           .addFields({
             name: 'Стоимость XGE',
             value: `${artifact.cost.xge}${
               artifact.cost.xge === 'невозможно купить' ? '' : ' зм.'
             }`,
-            inline: false
+            inline: false,
           });
       }
 
@@ -131,12 +130,12 @@ const commandArtifact: SlashCommand = {
               ? ` (${artifact.detailType.join(', ')})`
               : ''
           }`,
-          inline: false
+          inline: false,
         })
         .addFields({
           name: 'Редкость',
           value: artifact.rarity.name,
-          inline: false
+          inline: false,
         })
         .addFields({
           name: 'Настройка',
@@ -145,12 +144,12 @@ const commandArtifact: SlashCommand = {
               ? ` (${artifact.detailCustamization.join(', ')})`
               : ''
           }`,
-          inline: false
+          inline: false,
         })
         .addFields({
           name: 'Оригинал',
           value: artifactUrl,
-          inline: false
+          inline: false,
         })
         .setFooter({ text: footer });
 
@@ -159,7 +158,7 @@ const commandArtifact: SlashCommand = {
       }
 
       await interaction.followUp({
-        embeds: [embeds.main]
+        embeds: [embeds.main],
       });
 
       const description = getDescriptionEmbeds(artifact.description);
@@ -189,11 +188,11 @@ const commandArtifact: SlashCommand = {
       console.error(err);
 
       await interaction.followUp(
-        'Произошла какая-то ошибка... попробуй еще раз'
+        'Произошла какая-то ошибка... попробуй еще раз',
       );
     }
   },
-  cooldown: 10
+  cooldown: 10,
 };
 
 export default commandArtifact;

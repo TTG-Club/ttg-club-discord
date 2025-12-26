@@ -1,34 +1,33 @@
+import { gfm } from '@truto/turndown-plugin-gfm';
 import { ButtonStyle } from 'discord.js';
 import { Pagination } from 'discordjs-button-embed-pagination';
 import sanitizeHtml from 'sanitize-html';
 import TurndownService from 'turndown';
-// @ts-ignore - типы определены в src/types/gfm.d.ts
-import { gfm } from 'turndown-plugin-gfm';
+
+import type { CommandInteraction, EmbedBuilder } from 'discord.js';
 
 import { useConfig } from './useConfig.js';
 import { useJSDom } from './useJSDom.js';
 
-import type { CommandInteraction, EmbedBuilder } from 'discord.js';
-
 const { API_URL } = useConfig();
 
-export const useMarkdown = () => {
+export function useMarkdown() {
   const turndownService = new TurndownService({
-    bulletListMarker: '-'
+    bulletListMarker: '-',
   });
 
   const cleanAttribute = (attribute: string | null) =>
-    attribute ? attribute.replace(/(\n+\s*)+/g, '\n') : '';
+    attribute ? attribute.replace(/(?:\n\s*)+/g, '\n') : '';
 
   turndownService.use(gfm);
 
   turndownService.addRule('paragraph', {
     filter: 'p',
-    replacement: content => `\n\n${content}\n\n`
+    replacement: (content) => `\n\n${content}\n\n`,
   });
 
   turndownService.addRule('diceRoller', {
-    filter: node => node.nodeName === 'DICE-ROLLER',
+    filter: (node) => node.nodeName === 'DICE-ROLLER',
     replacement: (content, node, options) => {
       let text = '';
 
@@ -49,14 +48,14 @@ export const useMarkdown = () => {
       }
 
       return text;
-    }
+    },
   });
 
   turndownService.addRule('inlineLink', {
     filter: (node, options) =>
-      options.linkStyle === 'inlined' &&
-      node.nodeName === 'A' &&
-      !!node.getAttribute('href'),
+      options.linkStyle === 'inlined'
+      && node.nodeName === 'A'
+      && !!node.getAttribute('href'),
 
     replacement: (content, node) => {
       const getUpdatedHref = (href: string) => {
@@ -84,7 +83,7 @@ export const useMarkdown = () => {
       }
 
       return `[${content}](${href}${title || ''})`;
-    }
+    },
   });
 
   const getSanitized = (html: string) =>
@@ -124,8 +123,8 @@ export const useMarkdown = () => {
         'tr',
         'u',
         'ul',
-        'dice-roller'
-      ]
+        'dice-roller',
+      ],
     });
 
   const getMarkdown = (html: string) => {
@@ -138,18 +137,18 @@ export const useMarkdown = () => {
     return turndownService
       .turndown(sanitized)
       .replace(/\\\[/g, '[')
-      .replace(/\\]/g, ']');
+      .replace(/\\\]/g, ']');
   };
 
   const getMarkdownParagraphs = (html: string) => {
     const { getArrayParagraphs } = useJSDom();
     const array = getArrayParagraphs(html);
 
-    return array.map(node => getMarkdown(node));
+    return array.map((node) => getMarkdown(node));
   };
 
   const getDescriptionEmbeds = (html: string) => {
-    const rows = getMarkdownParagraphs(html).filter(row => !!row);
+    const rows = getMarkdownParagraphs(html).filter((row) => !!row);
 
     const embeds: string[] = [];
 
@@ -170,16 +169,16 @@ export const useMarkdown = () => {
       embeds.push(str.trim());
     }
 
-    return embeds.filter(row => !!row);
+    return embeds.filter((row) => !!row);
   };
 
   const getPagination = async (
     interaction: CommandInteraction,
-    embeds: EmbedBuilder[]
+    embeds: EmbedBuilder[],
   ) => {
     const channel =
-      interaction.channel ||
-      (await interaction.client.channels.fetch(interaction.channelId));
+      interaction.channel
+      || (await interaction.client.channels.fetch(interaction.channelId));
 
     return new Pagination(
       channel as any,
@@ -189,27 +188,27 @@ export const useMarkdown = () => {
       [
         {
           label: '<<',
-          style: ButtonStyle.Secondary
+          style: ButtonStyle.Secondary,
         },
         {
           label: '<',
-          style: ButtonStyle.Primary
+          style: ButtonStyle.Primary,
         },
         {
           label: 'стоп',
-          style: ButtonStyle.Danger
+          style: ButtonStyle.Danger,
         },
         {
           label: '>',
-          style: ButtonStyle.Primary
+          style: ButtonStyle.Primary,
         },
         {
           label: '>>',
-          style: ButtonStyle.Secondary
-        }
+          style: ButtonStyle.Secondary,
+        },
       ],
 
-      interaction.user as any
+      interaction.user as any,
     );
   };
 
@@ -218,6 +217,6 @@ export const useMarkdown = () => {
     getMarkdown,
     getMarkdownParagraphs,
     getDescriptionEmbeds,
-    getPagination
+    getPagination,
   };
-};
+}

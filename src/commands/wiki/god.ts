@@ -5,8 +5,8 @@ import { useAxios } from '../../utils/useAxios.js';
 import { useConfig } from '../../utils/useConfig.js';
 import { useMarkdown } from '../../utils/useMarkdown.js';
 
-import type { TGodItem, TGodLink } from '../../types/God.js';
 import type { SlashCommand } from '../../types.js';
+import type { TGodItem, TGodLink } from '../../types/God.js';
 
 const http = useAxios();
 const { API_URL } = useConfig();
@@ -17,15 +17,15 @@ const commandGod: SlashCommand = {
   command: new SlashCommandBuilder()
     .setName('god')
     .setDescription('Боги')
-    .addStringOption(option =>
+    .addStringOption((option) =>
       option
         .setName('name')
         .setNameLocalization('ru', 'имя')
         .setDescription('Имя бога')
         .setRequired(true)
-        .setAutocomplete(true)
+        .setAutocomplete(true),
     ),
-  autocomplete: async interaction => {
+  autocomplete: async (interaction) => {
     try {
       const resp = await http.post<TGodLink[]>({
         url: `/gods`,
@@ -34,15 +34,15 @@ const commandGod: SlashCommand = {
           limit: 10,
           search: {
             value: interaction.options.getString('name'),
-            exact: false
+            exact: false,
           },
           order: [
             {
               field: 'name',
-              direction: 'asc'
-            }
-          ]
-        }
+              direction: 'asc',
+            },
+          ],
+        },
       });
 
       if (resp.status !== 200) {
@@ -56,24 +56,23 @@ const commandGod: SlashCommand = {
       await interaction.respond(
         gods.map((god: TGodLink) => ({
           name: `[${god.shortAlignment}] ${god.name.rus}`,
-          value: god.url
-        }))
+          value: god.url,
+        })),
       );
     } catch (err) {
       console.error(err);
       await interaction.respond([]);
     }
   },
-  execute: async interaction => {
+  execute: async (interaction) => {
     try {
-      // @ts-ignore
       const url = interaction.options.getString('name');
 
       const resp = await http.post<TGodItem>({ url });
 
       if (resp.status !== 200) {
         await interaction.followUp(
-          'Произошла какая-то ошибка... попробуй еще раз'
+          'Произошла какая-то ошибка... попробуй еще раз',
         );
 
         return;
@@ -94,7 +93,7 @@ const commandGod: SlashCommand = {
         desc: EmbedBuilder[];
       } = {
         main: new EmbedBuilder(),
-        desc: []
+        desc: [],
       };
 
       embeds.main
@@ -103,27 +102,27 @@ const commandGod: SlashCommand = {
         .addFields({
           name: 'Источник',
           value: god.source.shortName,
-          inline: false
+          inline: false,
         })
         .addFields({
           name: 'Мировоззрение',
           value: god.alignment,
-          inline: false
+          inline: false,
         })
         .addFields({
           name: 'Ранг',
           value: god.rank,
-          inline: false
+          inline: false,
         })
         .addFields({
           name: 'Домены',
           value: god.domains.join(', '),
-          inline: false
+          inline: false,
         })
         .addFields({
           name: 'Пантеоны',
           value: god.panteons.join(', '),
-          inline: false
+          inline: false,
         })
         .setFooter({ text: footer });
 
@@ -131,7 +130,7 @@ const commandGod: SlashCommand = {
         embeds.main.addFields({
           name: 'Титулы',
           value: god.titles.join(', '),
-          inline: false
+          inline: false,
         });
       }
 
@@ -139,14 +138,14 @@ const commandGod: SlashCommand = {
         embeds.main.addFields({
           name: 'Символы',
           value: god.symbol,
-          inline: false
+          inline: false,
         });
       }
 
       embeds.main.addFields({
         name: 'Оригинал',
         value: godUrl,
-        inline: false
+        inline: false,
       });
 
       if (thumbnail) {
@@ -154,7 +153,7 @@ const commandGod: SlashCommand = {
       }
 
       await interaction.followUp({
-        embeds: [embeds.main]
+        embeds: [embeds.main],
       });
 
       const description = getDescriptionEmbeds(god.description);
@@ -184,11 +183,11 @@ const commandGod: SlashCommand = {
       console.error(err);
 
       await interaction.followUp(
-        'Произошла какая-то ошибка... попробуй еще раз'
+        'Произошла какая-то ошибка... попробуй еще раз',
       );
     }
   },
-  cooldown: 10
+  cooldown: 10,
 };
 
 export default commandGod;

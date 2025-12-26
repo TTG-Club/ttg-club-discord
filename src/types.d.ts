@@ -3,7 +3,7 @@ import type {
   Collection,
   CommandInteraction,
   SlashCommandBuilder,
-  SlashCommandOptionsOnlyBuilder
+  SlashCommandOptionsOnlyBuilder,
 } from 'discord.js';
 
 export interface SlashCommand {

@@ -23,5 +23,5 @@ export default [
   commandBook,
   commandWeapon,
   commandArmor,
-  commandRace
+  commandRace,
 ];

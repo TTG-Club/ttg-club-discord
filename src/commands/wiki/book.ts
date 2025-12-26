@@ -5,8 +5,8 @@ import { useAxios } from '../../utils/useAxios.js';
 import { useConfig } from '../../utils/useConfig.js';
 import { useMarkdown } from '../../utils/useMarkdown.js';
 
-import type { TBookItem, TBookLink } from '../../types/Book.js';
 import type { SlashCommand } from '../../types.js';
+import type { TBookItem, TBookLink } from '../../types/Book.js';
 
 const http = useAxios();
 const { API_URL } = useConfig();
@@ -17,15 +17,15 @@ const commandBook: SlashCommand = {
   command: new SlashCommandBuilder()
     .setName('book')
     .setDescription('Источники')
-    .addStringOption(option =>
+    .addStringOption((option) =>
       option
         .setName('name')
         .setNameLocalization('ru', 'название')
         .setDescription('Название источника')
         .setRequired(true)
-        .setAutocomplete(true)
+        .setAutocomplete(true),
     ),
-  autocomplete: async interaction => {
+  autocomplete: async (interaction) => {
     try {
       const resp = await http.post<TBookLink[]>({
         url: `/books`,
@@ -34,19 +34,19 @@ const commandBook: SlashCommand = {
           limit: 10,
           search: {
             value: interaction.options.getString('name'),
-            exact: false
+            exact: false,
           },
           order: [
             {
               field: 'year',
-              direction: 'asc'
+              direction: 'asc',
             },
             {
               field: 'name',
-              direction: 'asc'
-            }
-          ]
-        }
+              direction: 'asc',
+            },
+          ],
+        },
       });
 
       if (resp.status !== 200) {
@@ -60,24 +60,23 @@ const commandBook: SlashCommand = {
       await interaction.respond(
         books.map((book: TBookLink) => ({
           name: book.name.rus,
-          value: book.url
-        }))
+          value: book.url,
+        })),
       );
     } catch (err) {
       console.error(err);
       await interaction.respond([]);
     }
   },
-  execute: async interaction => {
+  execute: async (interaction) => {
     try {
-      // @ts-ignore
       const url = interaction.options.getString('name');
 
       const resp = await http.post<TBookItem>({ url });
 
       if (resp.status !== 200) {
         await interaction.followUp(
-          'Произошла какая-то ошибка... попробуй еще раз'
+          'Произошла какая-то ошибка... попробуй еще раз',
         );
 
         return;
@@ -97,7 +96,7 @@ const commandBook: SlashCommand = {
         desc: EmbedBuilder[];
       } = {
         main: new EmbedBuilder(),
-        desc: []
+        desc: [],
       };
 
       embeds.main
@@ -106,12 +105,12 @@ const commandBook: SlashCommand = {
         .addFields({
           name: 'Тип',
           value: book.type.name,
-          inline: true
+          inline: true,
         })
         .addFields({
           name: 'Аббревиатура',
           value: book.source.shortName,
-          inline: true
+          inline: true,
         })
         .setFooter({ text: footer });
 
@@ -119,18 +118,18 @@ const commandBook: SlashCommand = {
         embeds.main.addFields({
           name: 'Год',
           value: String(book.year),
-          inline: true
+          inline: true,
         });
       }
 
       embeds.main.addFields({
         name: 'Оригинал',
         value: bookUrl,
-        inline: false
+        inline: false,
       });
 
       await interaction.followUp({
-        embeds: [embeds.main]
+        embeds: [embeds.main],
       });
 
       if (book.description) {
@@ -162,11 +161,11 @@ const commandBook: SlashCommand = {
       console.error(err);
 
       await interaction.followUp(
-        'Произошла какая-то ошибка... попробуй еще раз'
+        'Произошла какая-то ошибка... попробуй еще раз',
       );
     }
   },
-  cooldown: 10
+  cooldown: 10,
 };
 
 export default commandBook;

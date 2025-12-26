@@ -1,16 +1,16 @@
 import { REST } from '@discordjs/rest';
 import { Routes } from 'discord.js';
 
-import commands from '../commands/index.js';
-import { useConfig } from '../utils/useConfig.js';
-import { useHelpers } from '../utils/useHelpers.js';
-
 import type {
   APIApplicationCommand,
   Client,
   SlashCommandBuilder,
-  SlashCommandOptionsOnlyBuilder
+  SlashCommandOptionsOnlyBuilder,
 } from 'discord.js';
+
+import commands from '../commands/index.js';
+import { useConfig } from '../utils/useConfig.js';
+import { useHelpers } from '../utils/useHelpers.js';
 
 const { TOKEN, CLIENT_ID } = useConfig();
 
@@ -32,7 +32,7 @@ export default (client: Client) => {
 
   rest
     .put(Routes.applicationCommands(CLIENT_ID), {
-      body: slashCommands.map(command => command.toJSON())
+      body: slashCommands.map((command) => command.toJSON()),
     })
     .then((data: unknown) => {
       const commandsData = data as APIApplicationCommand[];
@@ -43,14 +43,14 @@ export default (client: Client) => {
           'text',
           `🔥 Successfully loaded ${color(
             'variable',
-            String(commandsData.length)
-          )} slash command(s)`
-        )
+            String(commandsData.length),
+          )} slash command(s)`,
+        ),
       );
 
       // console.log(color('text', `🔥 Successfully loaded ${ color('variable', commands.length) } command(s)`));
     })
-    .catch(e => {
+    .catch((e) => {
       // eslint-disable-next-line no-console
       console.log(e);
     });

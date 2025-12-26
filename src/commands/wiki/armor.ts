@@ -5,8 +5,8 @@ import { useAxios } from '../../utils/useAxios.js';
 import { useConfig } from '../../utils/useConfig.js';
 import { useMarkdown } from '../../utils/useMarkdown.js';
 
-import type { TArmorItem, TArmorLink } from '../../types/Armor.js';
 import type { SlashCommand } from '../../types.js';
+import type { TArmorItem, TArmorLink } from '../../types/Armor.js';
 
 const http = useAxios();
 const { API_URL } = useConfig();
@@ -17,15 +17,15 @@ const commandArmor: SlashCommand = {
   command: new SlashCommandBuilder()
     .setName('armor')
     .setDescription('Доспехи')
-    .addStringOption(option =>
+    .addStringOption((option) =>
       option
         .setName('name')
         .setNameLocalization('ru', 'название')
         .setDescription('Название доспеха')
         .setRequired(true)
-        .setAutocomplete(true)
+        .setAutocomplete(true),
     ),
-  autocomplete: async interaction => {
+  autocomplete: async (interaction) => {
     try {
       const resp = await http.post<TArmorLink[]>({
         url: `/armors`,
@@ -34,15 +34,15 @@ const commandArmor: SlashCommand = {
           limit: 10,
           search: {
             value: interaction.options.getString('name'),
-            exact: false
+            exact: false,
           },
           order: [
             {
               field: 'name',
-              direction: 'asc'
-            }
-          ]
-        }
+              direction: 'asc',
+            },
+          ],
+        },
       });
 
       if (resp.status !== 200) {
@@ -56,24 +56,23 @@ const commandArmor: SlashCommand = {
       await interaction.respond(
         armors.map((armor: TArmorLink) => ({
           name: armor.name.rus,
-          value: armor.url
-        }))
+          value: armor.url,
+        })),
       );
     } catch (err) {
       console.error(err);
       await interaction.respond([]);
     }
   },
-  execute: async interaction => {
+  execute: async (interaction) => {
     try {
-      // @ts-ignore
       const url = interaction.options.getString('name');
 
       const resp = await http.post<TArmorItem>({ url });
 
       if (resp.status !== 200) {
         await interaction.followUp(
-          'Произошла какая-то ошибка... попробуй еще раз'
+          'Произошла какая-то ошибка... попробуй еще раз',
         );
 
         return;
@@ -93,7 +92,7 @@ const commandArmor: SlashCommand = {
         desc: EmbedBuilder[];
       } = {
         main: new EmbedBuilder(),
-        desc: []
+        desc: [],
       };
 
       embeds.main
@@ -102,34 +101,34 @@ const commandArmor: SlashCommand = {
         .addFields({
           name: 'Тип',
           value: armor.type.name,
-          inline: false
+          inline: false,
         })
         .addFields({
           name: 'Класс доспеха (АС)',
           value: armor.armorClass,
-          inline: false
+          inline: false,
         })
         .addFields({
           name: 'Стоимость',
           value: armor.price,
-          inline: true
+          inline: true,
         })
         .addFields({
           name: 'Вес (в фунтах)',
           value: String(armor.weight),
-          inline: true
+          inline: true,
         })
         .addFields({
           name: 'Помеха на скрытность',
           value: armor.disadvantage ? 'да' : 'нет',
-          inline: false
+          inline: false,
         });
 
       if (armor.requirement) {
         embeds.main.addFields({
           name: 'Требование к силе',
           value: String(armor.requirement),
-          inline: false
+          inline: false,
         });
       }
 
@@ -137,26 +136,26 @@ const commandArmor: SlashCommand = {
         .addFields({
           name: 'Надевание/Снятие',
           value: armor.duration,
-          inline: false
+          inline: false,
         })
         .addFields({
           name: 'Источник',
           value: armor.source.shortName,
-          inline: false
+          inline: false,
         })
         .addFields({
           name: 'Оригинал',
           value: armorUrl,
-          inline: false
+          inline: false,
         })
         .setFooter({ text: footer });
 
       await interaction.followUp({
-        embeds: [embeds.main]
+        embeds: [embeds.main],
       });
 
-      embeds.desc = getDescriptionEmbeds(armor.description).map(str =>
-        new EmbedBuilder().setTitle('Описание').setDescription(str)
+      embeds.desc = getDescriptionEmbeds(armor.description).map((str) =>
+        new EmbedBuilder().setTitle('Описание').setDescription(str),
       );
 
       if (embeds.desc.length <= 2) {
@@ -172,11 +171,11 @@ const commandArmor: SlashCommand = {
       console.error(err);
 
       await interaction.followUp(
-        'Произошла какая-то ошибка... попробуй еще раз'
+        'Произошла какая-то ошибка... попробуй еще раз',
       );
     }
   },
-  cooldown: 10
+  cooldown: 10,
 };
 
 export default commandArmor;

@@ -30,7 +30,7 @@ export function useDiceRoller() {
         notation,
         value: roll.value,
         highest: highest!.value,
-        lowest: lowest!.value
+        lowest: lowest!.value,
       });
     } catch (err) {
       return Promise.reject(err);
@@ -46,7 +46,7 @@ export function useDiceRoller() {
         full: `**[${notation}]:** ${rendered}`,
         rendered,
         notation,
-        value: roll.value
+        value: roll.value,
       });
     } catch (err) {
       return Promise.reject(err);
@@ -61,13 +61,12 @@ export function useDiceRoller() {
       case '2d20kh1':
       case '2d20kl1':
         return getDropOrKeepMsg(formula);
-
       default:
         return getDefaultDiceMsg(formula);
     }
   };
 
   return {
-    getDiceMsg
+    getDiceMsg,
   };
 }

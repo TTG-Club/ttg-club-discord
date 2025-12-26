@@ -5,8 +5,8 @@ import { useAxios } from '../../utils/useAxios.js';
 import { useConfig } from '../../utils/useConfig.js';
 import { useMarkdown } from '../../utils/useMarkdown.js';
 
-import type { TWeaponItem, TWeaponLink } from '../../types/Weapon.js';
 import type { SlashCommand } from '../../types.js';
+import type { TWeaponItem, TWeaponLink } from '../../types/Weapon.js';
 
 const http = useAxios();
 const { API_URL } = useConfig();
@@ -17,15 +17,15 @@ const commandWeapon: SlashCommand = {
   command: new SlashCommandBuilder()
     .setName('weapon')
     .setDescription('Оружие')
-    .addStringOption(option =>
+    .addStringOption((option) =>
       option
         .setName('name')
         .setNameLocalization('ru', 'название')
         .setDescription('Название оружия')
         .setRequired(true)
-        .setAutocomplete(true)
+        .setAutocomplete(true),
     ),
-  autocomplete: async interaction => {
+  autocomplete: async (interaction) => {
     try {
       const resp = await http.post<TWeaponLink[]>({
         url: `/weapons`,
@@ -34,15 +34,15 @@ const commandWeapon: SlashCommand = {
           limit: 10,
           search: {
             value: interaction.options.getString('name'),
-            exact: false
+            exact: false,
           },
           order: [
             {
               field: 'name',
-              direction: 'asc'
-            }
-          ]
-        }
+              direction: 'asc',
+            },
+          ],
+        },
       });
 
       if (resp.status !== 200) {
@@ -56,24 +56,23 @@ const commandWeapon: SlashCommand = {
       await interaction.respond(
         weapons.map((weapon: TWeaponLink) => ({
           name: weapon.name.rus,
-          value: weapon.url
-        }))
+          value: weapon.url,
+        })),
       );
     } catch (err) {
       console.error(err);
       await interaction.respond([]);
     }
   },
-  execute: async interaction => {
+  execute: async (interaction) => {
     try {
-      // @ts-ignore
       const url = interaction.options.getString('name');
 
       const resp = await http.post<TWeaponItem>({ url });
 
       if (resp.status !== 200) {
         await interaction.followUp(
-          'Произошла какая-то ошибка... попробуй еще раз'
+          'Произошла какая-то ошибка... попробуй еще раз',
         );
 
         return;
@@ -93,7 +92,7 @@ const commandWeapon: SlashCommand = {
         desc: EmbedBuilder[];
       } = {
         main: new EmbedBuilder(),
-        desc: []
+        desc: [],
       };
 
       embeds.main
@@ -102,62 +101,62 @@ const commandWeapon: SlashCommand = {
         .addFields({
           name: 'Стоимость',
           value: weapon.price,
-          inline: true
+          inline: true,
         })
         .addFields({
           name: 'Урон',
           value: `${weapon.damage.dice} ${weapon.damage.type}`,
-          inline: true
+          inline: true,
         })
         .addFields({
           name: 'Вес (в фунтах)',
           value: String(weapon.weight),
-          inline: true
+          inline: true,
         })
         .addFields({
           name: 'Тип',
           value: weapon.type.name,
-          inline: false
+          inline: false,
         })
         .addFields({
           name: 'Свойства',
           value: weapon.properties
             .map(
-              prop =>
+              (prop) =>
                 `${prop.name}${
                   prop.twoHandDice ? ` (${prop.twoHandDice})` : ''
-                }${prop.distance ? ` (дис. ${prop.distance}` : ''}`
+                }${prop.distance ? ` (дис. ${prop.distance}` : ''}`,
             )
             .join(', '),
-          inline: false
+          inline: false,
         })
         .addFields({
           name: 'Источник',
           value: weapon.source.shortName,
-          inline: false
+          inline: false,
         })
         .addFields({
           name: 'Оригинал',
           value: weaponUrl,
-          inline: false
+          inline: false,
         })
         .setFooter({ text: footer });
 
       await interaction.followUp({
-        embeds: [embeds.main]
+        embeds: [embeds.main],
       });
 
       if (weapon.description) {
-        embeds.desc = getDescriptionEmbeds(weapon.description).map(str =>
-          new EmbedBuilder().setTitle('Описание').setDescription(str)
+        embeds.desc = getDescriptionEmbeds(weapon.description).map((str) =>
+          new EmbedBuilder().setTitle('Описание').setDescription(str),
         );
       }
 
       if (weapon.special) {
         embeds.desc.push(
-          ...getDescriptionEmbeds(weapon.special).map(str =>
-            new EmbedBuilder().setTitle('Особое свойство').setDescription(str)
-          )
+          ...getDescriptionEmbeds(weapon.special).map((str) =>
+            new EmbedBuilder().setTitle('Особое свойство').setDescription(str),
+          ),
         );
       }
 
@@ -174,11 +173,11 @@ const commandWeapon: SlashCommand = {
       console.error(err);
 
       await interaction.followUp(
-        'Произошла какая-то ошибка... попробуй еще раз'
+        'Произошла какая-то ошибка... попробуй еще раз',
       );
     }
   },
-  cooldown: 10
+  cooldown: 10,
 };
 
 export default commandWeapon;

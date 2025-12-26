@@ -1,11 +1,10 @@
-import process from 'process';
-
 import { Events } from 'discord.js';
+
+import type { Client } from 'discord.js';
 
 import { useHelpers } from '../utils/useHelpers.js';
 
 import type { BotEvent } from '../types.js';
-import type { Client } from 'discord.js';
 
 const eventReady: BotEvent = {
   name: Events.ClientReady,
@@ -14,13 +13,13 @@ const eventReady: BotEvent = {
     const client = args[0] as Client;
     const { color } = useHelpers();
 
-    process.once('unhandledRejection', error => {
+    process.once('unhandledRejection', (error) => {
       console.error('UnhandledRejection:', error);
 
       process.exit(1);
     });
 
-    process.once('uncaughtException', error => {
+    process.once('uncaughtException', (error) => {
       console.error('UncaughtException:', error);
 
       process.exit(1);
@@ -30,10 +29,10 @@ const eventReady: BotEvent = {
     console.log(
       color(
         'text',
-        `💪 Logged in as ${color('variable', client.user?.tag ?? 'Unknown')}`
-      )
+        `💪 Logged in as ${color('variable', client.user?.tag ?? 'Unknown')}`,
+      ),
     );
-  }
+  },
 };
 
 export default eventReady;

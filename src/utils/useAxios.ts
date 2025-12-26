@@ -1,13 +1,13 @@
 import axios from 'axios';
 
-import { useConfig } from './useConfig.js';
-
 import type { AxiosInstance, AxiosRequestConfig } from 'axios';
 
-export type RequestConfig = {
+import { useConfig } from './useConfig.js';
+
+export interface RequestConfig {
   url: AxiosRequestConfig['url'];
   payload?: AxiosRequestConfig['params'] | AxiosRequestConfig['data'];
-};
+}
 
 const { API_URL } = useConfig();
 
@@ -20,13 +20,13 @@ class HTTPService {
     this.instance = axios.create({
       baseURL: `${API_URL || 'http://localhost:8080'}/api/v1`,
       withCredentials: true,
-      headers: {}
+      headers: {},
     });
   }
 
   get<T>(config: RequestConfig) {
     return this.instance.get<T>(config.url || '', {
-      params: config.payload
+      params: config.payload,
     });
   }
 
@@ -44,7 +44,7 @@ class HTTPService {
 
   delete<T>(config: RequestConfig) {
     return this.instance.delete<T>(config.url || '', {
-      params: config.payload
+      params: config.payload,
     });
   }
 }

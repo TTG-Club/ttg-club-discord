@@ -1,12 +1,12 @@
 import type { TName, TSource } from './BaseTypes.js';
 
-export type TEquipmentLink = {
+export interface TEquipmentLink {
   name: TName;
   url: string;
   homebrew?: boolean;
-};
+}
 
-export type TEquipmentItem = {
+export interface TEquipmentItem {
   name: TName;
   price?: string;
   source: TSource;
@@ -14,4 +14,4 @@ export type TEquipmentItem = {
   description?: string;
   categories: string[];
   homebrew?: boolean;
-};
+}

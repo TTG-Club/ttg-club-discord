@@ -5,8 +5,8 @@ import { useAxios } from '../../utils/useAxios.js';
 import { useConfig } from '../../utils/useConfig.js';
 import { useMarkdown } from '../../utils/useMarkdown.js';
 
-import type { TFeatItem, TFeatLink } from '../../types/Feat.js';
 import type { SlashCommand } from '../../types.js';
+import type { TFeatItem, TFeatLink } from '../../types/Feat.js';
 
 const http = useAxios();
 const { API_URL } = useConfig();
@@ -17,15 +17,15 @@ const commandFeat: SlashCommand = {
   command: new SlashCommandBuilder()
     .setName('feat')
     .setDescription('Черты')
-    .addStringOption(option =>
+    .addStringOption((option) =>
       option
         .setName('name')
         .setNameLocalization('ru', 'название')
         .setDescription('Название черты')
         .setRequired(true)
-        .setAutocomplete(true)
+        .setAutocomplete(true),
     ),
-  autocomplete: async interaction => {
+  autocomplete: async (interaction) => {
     try {
       const resp = await http.post<TFeatLink[]>({
         url: `/traits`,
@@ -34,15 +34,15 @@ const commandFeat: SlashCommand = {
           limit: 10,
           search: {
             value: interaction.options.getString('name'),
-            exact: false
+            exact: false,
           },
           order: [
             {
               field: 'name',
-              direction: 'asc'
-            }
-          ]
-        }
+              direction: 'asc',
+            },
+          ],
+        },
       });
 
       if (resp.status !== 200) {
@@ -56,24 +56,23 @@ const commandFeat: SlashCommand = {
       await interaction.respond(
         feats.map((feat: TFeatLink) => ({
           name: feat.name.rus,
-          value: feat.url
-        }))
+          value: feat.url,
+        })),
       );
     } catch (err) {
       console.error(err);
       await interaction.respond([]);
     }
   },
-  execute: async interaction => {
+  execute: async (interaction) => {
     try {
-      // @ts-ignore
       const url = interaction.options.getString('name');
 
       const resp = await http.post<TFeatItem>({ url });
 
       if (resp.status !== 200) {
         await interaction.followUp(
-          'Произошла какая-то ошибка... попробуй еще раз'
+          'Произошла какая-то ошибка... попробуй еще раз',
         );
 
         return;
@@ -94,18 +93,18 @@ const commandFeat: SlashCommand = {
         requirements: {
           name: 'Требования',
           value: feat.requirements,
-          inline: false
+          inline: false,
         },
         source: {
           name: 'Источник',
           value: feat.source.shortName,
-          inline: true
+          inline: true,
         },
         url: {
           name: 'Оригинал',
           value: featUrl,
-          inline: false
-        }
+          inline: false,
+        },
       };
 
       const embeds: {
@@ -113,7 +112,7 @@ const commandFeat: SlashCommand = {
         desc: EmbedBuilder[];
       } = {
         main: new EmbedBuilder(),
-        desc: []
+        desc: [],
       };
 
       embeds.main
@@ -137,7 +136,7 @@ const commandFeat: SlashCommand = {
       });
 
       await interaction.followUp({
-        embeds: [embeds.main]
+        embeds: [embeds.main],
       });
 
       if (embeds.desc.length <= 2) {
@@ -153,11 +152,11 @@ const commandFeat: SlashCommand = {
       console.error(err);
 
       await interaction.followUp(
-        'Произошла какая-то ошибка... попробуй еще раз'
+        'Произошла какая-то ошибка... попробуй еще раз',
       );
     }
   },
-  cooldown: 10
+  cooldown: 10,
 };
 
 export default commandFeat;
