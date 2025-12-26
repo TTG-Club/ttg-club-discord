@@ -60,7 +60,7 @@ const commandWildMagic: SlashCommand = {
   },
   execute: async (interaction) => {
     try {
-      const source = interaction.options.getString('source') || null;
+      const source = interaction.options.getString('source');
 
       const count = interaction.options.getInteger('count') || 1;
 

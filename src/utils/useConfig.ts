@@ -1,5 +1,3 @@
-import 'dotenv/config';
-
 interface Config {
   CLIENT_ID: string;
   TOKEN: string;
@@ -18,8 +16,8 @@ export function useConfig(): Config {
   }
 
   return {
-    CLIENT_ID: process.env.CLIENT_ID!,
-    TOKEN: process.env.TOKEN!,
-    API_URL: process.env.API_URL!,
+    CLIENT_ID: process.env.CLIENT_ID,
+    TOKEN: process.env.TOKEN,
+    API_URL: process.env.API_URL,
   };
 }

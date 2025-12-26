@@ -11,7 +11,7 @@
     "node": ">=22.12.0"
   },
   "scripts": {
-    "start": "pnpm run build && node dist/index.js",
+    "start": "pnpm run build && dotenvx run -- node dist/index.js",
     "build": "pnpm run clean && tsc --project tsconfig.json",
     "clean": "rimraf dist",
     "type-check": "tsc --noEmit --project tsconfig.json",
@@ -28,14 +28,14 @@
     "dice-roller-parser": "^0.1.8",
     "discord.js": "^14.25.1",
     "discordjs-button-embed-pagination": "^5.0.0",
-    "dotenv": "^17.2.3",
     "express": "^5.2.1",
-    "jsdom": "^27.3.0",
+    "jsdom": "^27.4.0",
     "lodash-es": "^4.17.22",
     "sanitize-html": "^2.17.0",
     "turndown": "^7.2.2"
   },
   "devDependencies": {
+    "@dotenvx/dotenvx": "^1.51.2",
     "@svifty7/eslint-config": "^0.0.2",
     "@types/express": "^5.0.6",
     "@types/jsdom": "^27.0.0",

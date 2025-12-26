@@ -73,7 +73,7 @@ const commandArtifact: SlashCommand = {
       const url = interaction.options.getString('name');
 
       if (!url) {
-        await interaction.followUp('Название артефакта обязательно');
+        await interaction.followUp('Название магического предмета обязательно');
 
         return;
       }

@@ -62,9 +62,7 @@ const commandMadness: SlashCommand = {
   },
   execute: async (interaction) => {
     try {
-      const durationString = interaction.options.getString('duration');
-      const duration: IDuration['value'] | null = durationString || null;
-
+      const duration = interaction.options.getString('duration');
       const count = interaction.options.getInteger('count') || 1;
 
       const payload: {

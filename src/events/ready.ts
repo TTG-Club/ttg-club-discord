@@ -7,12 +7,7 @@ import { useHelpers } from '../utils/useHelpers.js';
 import type { BotEvent } from '../types.js';
 
 function isClient(value: unknown): value is Client {
-  return (
-    typeof value === 'object'
-    && value !== null
-    && 'user' in value
-    && 'login' in value
-  );
+  return typeof value === 'object' && value !== null && 'isReady' in value;
 }
 
 const eventReady: BotEvent = {

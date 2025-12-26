@@ -31,7 +31,7 @@ const commandScreen: SlashCommand = {
     ),
   autocomplete: async (interaction) => {
     try {
-      const search = interaction.options.getString('name') || '';
+      const search = interaction.options.getString('name');
 
       if (!search) {
         await interaction.respond([]);
