@@ -1,39 +1,23 @@
-import { dirname, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
-
-import dotenv from 'dotenv';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const { error, parsed } = dotenv.config({
-  path: resolve(__dirname, '../../.env')
-});
-
-if (error !== undefined || parsed === undefined) {
-  throw error;
-}
-
-export const useConfig = (): {
+interface Config {
   CLIENT_ID: string;
   TOKEN: string;
   API_URL: string;
-} => {
-  if (!parsed.CLIENT_ID) {
-    throw new Error('CLIENT_ID is not defined');
-  }
+}
 
-  if (!parsed.TOKEN) {
-    throw new Error('TOKEN is not defined');
-  }
+export function useConfig(): Config {
+  const required = ['CLIENT_ID', 'TOKEN', 'API_URL'] as const;
 
-  if (!parsed.API_URL) {
-    throw new Error('API_URL is not defined');
+  for (const key of required) {
+    const value = process.env[key];
+
+    if (!value) {
+      throw new Error(`${key} is not defined in environment`);
+    }
   }
 
   return {
-    CLIENT_ID: parsed.CLIENT_ID,
-    TOKEN: parsed.TOKEN,
-    API_URL: parsed.API_URL
+    CLIENT_ID: process.env.CLIENT_ID,
+    TOKEN: process.env.TOKEN,
+    API_URL: process.env.API_URL,
   };
-};
+}

@@ -1,17 +1,18 @@
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import { cloneDeep, sortBy } from 'lodash-es';
 
+import type { HexColorString } from 'discord.js';
+
 import { useAxios } from '../../utils/useAxios.js';
 import { useConfig } from '../../utils/useConfig.js';
 
+import type { SlashCommand } from '../../types.js';
 import type {
   TArtifactLink,
-  TArtifactRarityEnum
+  TArtifactRarityEnum,
 } from '../../types/Artifact.js';
 import type { TNameValue, TSource } from '../../types/BaseTypes.js';
 import type { TSpellLink } from '../../types/Spell.js';
-import type { SlashCommand } from '../../types.js';
-import type { HexColorString } from 'discord.js';
 
 const http = useAxios();
 const { API_URL } = useConfig();
@@ -37,42 +38,42 @@ const colors: {
   'legendary': '#f6ff00',
   'artifact': '#ff8900',
   'unknown': '#35393D',
-  'varies': '#ffc480'
+  'varies': '#ffc480',
 };
 
 const commandTrader: SlashCommand = {
   command: new SlashCommandBuilder()
     .setName('trader')
     .setDescription('Генератор лавки торговца')
-    .addIntegerOption(option =>
+    .addIntegerOption((option) =>
       option
         .setName('magic-level')
         .setNameLocalization('ru', 'магии')
         .setDescription('Количество магии в мире')
         .setAutocomplete(true)
-        .setRequired(true)
+        .setRequired(true),
     )
-    .addStringOption(option =>
+    .addStringOption((option) =>
       option
         .setName('source')
         .setNameLocalization('ru', 'источник')
         .setDescription('Источник цены')
-        .setAutocomplete(true)
+        .setAutocomplete(true),
     )
-    .addIntegerOption(option =>
+    .addIntegerOption((option) =>
       option
         .setName('persuasion')
         .setNameLocalization('ru', 'убеждение')
         .setDescription('Результат проверки Харизмы (Убеждения)')
-        .setMinValue(1)
+        .setMinValue(1),
     )
-    .addBooleanOption(option =>
+    .addBooleanOption((option) =>
       option
         .setName('unique')
         .setNameLocalization('ru', 'уникальные')
-        .setDescription('Только уникальные предметы')
+        .setDescription('Только уникальные предметы'),
     ),
-  autocomplete: async interaction => {
+  autocomplete: async (interaction) => {
     const { name } = interaction.options.getFocused(true);
 
     try {
@@ -87,16 +88,15 @@ const commandTrader: SlashCommand = {
           }
 
           await interaction.respond(
-            data.sources.map(source => ({
+            data.sources.map((source) => ({
               name: `[${source.shortName}]${source.homebrew ? ' [HB]' : ''} ${
                 source.name
               }`,
-              value: source.shortName
-            }))
+              value: source.shortName,
+            })),
           );
 
           break;
-
         case 'magic-level':
           if (!data.magicLevels?.length) {
             await interaction.respond([]);
@@ -107,7 +107,6 @@ const commandTrader: SlashCommand = {
           await interaction.respond(data.magicLevels);
 
           break;
-
         default:
           await interaction.respond([]);
 
@@ -119,38 +118,32 @@ const commandTrader: SlashCommand = {
       await interaction.respond([]);
     }
   },
-  execute: async interaction => {
+  execute: async (interaction) => {
     try {
-      const persuasion =
-        // @ts-ignore
-        (interaction.options.getInteger('persuasion') as number) || 1;
+      const persuasion = interaction.options.getInteger('persuasion') || 1;
 
-      // @ts-ignore
       const magicLevel = interaction.options.getInteger('magic-level');
 
       const source =
-        // @ts-ignore
         interaction.options.getString('source')?.toLowerCase() || 'dmg';
 
       if (typeof magicLevel !== 'number') {
         await interaction.followUp(
-          'Поле "Количество магии" обязательно для заполнения'
+          'Поле "Количество магии" обязательно для заполнения',
         );
 
         return;
       }
 
-      const unique =
-        // @ts-ignore
-        (interaction.options.getBoolean('unique') as boolean) || true;
+      const unique = interaction.options.getBoolean('unique') ?? true;
 
       const {
-        data: { magicLevels }
+        data: { magicLevels },
       } = await http.get<IConfig>({ url: `/tools/trader` });
 
       if (!magicLevels?.length) {
         await interaction.followUp(
-          'Произошла какая-то ошибка... попробуй еще раз'
+          'Произошла какая-то ошибка... попробуй еще раз',
         );
 
         return;
@@ -158,7 +151,8 @@ const commandTrader: SlashCommand = {
 
       if (
         !magicLevels.find(
-          (level: { name: string; value: number }) => level.value === magicLevel
+          (level: { name: string; value: number }) =>
+            level.value === magicLevel,
         )
       ) {
         await interaction.followUp('Поле "Количество магии" заполнено неверно');
@@ -169,25 +163,25 @@ const commandTrader: SlashCommand = {
       const payload = {
         persuasion,
         magicLevel,
-        unique
+        unique,
       };
 
       const resp = await http.post<Array<IResponseData>>({
         url: `/tools/trader`,
-        payload
+        payload,
       });
 
       if (resp.status !== 200) {
         await interaction.followUp(
-          'Произошла какая-то ошибка... попробуй еще раз'
+          'Произошла какая-то ошибка... попробуй еще раз',
         );
 
         return;
       }
 
-      if (!(resp.data instanceof Array)) {
+      if (!Array.isArray(resp.data)) {
         await interaction.followUp(
-          'Произошла какая-то ошибка... попробуй еще раз'
+          'Произошла какая-то ошибка... попробуй еще раз',
         );
 
         return;
@@ -209,10 +203,12 @@ const commandTrader: SlashCommand = {
         'legendary': 4,
         'artifact': 5,
         'unknown': 6,
-        'varies': 7
+        'varies': 7,
       };
 
-      const results = sortBy(cloneDeep(resp.data), [o => order[o.rarity.type]]);
+      const results = sortBy(cloneDeep(resp.data), [
+        (o) => order[o.rarity.type],
+      ]);
 
       const chunkSize = 5;
 
@@ -229,22 +225,22 @@ const commandTrader: SlashCommand = {
             .addFields({
               name: 'Редкость',
               value: `[${artifact.rarity.short}] ${artifact.rarity.name}`,
-              inline: true
+              inline: true,
             })
             .addFields({
               name: 'Стоимость',
               value: `${artifact.price[source]} зм`,
-              inline: true
+              inline: true,
             })
             .addFields({
               name: 'Настройка',
               value: artifact.customization ? 'Да' : 'Нет',
-              inline: true
+              inline: true,
             })
             .addFields({
               name: 'Оригинал',
               value: `${API_URL}${artifact.url}`,
-              inline: false
+              inline: false,
             })
             .setURL(`${API_URL}${artifact.url}`)
             .setFooter({ text: 'TTG Club' });
@@ -253,7 +249,7 @@ const commandTrader: SlashCommand = {
             embed.addFields({
               name: 'Ссылка на заклинание',
               value: `${API_URL}${artifact.spell.url}`,
-              inline: false
+              inline: false,
             });
           }
 
@@ -266,11 +262,11 @@ const commandTrader: SlashCommand = {
       console.error(err);
 
       await interaction.followUp(
-        'Произошла какая-то ошибка... попробуй еще раз'
+        'Произошла какая-то ошибка... попробуй еще раз',
       );
     }
   },
-  cooldown: 10
+  cooldown: 10,
 };
 
 export default commandTrader;

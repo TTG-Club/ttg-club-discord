@@ -1,14 +1,14 @@
 import type { TName, TSource } from './BaseTypes.js';
 
-export type TRuleLink = {
+export interface TRuleLink {
   name: TName;
   url: string;
   source: TSource;
-};
+}
 
-export type TRuleItem = {
+export interface TRuleItem {
   name: TName;
   source: TSource;
   description: string;
   type: string;
-};
+}

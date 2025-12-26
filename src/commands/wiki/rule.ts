@@ -5,8 +5,8 @@ import { useAxios } from '../../utils/useAxios.js';
 import { useConfig } from '../../utils/useConfig.js';
 import { useMarkdown } from '../../utils/useMarkdown.js';
 
-import type { TRuleItem, TRuleLink } from '../../types/Rules.js';
 import type { SlashCommand } from '../../types.js';
+import type { TRuleItem, TRuleLink } from '../../types/Rules.js';
 
 const http = useAxios();
 const { API_URL } = useConfig();
@@ -17,15 +17,15 @@ const commandRule: SlashCommand = {
   command: new SlashCommandBuilder()
     .setName('rule')
     .setDescription('Правила и термины')
-    .addStringOption(option =>
+    .addStringOption((option) =>
       option
         .setName('name')
         .setNameLocalization('ru', 'название')
         .setDescription('Название правила или термина')
         .setRequired(true)
-        .setAutocomplete(true)
+        .setAutocomplete(true),
     ),
-  autocomplete: async interaction => {
+  autocomplete: async (interaction) => {
     try {
       const resp = await http.post<TRuleLink[]>({
         url: `/rules`,
@@ -34,15 +34,15 @@ const commandRule: SlashCommand = {
           limit: 10,
           search: {
             value: interaction.options.getString('name'),
-            exact: false
+            exact: false,
           },
           order: [
             {
               field: 'name',
-              direction: 'asc'
-            }
-          ]
-        }
+              direction: 'asc',
+            },
+          ],
+        },
       });
 
       if (resp.status !== 200) {
@@ -56,24 +56,29 @@ const commandRule: SlashCommand = {
       await interaction.respond(
         rules.map((rule: TRuleLink) => ({
           name: rule.name.rus,
-          value: rule.url
-        }))
+          value: rule.url,
+        })),
       );
     } catch (err) {
       console.error(err);
       await interaction.respond([]);
     }
   },
-  execute: async interaction => {
+  execute: async (interaction) => {
     try {
-      // @ts-ignore
       const url = interaction.options.getString('name');
+
+      if (!url) {
+        await interaction.followUp('Название правила обязательно');
+
+        return;
+      }
 
       const resp = await http.post<TRuleItem>({ url });
 
       if (resp.status !== 200) {
         await interaction.followUp(
-          'Произошла какая-то ошибка... попробуй еще раз'
+          'Произошла какая-то ошибка... попробуй еще раз',
         );
 
         return;
@@ -94,18 +99,18 @@ const commandRule: SlashCommand = {
         category: {
           name: 'Категория',
           value: rule.type,
-          inline: true
+          inline: true,
         },
         source: {
           name: 'Источник',
           value: rule.source.shortName,
-          inline: true
+          inline: true,
         },
         url: {
           name: 'Оригинал',
           value: ruleUrl,
-          inline: false
-        }
+          inline: false,
+        },
       };
 
       const embeds: {
@@ -113,7 +118,7 @@ const commandRule: SlashCommand = {
         desc: EmbedBuilder[];
       } = {
         main: new EmbedBuilder(),
-        desc: []
+        desc: [],
       };
 
       embeds.main
@@ -137,7 +142,7 @@ const commandRule: SlashCommand = {
       });
 
       await interaction.followUp({
-        embeds: [embeds.main]
+        embeds: [embeds.main],
       });
 
       if (embeds.desc.length <= 2) {
@@ -153,11 +158,11 @@ const commandRule: SlashCommand = {
       console.error(err);
 
       await interaction.followUp(
-        'Произошла какая-то ошибка... попробуй еще раз'
+        'Произошла какая-то ошибка... попробуй еще раз',
       );
     }
   },
-  cooldown: 10
+  cooldown: 10,
 };
 
 export default commandRule;

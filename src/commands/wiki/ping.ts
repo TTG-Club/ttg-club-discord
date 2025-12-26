@@ -8,7 +8,7 @@ const command: SlashCommand = {
   command: new SlashCommandBuilder()
     .setName('ping')
     .setDescription("Shows the bot's ping"),
-  execute: async interaction => {
+  execute: async (interaction) => {
     const { getThemeColor } = useHelpers();
 
     await interaction.followUp({
@@ -16,11 +16,11 @@ const command: SlashCommand = {
         new EmbedBuilder()
           .setAuthor({ name: 'MRC License' })
           .setDescription(`🏓 Pong! \n 📡 Ping: ${interaction.client.ws.ping}`)
-          .setColor(getThemeColor('text'))
-      ]
+          .setColor(getThemeColor('text')),
+      ],
     });
   },
-  cooldown: 10
+  cooldown: 10,
 };
 
 export default command;

@@ -5,8 +5,8 @@ import { useAxios } from '../../utils/useAxios.js';
 import { useConfig } from '../../utils/useConfig.js';
 import { useMarkdown } from '../../utils/useMarkdown.js';
 
-import type { TSpellItem, TSpellLink } from '../../types/Spell.js';
 import type { SlashCommand } from '../../types.js';
+import type { TSpellItem, TSpellLink } from '../../types/Spell.js';
 
 const http = useAxios();
 const { API_URL } = useConfig();
@@ -17,15 +17,15 @@ const commandSpell: SlashCommand = {
   command: new SlashCommandBuilder()
     .setName('spell')
     .setDescription('Заклинания')
-    .addStringOption(option =>
+    .addStringOption((option) =>
       option
         .setName('name')
         .setNameLocalization('ru', 'название')
         .setDescription('Название заклинания')
         .setRequired(true)
-        .setAutocomplete(true)
+        .setAutocomplete(true),
     ),
-  autocomplete: async interaction => {
+  autocomplete: async (interaction) => {
     try {
       const resp = await http.post<TSpellLink[]>({
         url: `/spells`,
@@ -33,19 +33,19 @@ const commandSpell: SlashCommand = {
           limit: 10,
           search: {
             value: interaction.options.getString('name'),
-            exact: false
+            exact: false,
           },
           order: [
             {
               field: 'level',
-              direction: 'asc'
+              direction: 'asc',
             },
             {
               field: 'name',
-              direction: 'asc'
-            }
-          ]
-        }
+              direction: 'asc',
+            },
+          ],
+        },
       });
 
       if (resp.status !== 200) {
@@ -70,25 +70,30 @@ const commandSpell: SlashCommand = {
 
           return {
             name: `[${spell.level || '-'}] ${name}`,
-            value: spell.url
+            value: spell.url,
           };
-        })
+        }),
       );
     } catch (err) {
       console.error(err);
       await interaction.respond([]);
     }
   },
-  execute: async interaction => {
+  execute: async (interaction) => {
     try {
-      // @ts-ignore
       const url = interaction.options.getString('name');
+
+      if (!url) {
+        await interaction.followUp('Название заклинания обязательно');
+
+        return;
+      }
 
       const resp = await http.post<TSpellItem>({ url });
 
       if (resp.status !== 200) {
         await interaction.followUp(
-          'Произошла какая-то ошибка... попробуй еще раз'
+          'Произошла какая-то ошибка... попробуй еще раз',
         );
 
         return;
@@ -121,59 +126,57 @@ const commandSpell: SlashCommand = {
         time: {
           name: 'Время накладывания',
           value: spell.ritual ? `${spell.time} (ритуал)` : spell.time,
-          inline: false
+          inline: false,
         },
         range: {
           name: 'Дистанция',
           value: spell.range,
-          inline: false
+          inline: false,
         },
         duration: {
           name: 'Длительность',
           value: spell.duration,
-          inline: false
+          inline: false,
         },
         level: {
           name: 'Уровень',
           value: !spell.level ? 'Заговор' : spell.level.toString(),
-          inline: true
+          inline: true,
         },
         source: {
           name: 'Источник',
           value: spell.source.shortName,
-          inline: true
+          inline: true,
         },
         school: {
           name: 'Школа',
           value: spell.school,
-          inline: true
+          inline: true,
         },
         components: {
           name: 'Компоненты',
           value: components.join(', '),
-          inline: false
+          inline: false,
         },
         url: {
           name: 'Оригинал',
           value: spellUrl,
-          inline: false
+          inline: false,
         },
         classes: {
           name: 'Классы',
           value: spell.classes?.length
-            ? spell.classes.map((classItem: any) => classItem.name).join(', ')
+            ? spell.classes.map((classItem) => classItem.name).join(', ')
             : '',
-          inline: false
+          inline: false,
         },
         subclasses: {
           name: 'Подклассы',
           value: spell.subclasses?.length
-            ? spell.subclasses
-                .map((classItem: any) => classItem.name)
-                .join(', ')
+            ? spell.subclasses.map((classItem) => classItem.name).join(', ')
             : '',
-          inline: false
-        }
+          inline: false,
+        },
       };
 
       const embed = new EmbedBuilder();
@@ -188,10 +191,10 @@ const commandSpell: SlashCommand = {
           fields.time,
           fields.range,
           fields.duration,
-          fields.components
+          fields.components,
         ])
         .setFooter({
-          text: footer
+          text: footer,
         });
 
       if (spell.classes?.length) {
@@ -204,17 +207,17 @@ const commandSpell: SlashCommand = {
 
       embed.addFields(fields.url);
 
-      const embeds = getDescriptionEmbeds(spell.description).map(str =>
-        new EmbedBuilder().setTitle('Описание').setDescription(str)
+      const embeds = getDescriptionEmbeds(spell.description).map((str) =>
+        new EmbedBuilder().setTitle('Описание').setDescription(str),
       );
 
       if (spell.upper) {
         embeds.push(
-          ...getDescriptionEmbeds(spell.upper).map(str =>
+          ...getDescriptionEmbeds(spell.upper).map((str) =>
             new EmbedBuilder()
               .setTitle('На более высоких уровнях')
-              .setDescription(str)
-          )
+              .setDescription(str),
+          ),
         );
       }
 
@@ -233,11 +236,11 @@ const commandSpell: SlashCommand = {
       console.error(err);
 
       await interaction.followUp(
-        'Произошла какая-то ошибка... попробуй еще раз'
+        'Произошла какая-то ошибка... попробуй еще раз',
       );
     }
   },
-  cooldown: 10
+  cooldown: 10,
 };
 
 export default commandSpell;

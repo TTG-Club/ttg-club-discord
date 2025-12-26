@@ -21,22 +21,22 @@ const commandWildMagic: SlashCommand = {
   command: new SlashCommandBuilder()
     .setName('wild-magic')
     .setDescription('Генератор дикой магии')
-    .addIntegerOption(option =>
+    .addIntegerOption((option) =>
       option
         .setName('count')
         .setNameLocalization('ru', 'количество')
         .setDescription('Количество сгенерированной дикой магии')
         .setMinValue(1)
-        .setMaxValue(15)
+        .setMaxValue(15),
     )
-    .addStringOption(option =>
+    .addStringOption((option) =>
       option
         .setName('source')
         .setNameLocalization('ru', 'источник')
         .setDescription('Источник таблиц для генерации')
-        .setAutocomplete(true)
+        .setAutocomplete(true),
     ),
-  autocomplete: async interaction => {
+  autocomplete: async (interaction) => {
     try {
       const resp = await http.get<Array<ISource>>({ url: `/tools/wildmagic` });
 
@@ -46,9 +46,9 @@ const commandWildMagic: SlashCommand = {
         return;
       }
 
-      const sources = cloneDeep(resp.data).map(item => ({
+      const sources = cloneDeep(resp.data).map((item) => ({
         name: `[${item.shortName}]${item.homebrew ? ' [HB]' : ''} ${item.name}`,
-        value: item.shortName
+        value: item.shortName,
       }));
 
       await interaction.respond(sources);
@@ -58,21 +58,18 @@ const commandWildMagic: SlashCommand = {
       await interaction.respond([]);
     }
   },
-  execute: async interaction => {
+  execute: async (interaction) => {
     try {
-      const source =
-        // @ts-ignore
-        (interaction.options.getString('source') as string) || null;
+      const source = interaction.options.getString('source');
 
-      // @ts-ignore
-      const count = (interaction.options.getInteger('count') as number) || 1;
+      const count = interaction.options.getInteger('count') || 1;
 
       const payload: {
         count: number;
         sources: Array<ISource['shortName']>;
       } = {
         count,
-        sources: ['PHB']
+        sources: ['PHB'],
       };
 
       if (source) {
@@ -86,12 +83,12 @@ const commandWildMagic: SlashCommand = {
         }>
       >({
         url: `/tools/wildmagic`,
-        payload
+        payload,
       });
 
       if (resp.status !== 200) {
         await interaction.followUp(
-          'Произошла какая-то ошибка... попробуй еще раз'
+          'Произошла какая-то ошибка... попробуй еще раз',
         );
 
         return;
@@ -99,13 +96,13 @@ const commandWildMagic: SlashCommand = {
 
       const results = cloneDeep(resp.data);
 
-      const embeds = results.map(result =>
+      const embeds = results.map((result) =>
         new EmbedBuilder()
           .setColor('#5865F2')
           .setDescription(
-            result.description ? getMarkdown(result.description) : ''
+            result.description ? getMarkdown(result.description) : '',
           )
-          .setFooter({ text: `TTG Club | ${result.source.name}` })
+          .setFooter({ text: `TTG Club | ${result.source.name}` }),
       );
 
       if (embeds.length < 2) {
@@ -121,11 +118,11 @@ const commandWildMagic: SlashCommand = {
       console.error(err);
 
       await interaction.followUp(
-        'Произошла какая-то ошибка... попробуй еще раз'
+        'Произошла какая-то ошибка... попробуй еще раз',
       );
     }
   },
-  cooldown: 10
+  cooldown: 10,
 };
 
 export default commandWildMagic;

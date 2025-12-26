@@ -5,12 +5,12 @@ import { useAxios } from '../../utils/useAxios.js';
 import { useConfig } from '../../utils/useConfig.js';
 import { useMarkdown } from '../../utils/useMarkdown.js';
 
+import type { SlashCommand } from '../../types.js';
 import type {
   TScreenGroupLink,
   TScreenItem,
-  TScreenLink
+  TScreenLink,
 } from '../../types/Screen.js';
-import type { SlashCommand } from '../../types.js';
 
 const http = useAxios();
 const { API_URL } = useConfig();
@@ -21,17 +21,17 @@ const commandScreen: SlashCommand = {
   command: new SlashCommandBuilder()
     .setName('screen')
     .setDescription('Ширма (справочник)')
-    .addStringOption(option =>
+    .addStringOption((option) =>
       option
         .setName('name')
         .setNameLocalization('ru', 'название')
         .setDescription('Название записи в ширме')
         .setRequired(true)
-        .setAutocomplete(true)
+        .setAutocomplete(true),
     ),
-  autocomplete: async interaction => {
+  autocomplete: async (interaction) => {
     try {
-      const search = interaction.options.getString('name') || '';
+      const search = interaction.options.getString('name');
 
       if (!search) {
         await interaction.respond([]);
@@ -46,19 +46,19 @@ const commandScreen: SlashCommand = {
           limit: 20,
           search: {
             value: search,
-            exact: false
+            exact: false,
           },
           order: [
             {
               field: 'ordering',
-              direction: 'asc'
+              direction: 'asc',
             },
             {
               field: 'name',
-              direction: 'asc'
-            }
-          ]
-        }
+              direction: 'asc',
+            },
+          ],
+        },
       });
 
       if (resp.status !== 200) {
@@ -69,31 +69,36 @@ const commandScreen: SlashCommand = {
 
       const screens = search
         ? cloneDeep(resp.data).filter(
-            (item: TScreenGroupLink | TScreenLink) => 'icon' in item
+            (item: TScreenGroupLink | TScreenLink) => 'icon' in item,
           )
         : cloneDeep(resp.data);
 
       await interaction.respond(
         screens.map((screen: TScreenGroupLink | TScreenLink) => ({
           name: screen.name.rus,
-          value: screen.url
-        }))
+          value: screen.url,
+        })),
       );
     } catch (err) {
       console.error(err);
       await interaction.respond([]);
     }
   },
-  execute: async interaction => {
+  execute: async (interaction) => {
     try {
-      // @ts-ignore
       const url = interaction.options.getString('name');
+
+      if (!url) {
+        await interaction.followUp('Название экрана обязательно');
+
+        return;
+      }
 
       const resp = await http.post<TScreenItem>({ url });
 
       if (resp.status !== 200) {
         await interaction.followUp(
-          'Произошла какая-то ошибка... попробуй еще раз'
+          'Произошла какая-то ошибка... попробуй еще раз',
         );
 
         return;
@@ -116,20 +121,20 @@ const commandScreen: SlashCommand = {
         .addFields({
           name: 'Источник',
           value: screen.source.shortName,
-          inline: true
+          inline: true,
         })
         .addFields({
           name: 'Категория',
           value: screen.parent.name.rus,
-          inline: true
+          inline: true,
         })
         .addFields({
           name: 'Оригинал',
           value: screenUrl,
-          inline: false
+          inline: false,
         })
         .setFooter({
-          text: footer
+          text: footer,
         });
 
       const description = getDescriptionEmbeds(screen.description);
@@ -160,11 +165,11 @@ const commandScreen: SlashCommand = {
       console.error(err);
 
       await interaction.followUp(
-        'Произошла какая-то ошибка... попробуй еще раз'
+        'Произошла какая-то ошибка... попробуй еще раз',
       );
     }
   },
-  cooldown: 10
+  cooldown: 10,
 };
 
 export default commandScreen;

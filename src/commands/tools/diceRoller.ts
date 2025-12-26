@@ -10,23 +10,28 @@ const commandDiceRoller: SlashCommand = {
   command: new SlashCommandBuilder()
     .setName('roll')
     .setDescription('Бросок кубиков')
-    .addStringOption(option =>
+    .addStringOption((option) =>
       option
         .setName('formula')
         .setNameLocalization('ru', 'формула')
         .setDescription('Формула броска')
-        .setRequired(true)
+        .setRequired(true),
     ),
-  execute: async interaction => {
+  execute: async (interaction) => {
     try {
-      // @ts-ignore
       const formula = interaction.options.getString('formula');
+
+      if (!formula) {
+        await interaction.followUp('Формула броска обязательна');
+
+        return;
+      }
 
       const roll = await getDiceMsg(formula);
 
       if (!roll) {
         await interaction.followUp(
-          'Произошла какая-то ошибка... попробуй еще раз'
+          'Произошла какая-то ошибка... попробуй еще раз',
         );
 
         return;
@@ -37,20 +42,20 @@ const commandDiceRoller: SlashCommand = {
       embed.addFields({
         name: 'Формула броска',
         value: `\`${roll.notation}\``,
-        inline: false
+        inline: false,
       });
 
       embed.addFields({
         name: 'Развернутый результат',
         value: roll.rendered,
-        inline: false
+        inline: false,
       });
 
       if (roll.highest) {
         embed.addFields({
           name: 'Лучший бросок',
           value: roll.highest.toString(),
-          inline: false
+          inline: false,
         });
       }
 
@@ -58,7 +63,7 @@ const commandDiceRoller: SlashCommand = {
         embed.addFields({
           name: 'Худший бросок',
           value: roll.lowest.toString(),
-          inline: false
+          inline: false,
         });
       }
 
@@ -66,7 +71,7 @@ const commandDiceRoller: SlashCommand = {
         embed.addFields({
           name: 'Результат',
           value: roll.value.toString(),
-          inline: false
+          inline: false,
         });
       }
 
@@ -75,11 +80,11 @@ const commandDiceRoller: SlashCommand = {
       console.error(err);
 
       await interaction.followUp(
-        'Произошла какая-то ошибка... попробуй еще раз'
+        'Произошла какая-то ошибка... попробуй еще раз',
       );
     }
   },
-  cooldown: 10
+  cooldown: 10,
 };
 
 export default commandDiceRoller;

@@ -20,22 +20,22 @@ const commandMadness: SlashCommand = {
   command: new SlashCommandBuilder()
     .setName('madness')
     .setDescription('Генератор безумия')
-    .addIntegerOption(option =>
+    .addIntegerOption((option) =>
       option
         .setName('count')
         .setNameLocalization('ru', 'количество')
         .setDescription('Количество сгенерированных безумий')
         .setMinValue(1)
-        .setMaxValue(15)
+        .setMaxValue(15),
     )
-    .addStringOption(option =>
+    .addStringOption((option) =>
       option
         .setName('duration')
         .setNameLocalization('ru', 'длительность')
         .setDescription('Длительность безумия')
-        .setAutocomplete(true)
+        .setAutocomplete(true),
     ),
-  autocomplete: async interaction => {
+  autocomplete: async (interaction) => {
     try {
       const resp = await http.get({ url: `/tools/madness` });
 
@@ -45,7 +45,13 @@ const commandMadness: SlashCommand = {
         return;
       }
 
-      const durations = cloneDeep(resp.data) as Array<IDuration>;
+      if (!Array.isArray(resp.data)) {
+        await interaction.respond([]);
+
+        return;
+      }
+
+      const durations = cloneDeep(resp.data);
 
       await interaction.respond(durations);
     } catch (err) {
@@ -54,14 +60,9 @@ const commandMadness: SlashCommand = {
       await interaction.respond([]);
     }
   },
-  execute: async interaction => {
+  execute: async (interaction) => {
     try {
-      const duration =
-        // @ts-ignore
-        (interaction.options.getString('duration') as IDuration['value']) ||
-        null;
-
-      // @ts-ignore
+      const duration = interaction.options.getString('duration');
       const count = interaction.options.getInteger('count') || 1;
 
       const payload: {
@@ -80,12 +81,12 @@ const commandMadness: SlashCommand = {
         }>
       >({
         url: `/tools/madness`,
-        payload
+        payload,
       });
 
       if (resp.status !== 200) {
         await interaction.followUp(
-          'Произошла какая-то ошибка... попробуй еще раз'
+          'Произошла какая-то ошибка... попробуй еще раз',
         );
 
         return;
@@ -93,25 +94,25 @@ const commandMadness: SlashCommand = {
 
       const results = cloneDeep(resp.data);
 
-      const embeds = results.map(result =>
+      const embeds = results.map((result) =>
         new EmbedBuilder()
           .setColor('#D84613')
           .addFields({
             name: 'Тип',
             value: result.type.name,
-            inline: true
+            inline: true,
           })
           .addFields({
             name: 'Длительность',
             value: result.type.additional || '',
-            inline: true
+            inline: true,
           })
           .addFields({
             name: 'Описание',
             value: result.description ? getMarkdown(result.description) : '',
-            inline: false
+            inline: false,
           })
-          .setFooter({ text: 'TTG Club' })
+          .setFooter({ text: 'TTG Club' }),
       );
 
       if (embeds.length < 2) {
@@ -127,11 +128,11 @@ const commandMadness: SlashCommand = {
       console.error(err);
 
       await interaction.followUp(
-        'Произошла какая-то ошибка... попробуй еще раз'
+        'Произошла какая-то ошибка... попробуй еще раз',
       );
     }
   },
-  cooldown: 10
+  cooldown: 10,
 };
 
 export default commandMadness;

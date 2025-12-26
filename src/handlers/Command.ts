@@ -1,17 +1,24 @@
 import { REST } from '@discordjs/rest';
 import { Routes } from 'discord.js';
 
+import type {
+  Client,
+  SlashCommandBuilder,
+  SlashCommandOptionsOnlyBuilder,
+} from 'discord.js';
+
 import commands from '../commands/index.js';
 import { useConfig } from '../utils/useConfig.js';
 import { useHelpers } from '../utils/useHelpers.js';
-
-import type { Client, SlashCommandBuilder } from 'discord.js';
 
 const { TOKEN, CLIENT_ID } = useConfig();
 
 export default (client: Client) => {
   const { color } = useHelpers();
-  const slashCommands: SlashCommandBuilder[] = [];
+
+  const slashCommands: Array<
+    SlashCommandBuilder | SlashCommandOptionsOnlyBuilder
+  > = [];
 
   for (const group of commands) {
     for (const command of group) {
@@ -24,23 +31,27 @@ export default (client: Client) => {
 
   rest
     .put(Routes.applicationCommands(CLIENT_ID), {
-      body: slashCommands.map(command => command.toJSON())
+      body: slashCommands.map((command) => command.toJSON()),
     })
-    .then((data: any) => {
+    .then((data) => {
+      if (!Array.isArray(data)) {
+        throw new TypeError('Invalid response from Discord API');
+      }
+
       // eslint-disable-next-line no-console
       console.log(
         color(
           'text',
           `🔥 Successfully loaded ${color(
             'variable',
-            data.length
-          )} slash command(s)`
-        )
+            String(data.length),
+          )} slash command(s)`,
+        ),
       );
 
       // console.log(color('text', `🔥 Successfully loaded ${ color('variable', commands.length) } command(s)`));
     })
-    .catch(e => {
+    .catch((e) => {
       // eslint-disable-next-line no-console
       console.log(e);
     });

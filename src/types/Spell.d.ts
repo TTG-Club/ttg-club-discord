@@ -3,10 +3,10 @@ import type {
   TName,
   TRaceBadge,
   TSource,
-  TSubclassBadge
+  TSubclassBadge,
 } from './BaseTypes.js';
 
-export type TSpellLink = {
+export interface TSpellLink {
   name: TName;
   level: number;
   school: string;
@@ -16,21 +16,21 @@ export type TSpellLink = {
   source: TSource;
   concentration?: boolean;
   ritual?: boolean;
-};
+}
 
-export type TSpellLinkComponents = {
+export interface TSpellLinkComponents {
   v?: boolean;
   s?: boolean;
   m?: boolean;
-};
+}
 
-export type TSpellItemComponents = {
+export interface TSpellItemComponents {
   v?: boolean;
   s?: boolean;
   m?: string;
-};
+}
 
-export type TSpellItem = {
+export interface TSpellItem {
   name: TName;
   level: number;
   school: string;
@@ -48,4 +48,4 @@ export type TSpellItem = {
   ritual?: boolean;
   races?: TRaceBadge[];
   upper?: string;
-};
+}

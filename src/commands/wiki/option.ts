@@ -5,8 +5,8 @@ import { useAxios } from '../../utils/useAxios.js';
 import { useConfig } from '../../utils/useConfig.js';
 import { useMarkdown } from '../../utils/useMarkdown.js';
 
-import type { TOptionItem, TOptionLink } from '../../types/Option.js';
 import type { SlashCommand } from '../../types.js';
+import type { TOptionItem, TOptionLink } from '../../types/Option.js';
 
 const http = useAxios();
 const { API_URL } = useConfig();
@@ -17,15 +17,15 @@ const commandOption: SlashCommand = {
   command: new SlashCommandBuilder()
     .setName('option')
     .setDescription('Особенности классов')
-    .addStringOption(option =>
+    .addStringOption((option) =>
       option
         .setName('name')
         .setNameLocalization('ru', 'название')
         .setDescription('Название особенности класса')
         .setRequired(true)
-        .setAutocomplete(true)
+        .setAutocomplete(true),
     ),
-  autocomplete: async interaction => {
+  autocomplete: async (interaction) => {
     try {
       const resp = await http.post<TOptionLink[]>({
         url: `/options`,
@@ -34,15 +34,15 @@ const commandOption: SlashCommand = {
           limit: 10,
           search: {
             value: interaction.options.getString('name'),
-            exact: false
+            exact: false,
           },
           order: [
             {
               field: 'name',
-              direction: 'asc'
-            }
-          ]
-        }
+              direction: 'asc',
+            },
+          ],
+        },
       });
 
       if (resp.status !== 200) {
@@ -56,24 +56,29 @@ const commandOption: SlashCommand = {
       await interaction.respond(
         options.map((option: TOptionLink) => ({
           name: option.name.rus,
-          value: option.url
-        }))
+          value: option.url,
+        })),
       );
     } catch (err) {
       console.error(err);
       await interaction.respond([]);
     }
   },
-  execute: async interaction => {
+  execute: async (interaction) => {
     try {
-      // @ts-ignore
       const url = interaction.options.getString('name');
+
+      if (!url) {
+        await interaction.followUp('Название особенности класса обязательно');
+
+        return;
+      }
 
       const resp = await http.post<TOptionItem>({ url });
 
       if (resp.status !== 200) {
         await interaction.followUp(
-          'Произошла какая-то ошибка... попробуй еще раз'
+          'Произошла какая-то ошибка... попробуй еще раз',
         );
 
         return;
@@ -94,25 +99,25 @@ const commandOption: SlashCommand = {
         requirements: {
           name: 'Требования',
           value: option.requirements,
-          inline: false
+          inline: false,
         },
         source: {
           name: 'Источник',
           value: option.source.shortName,
-          inline: true
+          inline: true,
         },
         url: {
           name: 'Оригинал',
           value: optionUrl,
-          inline: false
+          inline: false,
         },
         classes: {
           name: 'Классы',
           value: option.classes?.length
-            ? option.classes.map((classItem: any) => classItem.name).join(', ')
+            ? option.classes.map((classItem) => classItem.name).join(', ')
             : '',
-          inline: false
-        }
+          inline: false,
+        },
       };
 
       const embeds: {
@@ -120,7 +125,7 @@ const commandOption: SlashCommand = {
         desc: EmbedBuilder[];
       } = {
         main: new EmbedBuilder(),
-        desc: []
+        desc: [],
       };
 
       embeds.main
@@ -145,7 +150,7 @@ const commandOption: SlashCommand = {
       });
 
       await interaction.followUp({
-        embeds: [embeds.main]
+        embeds: [embeds.main],
       });
 
       if (embeds.desc.length <= 2) {
@@ -161,11 +166,11 @@ const commandOption: SlashCommand = {
       console.error(err);
 
       await interaction.followUp(
-        'Произошла какая-то ошибка... попробуй еще раз'
+        'Произошла какая-то ошибка... попробуй еще раз',
       );
     }
   },
-  cooldown: 10
+  cooldown: 10,
 };
 
 export default commandOption;

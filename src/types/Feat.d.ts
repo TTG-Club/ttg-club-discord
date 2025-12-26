@@ -1,16 +1,16 @@
 import type { TName, TSource } from './BaseTypes.js';
 
-export type TFeatLink = {
+export interface TFeatLink {
   name: TName;
   url: string;
   requirements: string;
   homebrew?: boolean;
-};
+}
 
-export type TFeatItem = {
+export interface TFeatItem {
   name: TName;
   requirements: string;
   description: string;
   source: TSource;
   homebrew?: boolean;
-};
+}

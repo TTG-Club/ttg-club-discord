@@ -12,12 +12,12 @@ const commandRollStats: SlashCommand = {
   command: new SlashCommandBuilder()
     .setName('roll-stats')
     .setDescription('Набросать характеристики'),
-  execute: async interaction => {
+  execute: async (interaction) => {
     try {
       const embed = new EmbedBuilder();
 
       const rolls = await Promise.all(
-        Array.from(Array(6), () => getDiceMsg('4d6kh3'))
+        Array.from(Array.from({ length: 6 }), () => getDiceMsg('4d6kh3')),
       );
 
       const total = rolls.reduce((result, roll) => result + roll.value, 0);
@@ -27,7 +27,7 @@ const commandRollStats: SlashCommand = {
       const color = colord(`hsl(${hue},100%,50%)`).toRgb();
 
       const results = rolls.map(
-        (roll, index) => `${index + 1}. [${roll.notation}]: ${roll.rendered}`
+        (roll, index) => `${index + 1}. [${roll.notation}]: ${roll.rendered}`,
       );
 
       embed
@@ -35,12 +35,12 @@ const commandRollStats: SlashCommand = {
         .addFields({
           name: 'Броски характеристик',
           value: results.join('\n'),
-          inline: false
+          inline: false,
         })
         .addFields({
           name: 'Суммарное значение',
           value: total.toString(),
-          inline: false
+          inline: false,
         });
 
       await interaction.followUp({ embeds: [embed] });
@@ -48,11 +48,11 @@ const commandRollStats: SlashCommand = {
       console.error(err);
 
       await interaction.followUp(
-        'Произошла какая-то ошибка... попробуй еще раз'
+        'Произошла какая-то ошибка... попробуй еще раз',
       );
     }
   },
-  cooldown: 10
+  cooldown: 10,
 };
 
 export default commandRollStats;

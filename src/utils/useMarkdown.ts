@@ -1,33 +1,38 @@
+import { gfm } from '@truto/turndown-plugin-gfm';
 import { ButtonStyle } from 'discord.js';
 import { Pagination } from 'discordjs-button-embed-pagination';
 import sanitizeHtml from 'sanitize-html';
 import TurndownService from 'turndown';
-import { gfm } from 'turndown-plugin-gfm';
+
+import type {
+  ChatInputCommandInteraction,
+  DMChannel,
+  EmbedBuilder,
+  TextChannel,
+} from 'discord.js';
 
 import { useConfig } from './useConfig.js';
 import { useJSDom } from './useJSDom.js';
 
-import type { CommandInteraction, EmbedBuilder, TextChannel } from 'discord.js';
-
 const { API_URL } = useConfig();
 
-export const useMarkdown = () => {
+export function useMarkdown() {
   const turndownService = new TurndownService({
-    bulletListMarker: '-'
+    bulletListMarker: '-',
   });
 
   const cleanAttribute = (attribute: string | null) =>
-    attribute ? attribute.replace(/(\n+\s*)+/g, '\n') : '';
+    attribute ? attribute.replace(/(?:\n\s*)+/g, '\n') : '';
 
   turndownService.use(gfm);
 
   turndownService.addRule('paragraph', {
     filter: 'p',
-    replacement: content => `\n\n${content}\n\n`
+    replacement: (content) => `\n\n${content}\n\n`,
   });
 
   turndownService.addRule('diceRoller', {
-    filter: node => node.nodeName === 'DICE-ROLLER',
+    filter: (node) => node.nodeName === 'DICE-ROLLER',
     replacement: (content, node, options) => {
       let text = '';
 
@@ -48,14 +53,14 @@ export const useMarkdown = () => {
       }
 
       return text;
-    }
+    },
   });
 
   turndownService.addRule('inlineLink', {
     filter: (node, options) =>
-      options.linkStyle === 'inlined' &&
-      node.nodeName === 'A' &&
-      !!node.getAttribute('href'),
+      options.linkStyle === 'inlined'
+      && node.nodeName === 'A'
+      && !!node.getAttribute('href'),
 
     replacement: (content, node) => {
       const getUpdatedHref = (href: string) => {
@@ -83,7 +88,7 @@ export const useMarkdown = () => {
       }
 
       return `[${content}](${href}${title || ''})`;
-    }
+    },
   });
 
   const getSanitized = (html: string) =>
@@ -123,8 +128,8 @@ export const useMarkdown = () => {
         'tr',
         'u',
         'ul',
-        'dice-roller'
-      ]
+        'dice-roller',
+      ],
     });
 
   const getMarkdown = (html: string) => {
@@ -137,18 +142,18 @@ export const useMarkdown = () => {
     return turndownService
       .turndown(sanitized)
       .replace(/\\\[/g, '[')
-      .replace(/\\]/g, ']');
+      .replace(/\\\]/g, ']');
   };
 
   const getMarkdownParagraphs = (html: string) => {
     const { getArrayParagraphs } = useJSDom();
     const array = getArrayParagraphs(html);
 
-    return array.map(node => getMarkdown(node));
+    return array.map((node) => getMarkdown(node));
   };
 
   const getDescriptionEmbeds = (html: string) => {
-    const rows = getMarkdownParagraphs(html).filter(row => !!row);
+    const rows = getMarkdownParagraphs(html).filter((row) => !!row);
 
     const embeds: string[] = [];
 
@@ -169,45 +174,67 @@ export const useMarkdown = () => {
       embeds.push(str.trim());
     }
 
-    return embeds.filter(row => !!row);
+    return embeds.filter((row) => !!row);
   };
 
   const getPagination = async (
-    interaction: CommandInteraction,
-    embeds: EmbedBuilder[]
+    interaction: ChatInputCommandInteraction,
+    embeds: EmbedBuilder[],
   ) => {
     const channel =
-      interaction.channel ||
-      (await interaction.client.channels.fetch(interaction.channelId));
+      interaction.channel
+      || (await interaction.client.channels.fetch(interaction.channelId));
+
+    if (!channel) {
+      throw new Error('Channel is not available');
+    }
+
+    function isTextOrDMChannel(
+      ch: NonNullable<typeof channel>,
+    ): ch is TextChannel | DMChannel {
+      return 'send' in ch || 'messages' in ch;
+    }
+
+    if (!isTextOrDMChannel(channel)) {
+      throw new Error('Channel is not a text channel or DM channel');
+    }
+
+    // Примечание: из-за несовместимости версий discord.js и discordjs-button-embed-pagination
+    // требуется приведение типа. Это известная проблема библиотеки.
+    // Используем двойное приведение через unknown для обхода проблем совместимости типов
+    const compatibleChannel = channel as unknown as TextChannel | DMChannel;
 
     return new Pagination(
-      channel as TextChannel,
+      // @ts-ignore - несовместимость версий discord.js и discordjs-button-embed-pagination
+      compatibleChannel,
       embeds,
       `Страница`,
       1000 * 60 * 5,
       [
         {
           label: '<<',
-          style: ButtonStyle.Secondary
+          style: ButtonStyle.Secondary,
         },
         {
           label: '<',
-          style: ButtonStyle.Primary
+          style: ButtonStyle.Primary,
         },
         {
           label: 'стоп',
-          style: ButtonStyle.Danger
+          style: ButtonStyle.Danger,
         },
         {
           label: '>',
-          style: ButtonStyle.Primary
+          style: ButtonStyle.Primary,
         },
         {
           label: '>>',
-          style: ButtonStyle.Secondary
-        }
+          style: ButtonStyle.Secondary,
+        },
       ],
-      interaction.user
+      // Примечание: из-за несовместимости версий discord.js и discordjs-button-embed-pagination
+      // требуется приведение типа. Это известная проблема библиотеки.
+      interaction.user as unknown as typeof interaction.user,
     );
   };
 
@@ -216,6 +243,6 @@ export const useMarkdown = () => {
     getMarkdown,
     getMarkdownParagraphs,
     getDescriptionEmbeds,
-    getPagination
+    getPagination,
   };
-};
+}

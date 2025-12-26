@@ -1,14 +1,14 @@
 import type { TName, TSource } from './BaseTypes.js';
 
-export type TGodLink = {
+export interface TGodLink {
   name: TName;
   url: string;
   alignment: string;
   shortAlignment: string;
   homebrew?: boolean;
-};
+}
 
-export type TGodItem = {
+export interface TGodItem {
   name: TName;
   alignment: string;
   shortAlignment: string;
@@ -21,4 +21,4 @@ export type TGodItem = {
   images?: string[];
   source: TSource;
   homebrew?: boolean;
-};
+}

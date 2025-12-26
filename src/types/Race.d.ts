@@ -1,6 +1,6 @@
 import type { TName, TSource, TType } from './BaseTypes.js';
 
-export type TRaceLink = {
+export interface TRaceLink {
   name: TName;
   url: string;
   abilities: TRaceAbility[];
@@ -8,25 +8,25 @@ export type TRaceLink = {
   source: TSource;
   image: string;
   subraces?: TRaceLinkSubrace[];
-};
+}
 
-export type TRaceAbility = {
+export interface TRaceAbility {
   key: string;
   name: string;
   shortName: string;
   value: number;
-};
+}
 
-export type TRaceLinkSubrace = {
+export interface TRaceLinkSubrace {
   name: TName;
   url: string;
   abilities: TRaceAbility[];
   type: TType;
   source: TSource;
   image: string;
-};
+}
 
-export type TRaceItem = {
+export interface TRaceItem {
   name: TName;
   abilities: TRaceAbility[];
   type: string;
@@ -39,20 +39,20 @@ export type TRaceItem = {
   skills: TRaceItemSkill[];
   subraces?: TRaceItemSubrace[];
   darkvision?: number;
-};
+}
 
-export type TRaceItemSkill = {
+export interface TRaceItemSkill {
   name: string;
   description: string;
   opened?: boolean;
-};
+}
 
-export type TRaceItemSpeed = {
+export interface TRaceItemSpeed {
   name?: string;
   value: number;
-};
+}
 
-export type TRaceItemSubrace = {
+export interface TRaceItemSubrace {
   name: TName;
   abilities: TRaceAbility[];
   type: string;
@@ -63,11 +63,11 @@ export type TRaceItemSubrace = {
   speed: TRaceItemSpeed[];
   darkvision?: number;
   skills: TRaceItemSubraceSkill[];
-};
+}
 
-export type TRaceItemSubraceSkill = {
+export interface TRaceItemSubraceSkill {
   name: string;
   description: string;
   opened?: boolean;
   subrace?: boolean;
-};
+}
