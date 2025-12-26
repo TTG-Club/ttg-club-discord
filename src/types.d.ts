@@ -1,14 +1,14 @@
 import type {
   AutocompleteInteraction,
+  ChatInputCommandInteraction,
   Collection,
-  CommandInteraction,
   SlashCommandBuilder,
   SlashCommandOptionsOnlyBuilder,
 } from 'discord.js';
 
 export interface SlashCommand {
   command: SlashCommandBuilder | SlashCommandOptionsOnlyBuilder;
-  execute: (interaction: CommandInteraction) => void;
+  execute: (interaction: ChatInputCommandInteraction) => void;
   autocomplete?: (interaction: AutocompleteInteraction) => void;
   cooldown?: number;
 }

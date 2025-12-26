@@ -4,7 +4,7 @@ import { Pagination } from 'discordjs-button-embed-pagination';
 import sanitizeHtml from 'sanitize-html';
 import TurndownService from 'turndown';
 
-import type { CommandInteraction, EmbedBuilder } from 'discord.js';
+import type { ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
 
 import { useConfig } from './useConfig.js';
 import { useJSDom } from './useJSDom.js';
@@ -173,7 +173,7 @@ export function useMarkdown() {
   };
 
   const getPagination = async (
-    interaction: CommandInteraction,
+    interaction: ChatInputCommandInteraction,
     embeds: EmbedBuilder[],
   ) => {
     const channel =

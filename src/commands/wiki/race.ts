@@ -69,7 +69,7 @@ const commandRace: SlashCommand = {
   },
   execute: async (interaction) => {
     try {
-      const url = interaction.options.getString('name');
+      const url = interaction.options.getString('name') as string;
 
       const resp = await http.post<TRaceItem>({ url });
 

@@ -3,6 +3,7 @@
   "type": "module",
   "version": "0.0.1",
   "private": true,
+  "packageManager": "pnpm@10.26.2",
   "description": "TTG Club Discord Bot",
   "license": "MIT",
   "keywords": [],
@@ -13,9 +14,10 @@
     "start": "pnpm run build && node dist/index.js",
     "build": "pnpm run clean && tsc --project tsconfig.json",
     "clean": "rimraf dist",
-    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
-    "lint:fix": "eslint . --fix --ext .js,.jsx,.ts,.tsx",
-    "type-check": "tsc --noEmit --project tsconfig.json"
+    "type-check": "tsc --noEmit --project tsconfig.json",
+    "lint:check": "eslint . --cache --cache-strategy content",
+    "lint:write": "eslint . --cache --cache-strategy content --fix",
+    "lint:workflow": "eslint . --cache --cache-strategy content --quiet"
   },
   "dependencies": {
     "@discordjs/rest": "^2.6.0",
@@ -42,8 +44,13 @@
     "@types/sanitize-html": "^2.16.0",
     "@types/turndown": "^5.0.6",
     "eslint": "^9.39.2",
+    "lint-staged": "^16.2.7",
     "prettier": "^3.7.4",
     "rimraf": "^6.1.2",
+    "simple-git-hooks": "^2.13.1",
     "typescript": "^5.9.3"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "pnpm lint-staged"
   }
 }

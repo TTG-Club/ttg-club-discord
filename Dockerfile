@@ -12,18 +12,11 @@ RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
 
 FROM base AS build
 COPY --from=deps /app/node_modules ./node_modules
-COPY package.json tsconfig.json ./
-COPY src ./src
+COPY . .
 RUN pnpm run build
 
-FROM base AS production-deps
-COPY package.json pnpm-lock.yaml ./
-COPY .npmrc* pnpm-workspace.yaml* ./
-RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
-    pnpm install --frozen-lockfile --prod=true
-
 FROM base AS production
-COPY --from=production-deps /app/node_modules ./node_modules
+COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
 COPY package.json ./
 

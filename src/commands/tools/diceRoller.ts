@@ -19,7 +19,7 @@ const commandDiceRoller: SlashCommand = {
     ),
   execute: async (interaction) => {
     try {
-      const formula = interaction.options.getString('formula');
+      const formula = interaction.options.getString('formula') as string;
 
       const roll = await getDiceMsg(formula);
 
