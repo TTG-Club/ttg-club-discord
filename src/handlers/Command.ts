@@ -2,7 +2,6 @@ import { REST } from '@discordjs/rest';
 import { Routes } from 'discord.js';
 
 import type {
-  APIApplicationCommand,
   Client,
   SlashCommandBuilder,
   SlashCommandOptionsOnlyBuilder,
@@ -34,8 +33,10 @@ export default (client: Client) => {
     .put(Routes.applicationCommands(CLIENT_ID), {
       body: slashCommands.map((command) => command.toJSON()),
     })
-    .then((data: unknown) => {
-      const commandsData = data as APIApplicationCommand[];
+    .then((data) => {
+      if (!Array.isArray(data)) {
+        throw new TypeError('Invalid response from Discord API');
+      }
 
       // eslint-disable-next-line no-console
       console.log(
@@ -43,7 +44,7 @@ export default (client: Client) => {
           'text',
           `🔥 Successfully loaded ${color(
             'variable',
-            String(commandsData.length),
+            String(data.length),
           )} slash command(s)`,
         ),
       );

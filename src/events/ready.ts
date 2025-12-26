@@ -6,11 +6,25 @@ import { useHelpers } from '../utils/useHelpers.js';
 
 import type { BotEvent } from '../types.js';
 
+function isClient(value: unknown): value is Client {
+  return (
+    typeof value === 'object'
+    && value !== null
+    && 'user' in value
+    && 'login' in value
+  );
+}
+
 const eventReady: BotEvent = {
   name: Events.ClientReady,
   once: true,
   execute: (...args: unknown[]) => {
-    const client = args[0] as Client;
+    const client = args[0];
+
+    if (!isClient(client)) {
+      throw new Error('Invalid client argument');
+    }
+
     const { color } = useHelpers();
 
     process.once('unhandledRejection', (error) => {

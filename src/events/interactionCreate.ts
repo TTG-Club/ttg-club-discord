@@ -77,10 +77,23 @@ function autocompleteInteraction(interaction: AutocompleteInteraction) {
   }
 }
 
+function isInteraction(value: unknown): value is Interaction {
+  return (
+    typeof value === 'object'
+    && value !== null
+    && 'isChatInputCommand' in value
+    && 'isAutocomplete' in value
+  );
+}
+
 const eventInteractionCreate: BotEvent = {
   name: Events.InteractionCreate,
   execute: async (...args: unknown[]) => {
-    const interaction = args[0] as Interaction;
+    const interaction = args[0];
+
+    if (!isInteraction(interaction)) {
+      return;
+    }
 
     if (interaction.isChatInputCommand()) {
       await chatInputCommandInteraction(interaction);

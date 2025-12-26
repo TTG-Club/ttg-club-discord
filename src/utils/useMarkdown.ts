@@ -4,7 +4,12 @@ import { Pagination } from 'discordjs-button-embed-pagination';
 import sanitizeHtml from 'sanitize-html';
 import TurndownService from 'turndown';
 
-import type { ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
+import type {
+  ChatInputCommandInteraction,
+  DMChannel,
+  EmbedBuilder,
+  TextChannel,
+} from 'discord.js';
 
 import { useConfig } from './useConfig.js';
 import { useJSDom } from './useJSDom.js';
@@ -180,8 +185,28 @@ export function useMarkdown() {
       interaction.channel
       || (await interaction.client.channels.fetch(interaction.channelId));
 
+    if (!channel) {
+      throw new Error('Channel is not available');
+    }
+
+    function isTextOrDMChannel(
+      ch: NonNullable<typeof channel>,
+    ): ch is TextChannel | DMChannel {
+      return 'send' in ch || 'messages' in ch;
+    }
+
+    if (!isTextOrDMChannel(channel)) {
+      throw new Error('Channel is not a text channel or DM channel');
+    }
+
+    // Примечание: из-за несовместимости версий discord.js и discordjs-button-embed-pagination
+    // требуется приведение типа. Это известная проблема библиотеки.
+    // Используем двойное приведение через unknown для обхода проблем совместимости типов
+    const compatibleChannel = channel as unknown as TextChannel | DMChannel;
+
     return new Pagination(
-      channel as any,
+      // @ts-ignore - несовместимость версий discord.js и discordjs-button-embed-pagination
+      compatibleChannel,
       embeds,
       `Страница`,
       1000 * 60 * 5,
@@ -207,8 +232,9 @@ export function useMarkdown() {
           style: ButtonStyle.Secondary,
         },
       ],
-
-      interaction.user as any,
+      // Примечание: из-за несовместимости версий discord.js и discordjs-button-embed-pagination
+      // требуется приведение типа. Это известная проблема библиотеки.
+      interaction.user as unknown as typeof interaction.user,
     );
   };
 

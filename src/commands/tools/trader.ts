@@ -120,8 +120,7 @@ const commandTrader: SlashCommand = {
   },
   execute: async (interaction) => {
     try {
-      const persuasion =
-        (interaction.options.getInteger('persuasion') as number) || 1;
+      const persuasion = interaction.options.getInteger('persuasion') || 1;
 
       const magicLevel = interaction.options.getInteger('magic-level');
 
@@ -136,8 +135,7 @@ const commandTrader: SlashCommand = {
         return;
       }
 
-      const unique =
-        (interaction.options.getBoolean('unique') as boolean) || true;
+      const unique = interaction.options.getBoolean('unique') ?? true;
 
       const {
         data: { magicLevels },

@@ -66,7 +66,13 @@ const commandEquipment: SlashCommand = {
   },
   execute: async (interaction) => {
     try {
-      const url = interaction.options.getString('name') as string;
+      const url = interaction.options.getString('name');
+
+      if (!url) {
+        await interaction.followUp('Название снаряжения обязательно');
+
+        return;
+      }
 
       const resp = await http.post<TEquipmentItem>({ url });
 

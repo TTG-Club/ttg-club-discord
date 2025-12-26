@@ -45,7 +45,13 @@ const commandMadness: SlashCommand = {
         return;
       }
 
-      const durations = cloneDeep(resp.data) as Array<IDuration>;
+      if (!Array.isArray(resp.data)) {
+        await interaction.respond([]);
+
+        return;
+      }
+
+      const durations = cloneDeep(resp.data);
 
       await interaction.respond(durations);
     } catch (err) {
@@ -56,9 +62,8 @@ const commandMadness: SlashCommand = {
   },
   execute: async (interaction) => {
     try {
-      const duration =
-        (interaction.options.getString('duration') as IDuration['value'])
-        || null;
+      const durationString = interaction.options.getString('duration');
+      const duration: IDuration['value'] | null = durationString || null;
 
       const count = interaction.options.getInteger('count') || 1;
 

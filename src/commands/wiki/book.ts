@@ -70,7 +70,13 @@ const commandBook: SlashCommand = {
   },
   execute: async (interaction) => {
     try {
-      const url = interaction.options.getString('name') as string;
+      const url = interaction.options.getString('name');
+
+      if (!url) {
+        await interaction.followUp('Название книги обязательно');
+
+        return;
+      }
 
       const resp = await http.post<TBookItem>({ url });
 
