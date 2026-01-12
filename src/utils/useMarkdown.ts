@@ -14,7 +14,7 @@ import type {
   Message,
 } from 'discord.js';
 
-const { API_URL } = useConfig();
+const { SITE_URL } = useConfig();
 
 export function useMarkdown() {
   const turndownService = new TurndownService({
@@ -68,7 +68,7 @@ export function useMarkdown() {
           return href;
         }
 
-        return `${API_URL || 'http://localhost:8080'}${href}`;
+        return `${SITE_URL || 'http://localhost:8080'}${href}`;
       };
 
       let href: string | null = null;

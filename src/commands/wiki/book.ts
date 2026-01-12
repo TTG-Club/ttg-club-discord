@@ -9,7 +9,7 @@ import type { SlashCommand } from '../../types.js';
 import type { TBookItem, TBookLink } from '../../types/Book.js';
 
 const http = useAxios();
-const { API_URL } = useConfig();
+const { SITE_URL } = useConfig();
 
 const { getDescriptionEmbeds, getPagination } = useMarkdown();
 
@@ -83,7 +83,7 @@ const commandBook: SlashCommand = {
       const book = cloneDeep(resp.data);
 
       const title = `${book.name.rus} [${book.name.eng}]`;
-      const bookUrl = `${API_URL}${url}`;
+      const bookUrl = `${SITE_URL}${url}`;
 
       const footer = `TTG Club | ${book.source.name} ${
         book.source.page || ''

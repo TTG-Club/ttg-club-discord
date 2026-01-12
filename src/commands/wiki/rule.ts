@@ -9,7 +9,7 @@ import type { SlashCommand } from '../../types.js';
 import type { TRuleItem, TRuleLink } from '../../types/Rules.js';
 
 const http = useAxios();
-const { API_URL } = useConfig();
+const { SITE_URL } = useConfig();
 
 const { getDescriptionEmbeds, getPagination } = useMarkdown();
 
@@ -80,7 +80,7 @@ const commandRule: SlashCommand = {
       const rule = cloneDeep(resp.data);
 
       const title = `${rule.name.rus} [${rule.name.eng}]`;
-      const ruleUrl = `${API_URL}${url}`;
+      const ruleUrl = `${SITE_URL}${url}`;
 
       const footer = `TTG Club | ${rule.source.name} ${
         rule.source.page || ''

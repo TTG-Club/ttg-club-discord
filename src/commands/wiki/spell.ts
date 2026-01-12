@@ -9,7 +9,7 @@ import type { SlashCommand } from '../../types.js';
 import type { TSpellItem, TSpellLink } from '../../types/Spell.js';
 
 const http = useAxios();
-const { API_URL } = useConfig();
+const { SITE_URL } = useConfig();
 
 const { getDescriptionEmbeds, getPagination } = useMarkdown();
 
@@ -109,7 +109,7 @@ const commandSpell: SlashCommand = {
       }
 
       const title = `${spell.name.rus} [${spell.name.eng}]`;
-      const spellUrl = `${API_URL}${spell.url}`;
+      const spellUrl = `${SITE_URL}${spell.url}`;
 
       const footer = `TTG Club | ${spell.source.name} ${
         spell.source.page || ''

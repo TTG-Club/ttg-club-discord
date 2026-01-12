@@ -9,7 +9,7 @@ import type { SlashCommand } from '../../types.js';
 import type { TArmorItem, TArmorLink } from '../../types/Armor.js';
 
 const http = useAxios();
-const { API_URL } = useConfig();
+const { SITE_URL } = useConfig();
 
 const { getDescriptionEmbeds, getPagination } = useMarkdown();
 
@@ -83,7 +83,7 @@ const commandArmor: SlashCommand = {
       const armor = cloneDeep(resp.data);
 
       const title = `${armor.name.rus} [${armor.name.eng}]`;
-      const armorUrl = `${API_URL}${url}`;
+      const armorUrl = `${SITE_URL}${url}`;
 
       const footer = `TTG Club | ${armor.source.name} ${
         armor.source.page || ''

@@ -9,7 +9,7 @@ import type { SlashCommand } from '../../types.js';
 import type { TFeatItem, TFeatLink } from '../../types/Feat.js';
 
 const http = useAxios();
-const { API_URL } = useConfig();
+const { SITE_URL } = useConfig();
 
 const { getDescriptionEmbeds, getPagination } = useMarkdown();
 
@@ -80,7 +80,7 @@ const commandFeat: SlashCommand = {
       const feat = cloneDeep(resp.data);
 
       const title = `${feat.name.rus} [${feat.name.eng}]`;
-      const featUrl = `${API_URL}${url}`;
+      const featUrl = `${SITE_URL}${url}`;
 
       const footer = `TTG Club | ${feat.source.name} ${
         feat.source.page || ''

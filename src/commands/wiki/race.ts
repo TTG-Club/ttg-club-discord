@@ -10,7 +10,7 @@ import type { SlashCommand } from '../../types.js';
 import type { TRaceItem, TRaceLink } from '../../types/Race.js';
 
 const http = useAxios();
-const { API_URL } = useConfig();
+const { SITE_URL } = useConfig();
 
 const { getDescriptionEmbeds, getPagination } = useMarkdown();
 
@@ -83,7 +83,7 @@ const commandRace: SlashCommand = {
       const race = cloneDeep(resp.data);
 
       const title = `${race.name.rus} [${race.name.eng}]`;
-      const raceUrl = `${API_URL}${url}`;
+      const raceUrl = `${SITE_URL}${url}`;
 
       const footer = `TTG Club | ${race.source.name} ${
         race.source.page || ''

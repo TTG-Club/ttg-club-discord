@@ -15,7 +15,7 @@ import type { TNameValue, TSource } from '../../types/BaseTypes.js';
 import type { TSpellLink } from '../../types/Spell.js';
 
 const http = useAxios();
-const { API_URL } = useConfig();
+const { SITE_URL } = useConfig();
 
 interface IConfig {
   magicLevels: Array<TNameValue<number>>;
@@ -239,16 +239,16 @@ const commandTrader: SlashCommand = {
             })
             .addFields({
               name: 'Оригинал',
-              value: `${API_URL}${artifact.url}`,
+              value: `${SITE_URL}${artifact.url}`,
               inline: false,
             })
-            .setURL(`${API_URL}${artifact.url}`)
+            .setURL(`${SITE_URL}${artifact.url}`)
             .setFooter({ text: 'TTG Club' });
 
           if (artifact.spell) {
             embed.addFields({
               name: 'Ссылка на заклинание',
-              value: `${API_URL}${artifact.spell.url}`,
+              value: `${SITE_URL}${artifact.spell.url}`,
               inline: false,
             });
           }

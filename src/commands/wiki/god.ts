@@ -9,7 +9,7 @@ import type { SlashCommand } from '../../types.js';
 import type { TGodItem, TGodLink } from '../../types/God.js';
 
 const http = useAxios();
-const { API_URL } = useConfig();
+const { SITE_URL } = useConfig();
 
 const { getDescriptionEmbeds, getPagination } = useMarkdown();
 
@@ -80,7 +80,7 @@ const commandGod: SlashCommand = {
       const god = cloneDeep(resp.data);
 
       const title = `${god.name.rus} [${god.name.eng}]`;
-      const godUrl = `${API_URL}${url}`;
+      const godUrl = `${SITE_URL}${url}`;
       const thumbnail = god.images?.length ? god.images[0] : null;
 
       const footer = `TTG Club | ${god.source.name} ${

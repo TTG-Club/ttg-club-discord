@@ -9,7 +9,7 @@ import type { SlashCommand } from '../../types.js';
 import type { TOptionItem, TOptionLink } from '../../types/Option.js';
 
 const http = useAxios();
-const { API_URL } = useConfig();
+const { SITE_URL } = useConfig();
 
 const { getDescriptionEmbeds, getPagination } = useMarkdown();
 
@@ -80,7 +80,7 @@ const commandOption: SlashCommand = {
       const option = cloneDeep(resp.data);
 
       const title = `${option.name.rus} [${option.name.eng}]`;
-      const optionUrl = `${API_URL}${url}`;
+      const optionUrl = `${SITE_URL}${url}`;
 
       const footer = `TTG Club | ${option.source.name} ${
         option.source.page || ''

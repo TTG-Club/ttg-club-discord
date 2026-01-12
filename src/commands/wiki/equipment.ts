@@ -9,7 +9,7 @@ import type { SlashCommand } from '../../types.js';
 import type { TEquipmentItem, TEquipmentLink } from '../../types/Equipment.js';
 
 const http = useAxios();
-const { API_URL } = useConfig();
+const { SITE_URL } = useConfig();
 
 const { getDescriptionEmbeds, getPagination } = useMarkdown();
 
@@ -80,7 +80,7 @@ const commandEquipment: SlashCommand = {
       const equipment = cloneDeep(resp.data);
 
       const title = `${equipment.name.rus} [${equipment.name.eng}]`;
-      const itemUrl = `${API_URL}${url}`;
+      const itemUrl = `${SITE_URL}${url}`;
 
       const footer = `TTG Club | ${equipment.source.name} ${
         equipment.source.page || ''

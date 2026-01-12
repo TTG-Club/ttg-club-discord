@@ -13,7 +13,7 @@ import type {
 } from '../../types/Screen.js';
 
 const http = useAxios();
-const { API_URL } = useConfig();
+const { SITE_URL } = useConfig();
 
 const { getDescriptionEmbeds, getPagination } = useMarkdown();
 
@@ -103,7 +103,7 @@ const commandScreen: SlashCommand = {
       const embed = new EmbedBuilder();
 
       const title = `${screen.name.rus} [${screen.name.eng}]`;
-      const screenUrl = `${API_URL}${screen.url}`;
+      const screenUrl = `${SITE_URL}${screen.url}`;
 
       const footer = `TTG Club | ${screen.source.name} ${
         screen.source.page || ''

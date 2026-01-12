@@ -9,7 +9,7 @@ import type { SlashCommand } from '../../types.js';
 import type { TArtifactItem, TArtifactLink } from '../../types/Artifact.js';
 
 const http = useAxios();
-const { API_URL } = useConfig();
+const { SITE_URL } = useConfig();
 
 const { getDescriptionEmbeds, getPagination } = useMarkdown();
 
@@ -83,7 +83,7 @@ const commandArtifact: SlashCommand = {
       const artifact = cloneDeep(resp.data);
 
       const title = `${artifact.name.rus} [${artifact.name.eng}]`;
-      const artifactUrl = `${API_URL}${url}`;
+      const artifactUrl = `${SITE_URL}${url}`;
       const thumbnail = artifact.images?.length ? artifact.images[0] : null;
 
       const footer = `TTG Club | ${artifact.source.name} ${

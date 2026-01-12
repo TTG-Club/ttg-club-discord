@@ -25,6 +25,7 @@ declare global {
       readonly TOKEN: string;
       readonly CLIENT_ID: string;
       readonly API_URL: string;
+      readonly SITE_URL: string;
     }
   }
 }
