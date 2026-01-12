@@ -1,10 +1,10 @@
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import { cloneDeep, sortBy } from 'lodash-es';
 
-import type { HexColorString } from 'discord.js';
-
 import { useAxios } from '../../utils/useAxios.js';
 import { useConfig } from '../../utils/useConfig.js';
+
+import type { HexColorString } from 'discord.js';
 
 import type { SlashCommand } from '../../types.js';
 import type {

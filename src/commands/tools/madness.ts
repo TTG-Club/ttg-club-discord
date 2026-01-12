@@ -51,9 +51,7 @@ const commandMadness: SlashCommand = {
         return;
       }
 
-      const durations = cloneDeep(resp.data);
-
-      await interaction.respond(durations);
+      await interaction.respond(resp.data);
     } catch (err) {
       console.error(err);
 
@@ -121,9 +119,9 @@ const commandMadness: SlashCommand = {
         return;
       }
 
-      const pagination = await getPagination(interaction, embeds);
+      const pagination = getPagination(interaction, embeds);
 
-      await pagination.paginate();
+      await pagination.render();
     } catch (err) {
       console.error(err);
 

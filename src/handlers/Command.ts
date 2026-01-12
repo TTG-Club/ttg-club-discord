@@ -1,15 +1,15 @@
 import { REST } from '@discordjs/rest';
 import { Routes } from 'discord.js';
 
+import commands from '../commands/index.js';
+import { useConfig } from '../utils/useConfig.js';
+import { useHelpers } from '../utils/useHelpers.js';
+
 import type {
   Client,
   SlashCommandBuilder,
   SlashCommandOptionsOnlyBuilder,
 } from 'discord.js';
-
-import commands from '../commands/index.js';
-import { useConfig } from '../utils/useConfig.js';
-import { useHelpers } from '../utils/useHelpers.js';
 
 const { TOKEN, CLIENT_ID } = useConfig();
 

@@ -31,17 +31,12 @@ const commandWeapon: SlashCommand = {
         url: `/weapons`,
         payload: {
           page: 0,
-          limit: 10,
+          size: 25,
           search: {
-            value: interaction.options.getString('name'),
+            value: interaction.options.getString('name') || '',
             exact: false,
           },
-          order: [
-            {
-              field: 'name',
-              direction: 'asc',
-            },
-          ],
+          order: [{ field: 'name', direction: 'asc' }],
         },
       });
 
@@ -51,10 +46,8 @@ const commandWeapon: SlashCommand = {
         return;
       }
 
-      const weapons = cloneDeep(resp.data);
-
       await interaction.respond(
-        weapons.map((weapon: TWeaponLink) => ({
+        resp.data.map((weapon: TWeaponLink) => ({
           name: weapon.name.rus,
           value: weapon.url,
         })),
@@ -172,9 +165,9 @@ const commandWeapon: SlashCommand = {
         return;
       }
 
-      const pagination = await getPagination(interaction, embeds.desc);
+      const pagination = getPagination(interaction, embeds.desc);
 
-      await pagination.paginate();
+      await pagination.render();
     } catch (err) {
       console.error(err);
 

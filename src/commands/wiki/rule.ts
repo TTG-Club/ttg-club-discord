@@ -31,17 +31,12 @@ const commandRule: SlashCommand = {
         url: `/rules`,
         payload: {
           page: 0,
-          limit: 10,
+          size: 25,
           search: {
-            value: interaction.options.getString('name'),
+            value: interaction.options.getString('name') || '',
             exact: false,
           },
-          order: [
-            {
-              field: 'name',
-              direction: 'asc',
-            },
-          ],
+          order: [{ field: 'name', direction: 'asc' }],
         },
       });
 
@@ -51,10 +46,8 @@ const commandRule: SlashCommand = {
         return;
       }
 
-      const rules = cloneDeep(resp.data);
-
       await interaction.respond(
-        rules.map((rule: TRuleLink) => ({
+        resp.data.map((rule: TRuleLink) => ({
           name: rule.name.rus,
           value: rule.url,
         })),
@@ -151,9 +144,9 @@ const commandRule: SlashCommand = {
         return;
       }
 
-      const pagination = await getPagination(interaction, embeds.desc);
+      const pagination = getPagination(interaction, embeds.desc);
 
-      await pagination.paginate();
+      await pagination.render();
     } catch (err) {
       console.error(err);
 

@@ -1,18 +1,18 @@
 import { gfm } from '@truto/turndown-plugin-gfm';
 import { ButtonStyle } from 'discord.js';
-import { Pagination } from 'discordjs-button-embed-pagination';
+import { Pagination } from 'pagination.djs';
 import sanitizeHtml from 'sanitize-html';
 import TurndownService from 'turndown';
 
-import type {
-  ChatInputCommandInteraction,
-  DMChannel,
-  EmbedBuilder,
-  TextChannel,
-} from 'discord.js';
-
 import { useConfig } from './useConfig.js';
 import { useJSDom } from './useJSDom.js';
+
+import type {
+  EmbedBuilder,
+  Interaction,
+  InteractionType,
+  Message,
+} from 'discord.js';
 
 const { API_URL } = useConfig();
 
@@ -58,9 +58,9 @@ export function useMarkdown() {
 
   turndownService.addRule('inlineLink', {
     filter: (node, options) =>
-      options.linkStyle === 'inlined'
-      && node.nodeName === 'A'
-      && !!node.getAttribute('href'),
+      options.linkStyle === 'inlined' &&
+      node.nodeName === 'A' &&
+      !!node.getAttribute('href'),
 
     replacement: (content, node) => {
       const getUpdatedHref = (href: string) => {
@@ -177,65 +177,43 @@ export function useMarkdown() {
     return embeds.filter((row) => !!row);
   };
 
-  const getPagination = async (
-    interaction: ChatInputCommandInteraction,
+  const getPagination = (
+    interaction:
+      | Exclude<
+          Interaction,
+          { type: InteractionType.ApplicationCommandAutocomplete }
+        >
+      | Message,
     embeds: EmbedBuilder[],
   ) => {
-    const channel =
-      interaction.channel
-      || (await interaction.client.channels.fetch(interaction.channelId));
+    const pagination = new Pagination(interaction);
 
-    if (!channel) {
-      throw new Error('Channel is not available');
-    }
+    pagination.setButtonAppearance({
+      first: {
+        label: '<<',
+        emoji: '',
+        style: ButtonStyle.Secondary,
+      },
+      prev: {
+        label: '<',
+        emoji: '',
+        style: ButtonStyle.Primary,
+      },
+      next: {
+        label: '>',
+        emoji: '',
+        style: ButtonStyle.Primary,
+      },
+      last: {
+        label: '>>',
+        emoji: '',
+        style: ButtonStyle.Secondary,
+      },
+    });
 
-    function isTextOrDMChannel(
-      ch: NonNullable<typeof channel>,
-    ): ch is TextChannel | DMChannel {
-      return 'send' in ch || 'messages' in ch;
-    }
+    pagination.setEmbeds(embeds);
 
-    if (!isTextOrDMChannel(channel)) {
-      throw new Error('Channel is not a text channel or DM channel');
-    }
-
-    // Примечание: из-за несовместимости версий discord.js и discordjs-button-embed-pagination
-    // требуется приведение типа. Это известная проблема библиотеки.
-    // Используем двойное приведение через unknown для обхода проблем совместимости типов
-    const compatibleChannel = channel as unknown as TextChannel | DMChannel;
-
-    return new Pagination(
-      // @ts-ignore - несовместимость версий discord.js и discordjs-button-embed-pagination
-      compatibleChannel,
-      embeds,
-      `Страница`,
-      1000 * 60 * 5,
-      [
-        {
-          label: '<<',
-          style: ButtonStyle.Secondary,
-        },
-        {
-          label: '<',
-          style: ButtonStyle.Primary,
-        },
-        {
-          label: 'стоп',
-          style: ButtonStyle.Danger,
-        },
-        {
-          label: '>',
-          style: ButtonStyle.Primary,
-        },
-        {
-          label: '>>',
-          style: ButtonStyle.Secondary,
-        },
-      ],
-      // Примечание: из-за несовместимости версий discord.js и discordjs-button-embed-pagination
-      // требуется приведение типа. Это известная проблема библиотеки.
-      interaction.user as unknown as typeof interaction.user,
-    );
+    return pagination;
   };
 
   return {

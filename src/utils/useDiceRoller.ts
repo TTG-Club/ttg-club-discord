@@ -60,9 +60,9 @@ function hasRolls(roll: unknown): roll is RollWithRolls {
   const firstRoll = rolls[0];
 
   if (
-    typeof firstRoll !== 'object'
-    || firstRoll === null
-    || !('value' in firstRoll)
+    typeof firstRoll !== 'object' ||
+    firstRoll === null ||
+    !('value' in firstRoll)
   ) {
     return false;
   }

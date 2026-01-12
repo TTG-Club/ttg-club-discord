@@ -43,20 +43,14 @@ const commandScreen: SlashCommand = {
         url: `/screens`,
         payload: {
           page: 0,
-          limit: 20,
+          size: 25,
           search: {
             value: search,
             exact: false,
           },
           order: [
-            {
-              field: 'ordering',
-              direction: 'asc',
-            },
-            {
-              field: 'name',
-              direction: 'asc',
-            },
+            { field: 'ordering', direction: 'asc' },
+            { field: 'name', direction: 'asc' },
           ],
         },
       });
@@ -68,10 +62,10 @@ const commandScreen: SlashCommand = {
       }
 
       const screens = search
-        ? cloneDeep(resp.data).filter(
+        ? resp.data.filter(
             (item: TScreenGroupLink | TScreenLink) => 'icon' in item,
           )
-        : cloneDeep(resp.data);
+        : resp.data;
 
       await interaction.respond(
         screens.map((screen: TScreenGroupLink | TScreenLink) => ({
@@ -158,9 +152,9 @@ const commandScreen: SlashCommand = {
         return;
       }
 
-      const pagination = await getPagination(interaction, embeds);
+      const pagination = getPagination(interaction, embeds);
 
-      await pagination.paginate();
+      await pagination.render();
     } catch (err) {
       console.error(err);
 

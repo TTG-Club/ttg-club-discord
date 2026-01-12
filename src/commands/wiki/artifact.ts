@@ -31,20 +31,14 @@ const commandArtifact: SlashCommand = {
         url: `/items/magic`,
         payload: {
           page: 0,
-          limit: 10,
+          size: 25,
           search: {
-            value: interaction.options.getString('name'),
+            value: interaction.options.getString('name') || '',
             exact: false,
           },
           order: [
-            {
-              field: 'rarity',
-              direction: 'asc',
-            },
-            {
-              field: 'name',
-              direction: 'asc',
-            },
+            { field: 'rarity', direction: 'asc' },
+            { field: 'name', direction: 'asc' },
           ],
         },
       });
@@ -55,10 +49,8 @@ const commandArtifact: SlashCommand = {
         return;
       }
 
-      const artifacts = cloneDeep(resp.data);
-
       await interaction.respond(
-        artifacts.map((artifact: TArtifactLink) => ({
+        resp.data.map((artifact: TArtifactLink) => ({
           name: `[${artifact.rarity.short}] ${artifact.name.rus}`,
           value: artifact.url,
         })),
@@ -187,9 +179,9 @@ const commandArtifact: SlashCommand = {
         return;
       }
 
-      const pagination = await getPagination(interaction, embeds.desc);
+      const pagination = getPagination(interaction, embeds.desc);
 
-      await pagination.paginate();
+      await pagination.render();
     } catch (err) {
       console.error(err);
 

@@ -46,12 +46,12 @@ const commandWildMagic: SlashCommand = {
         return;
       }
 
-      const sources = cloneDeep(resp.data).map((item) => ({
-        name: `[${item.shortName}]${item.homebrew ? ' [HB]' : ''} ${item.name}`,
-        value: item.shortName,
-      }));
-
-      await interaction.respond(sources);
+      await interaction.respond(
+        resp.data.map((item) => ({
+          name: `[${item.shortName}]${item.homebrew ? ' [HB]' : ''} ${item.name}`,
+          value: item.shortName,
+        })),
+      );
     } catch (err) {
       console.error(err);
 
@@ -111,9 +111,9 @@ const commandWildMagic: SlashCommand = {
         return;
       }
 
-      const pagination = await getPagination(interaction, embeds);
+      const pagination = getPagination(interaction, embeds);
 
-      await pagination.paginate();
+      await pagination.render();
     } catch (err) {
       console.error(err);
 

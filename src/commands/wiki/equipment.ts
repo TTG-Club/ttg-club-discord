@@ -31,17 +31,12 @@ const commandEquipment: SlashCommand = {
         url: `/items`,
         payload: {
           page: 0,
-          limit: 10,
+          size: 25,
           search: {
-            value: interaction.options.getString('name'),
+            value: interaction.options.getString('name') || '',
             exact: false,
           },
-          order: [
-            {
-              field: 'name',
-              direction: 'asc',
-            },
-          ],
+          order: [{ field: 'name', direction: 'asc' }],
         },
       });
 
@@ -51,10 +46,8 @@ const commandEquipment: SlashCommand = {
         return;
       }
 
-      const equipments = cloneDeep(resp.data);
-
       await interaction.respond(
-        equipments.map((item: TEquipmentLink) => ({
+        resp.data.map((item: TEquipmentLink) => ({
           name: item.name.rus,
           value: item.url,
         })),
@@ -170,9 +163,9 @@ const commandEquipment: SlashCommand = {
           return;
         }
 
-        const pagination = await getPagination(interaction, embeds.desc);
+        const pagination = getPagination(interaction, embeds.desc);
 
-        await pagination.paginate();
+        await pagination.render();
       }
     } catch (err) {
       console.error(err);

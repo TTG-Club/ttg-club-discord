@@ -31,17 +31,12 @@ const commandOption: SlashCommand = {
         url: `/options`,
         payload: {
           page: 0,
-          limit: 10,
+          size: 25,
           search: {
-            value: interaction.options.getString('name'),
+            value: interaction.options.getString('name') || '',
             exact: false,
           },
-          order: [
-            {
-              field: 'name',
-              direction: 'asc',
-            },
-          ],
+          order: [{ field: 'name', direction: 'asc' }],
         },
       });
 
@@ -51,10 +46,8 @@ const commandOption: SlashCommand = {
         return;
       }
 
-      const options = cloneDeep(resp.data);
-
       await interaction.respond(
-        options.map((option: TOptionLink) => ({
+        resp.data.map((option: TOptionLink) => ({
           name: option.name.rus,
           value: option.url,
         })),
@@ -159,9 +152,9 @@ const commandOption: SlashCommand = {
         return;
       }
 
-      const pagination = await getPagination(interaction, embeds.desc);
+      const pagination = getPagination(interaction, embeds.desc);
 
-      await pagination.paginate();
+      await pagination.render();
     } catch (err) {
       console.error(err);
 

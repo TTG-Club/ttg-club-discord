@@ -31,16 +31,14 @@ const commandArmor: SlashCommand = {
         url: `/armors`,
         payload: {
           page: 0,
-          limit: 10,
+          size: 25,
           search: {
-            value: interaction.options.getString('name'),
+            value: interaction.options.getString('name') || '',
             exact: false,
           },
           order: [
-            {
-              field: 'name',
-              direction: 'asc',
-            },
+            { field: 'AC', direction: 'asc' },
+            { field: 'name', direction: 'asc' },
           ],
         },
       });
@@ -51,10 +49,8 @@ const commandArmor: SlashCommand = {
         return;
       }
 
-      const armors = cloneDeep(resp.data);
-
       await interaction.respond(
-        armors.map((armor: TArmorLink) => ({
+        resp.data.map((armor: TArmorLink) => ({
           name: armor.name.rus,
           value: armor.url,
         })),
@@ -170,9 +166,9 @@ const commandArmor: SlashCommand = {
         return;
       }
 
-      const pagination = await getPagination(interaction, embeds.desc);
+      const pagination = getPagination(interaction, embeds.desc);
 
-      await pagination.paginate();
+      await pagination.render();
     } catch (err) {
       console.error(err);
 

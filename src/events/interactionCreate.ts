@@ -79,10 +79,10 @@ function autocompleteInteraction(interaction: AutocompleteInteraction) {
 
 function isInteraction(value: unknown): value is Interaction {
   return (
-    typeof value === 'object'
-    && value !== null
-    && 'isChatInputCommand' in value
-    && 'isAutocomplete' in value
+    typeof value === 'object' &&
+    value !== null &&
+    'isChatInputCommand' in value &&
+    'isAutocomplete' in value
   );
 }
 

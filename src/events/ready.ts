@@ -1,8 +1,8 @@
 import { Events } from 'discord.js';
 
-import type { Client } from 'discord.js';
-
 import { useHelpers } from '../utils/useHelpers.js';
+
+import type { Client } from 'discord.js';
 
 import type { BotEvent } from '../types.js';
 

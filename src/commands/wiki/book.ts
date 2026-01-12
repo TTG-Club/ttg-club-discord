@@ -31,20 +31,14 @@ const commandBook: SlashCommand = {
         url: `/books`,
         payload: {
           page: 0,
-          limit: 10,
+          size: 25,
           search: {
-            value: interaction.options.getString('name'),
+            value: interaction.options.getString('name') || '',
             exact: false,
           },
           order: [
-            {
-              field: 'year',
-              direction: 'asc',
-            },
-            {
-              field: 'name',
-              direction: 'asc',
-            },
+            { field: 'year', direction: 'asc' },
+            { field: 'name', direction: 'asc' },
           ],
         },
       });
@@ -55,10 +49,8 @@ const commandBook: SlashCommand = {
         return;
       }
 
-      const books = cloneDeep(resp.data);
-
       await interaction.respond(
-        books.map((book: TBookLink) => ({
+        resp.data.map((book: TBookLink) => ({
           name: book.name.rus,
           value: book.url,
         })),
@@ -159,9 +151,9 @@ const commandBook: SlashCommand = {
           return;
         }
 
-        const pagination = await getPagination(interaction, embeds.desc);
+        const pagination = getPagination(interaction, embeds.desc);
 
-        await pagination.paginate();
+        await pagination.render();
       }
     } catch (err) {
       console.error(err);

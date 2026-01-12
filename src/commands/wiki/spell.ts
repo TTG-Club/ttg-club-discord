@@ -30,20 +30,15 @@ const commandSpell: SlashCommand = {
       const resp = await http.post<TSpellLink[]>({
         url: `/spells`,
         payload: {
-          limit: 10,
+          page: 0,
+          size: 25,
           search: {
-            value: interaction.options.getString('name'),
+            value: interaction.options.getString('name') || '',
             exact: false,
           },
           order: [
-            {
-              field: 'level',
-              direction: 'asc',
-            },
-            {
-              field: 'name',
-              direction: 'asc',
-            },
+            { field: 'level', direction: 'asc' },
+            { field: 'name', direction: 'asc' },
           ],
         },
       });
@@ -54,10 +49,8 @@ const commandSpell: SlashCommand = {
         return;
       }
 
-      const spells = cloneDeep(resp.data);
-
       await interaction.respond(
-        spells.map((spell: TSpellLink) => {
+        resp.data.map((spell: TSpellLink) => {
           let name = spell.name.rus;
 
           if (spell.concentration) {
@@ -229,9 +222,9 @@ const commandSpell: SlashCommand = {
         return;
       }
 
-      const pagination = await getPagination(interaction, embeds);
+      const pagination = getPagination(interaction, embeds);
 
-      await pagination.paginate();
+      await pagination.render();
     } catch (err) {
       console.error(err);
 
