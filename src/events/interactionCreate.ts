@@ -1,5 +1,3 @@
-import { Events } from 'discord.js';
-
 import type {
   AutocompleteInteraction,
   ChatInputCommandInteraction,
@@ -7,6 +5,8 @@ import type {
 } from 'discord.js';
 
 import type { BotEvent } from '../types.js';
+
+import { Events } from 'discord.js';
 
 async function chatInputCommandInteraction(
   interaction: ChatInputCommandInteraction,
@@ -79,10 +79,10 @@ function autocompleteInteraction(interaction: AutocompleteInteraction) {
 
 function isInteraction(value: unknown): value is Interaction {
   return (
-    typeof value === 'object' &&
-    value !== null &&
-    'isChatInputCommand' in value &&
-    'isAutocomplete' in value
+    typeof value === 'object'
+    && value !== null
+    && 'isChatInputCommand' in value
+    && 'isAutocomplete' in value
   );
 }
 

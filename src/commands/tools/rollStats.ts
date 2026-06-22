@@ -1,9 +1,9 @@
+import type { SlashCommand } from '../../types.js';
+
 import { colord } from 'colord';
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 
 import { useDiceRoller } from '../../utils/useDiceRoller.js';
-
-import type { SlashCommand } from '../../types.js';
 
 const COLOR_COEFFICIENT = 1.2;
 const { getDiceMsg } = useDiceRoller();

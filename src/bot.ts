@@ -1,9 +1,9 @@
+import type { SlashCommand } from './types.js';
+
 import { Client, Collection } from 'discord.js';
 
 import handlers from './handlers/index.js';
 import { useConfig } from './utils/useConfig.js';
-
-import type { SlashCommand } from './types.js';
 
 const client = new Client({
   intents: [],

@@ -1,11 +1,11 @@
-import chalk from 'chalk';
-import { PermissionFlagsBits } from 'discord.js';
-
 import type {
   GuildMember,
   PermissionResolvable,
   TextChannel,
 } from 'discord.js';
+
+import chalk from 'chalk';
+import { PermissionFlagsBits } from 'discord.js';
 
 export type colorType = 'text' | 'variable' | 'error';
 

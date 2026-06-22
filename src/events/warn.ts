@@ -1,6 +1,6 @@
-import { Events } from 'discord.js';
-
 import type { BotEvent } from '../types.js';
+
+import { Events } from 'discord.js';
 
 function isErrorEvent(value: unknown): value is ErrorEvent {
   return value instanceof ErrorEvent;

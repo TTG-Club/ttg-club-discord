@@ -1,10 +1,10 @@
-import { Events } from 'discord.js';
-
-import { useHelpers } from '../utils/useHelpers.js';
-
 import type { Client } from 'discord.js';
 
 import type { BotEvent } from '../types.js';
+
+import { Events } from 'discord.js';
+
+import { useHelpers } from '../utils/useHelpers.js';
 
 function isClient(value: unknown): value is Client {
   return typeof value === 'object' && value !== null && 'isReady' in value;
