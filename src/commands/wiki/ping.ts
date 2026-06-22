@@ -1,8 +1,8 @@
+import type { SlashCommand } from '../../types.js';
+
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 
 import { useHelpers } from '../../utils/useHelpers.js';
-
-import type { SlashCommand } from '../../types.js';
 
 const command: SlashCommand = {
   command: new SlashCommandBuilder()

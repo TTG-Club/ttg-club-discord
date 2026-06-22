@@ -1,8 +1,8 @@
+import type { SlashCommand } from '../../types.js';
+
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 
 import { useDiceRoller } from '../../utils/useDiceRoller.js';
-
-import type { SlashCommand } from '../../types.js';
 
 const { getDiceMsg } = useDiceRoller();
 

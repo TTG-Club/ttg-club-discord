@@ -1,3 +1,6 @@
+import type { SlashCommand } from '../../types.js';
+import type { TRaceItem, TRaceLink } from '../../types/Race.js';
+
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import { cloneDeep } from 'lodash-es';
 
@@ -5,9 +8,6 @@ import { useAxios } from '../../utils/useAxios.js';
 import { useConfig } from '../../utils/useConfig.js';
 import { useJSDom } from '../../utils/useJSDom.js';
 import { useMarkdown } from '../../utils/useMarkdown.js';
-
-import type { SlashCommand } from '../../types.js';
-import type { TRaceItem, TRaceLink } from '../../types/Race.js';
 
 const http = useAxios();
 const { SITE_URL } = useConfig();

@@ -1,8 +1,8 @@
+import type { AxiosInstance, AxiosRequestConfig } from 'axios';
+
 import axios from 'axios';
 
 import { useConfig } from './useConfig.js';
-
-import type { AxiosInstance, AxiosRequestConfig } from 'axios';
 
 export interface RequestConfig {
   url: AxiosRequestConfig['url'];

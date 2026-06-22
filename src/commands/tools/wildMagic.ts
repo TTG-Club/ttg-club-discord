@@ -1,10 +1,10 @@
+import type { SlashCommand } from '../../types.js';
+
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import { cloneDeep } from 'lodash-es';
 
 import { useAxios } from '../../utils/useAxios.js';
 import { useMarkdown } from '../../utils/useMarkdown.js';
-
-import type { SlashCommand } from '../../types.js';
 
 const http = useAxios();
 

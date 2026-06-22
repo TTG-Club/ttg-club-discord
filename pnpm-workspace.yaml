@@ -1,3 +1,6 @@
+
+shellEmulator: true
+
 onlyBuiltDependencies:
   - simple-git-hooks
   - unrs-resolver

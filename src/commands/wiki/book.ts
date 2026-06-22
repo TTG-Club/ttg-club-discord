@@ -1,12 +1,12 @@
+import type { SlashCommand } from '../../types.js';
+import type { TBookItem, TBookLink } from '../../types/Book.js';
+
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import { cloneDeep } from 'lodash-es';
 
 import { useAxios } from '../../utils/useAxios.js';
 import { useConfig } from '../../utils/useConfig.js';
 import { useMarkdown } from '../../utils/useMarkdown.js';
-
-import type { SlashCommand } from '../../types.js';
-import type { TBookItem, TBookLink } from '../../types/Book.js';
 
 const http = useAxios();
 const { SITE_URL } = useConfig();

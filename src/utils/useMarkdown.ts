@@ -1,3 +1,10 @@
+import type {
+  EmbedBuilder,
+  Interaction,
+  InteractionType,
+  Message,
+} from 'discord.js';
+
 import { gfm } from '@truto/turndown-plugin-gfm';
 import { ButtonStyle } from 'discord.js';
 import { Pagination } from 'pagination.djs';
@@ -6,13 +13,6 @@ import TurndownService from 'turndown';
 
 import { useConfig } from './useConfig.js';
 import { useJSDom } from './useJSDom.js';
-
-import type {
-  EmbedBuilder,
-  Interaction,
-  InteractionType,
-  Message,
-} from 'discord.js';
 
 const { SITE_URL } = useConfig();
 
@@ -58,9 +58,9 @@ export function useMarkdown() {
 
   turndownService.addRule('inlineLink', {
     filter: (node, options) =>
-      options.linkStyle === 'inlined' &&
-      node.nodeName === 'A' &&
-      !!node.getAttribute('href'),
+      options.linkStyle === 'inlined'
+      && node.nodeName === 'A'
+      && !!node.getAttribute('href'),
 
     replacement: (content, node) => {
       const getUpdatedHref = (href: string) => {

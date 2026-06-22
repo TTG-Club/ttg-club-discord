@@ -1,9 +1,3 @@
-import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
-import { cloneDeep, sortBy } from 'lodash-es';
-
-import { useAxios } from '../../utils/useAxios.js';
-import { useConfig } from '../../utils/useConfig.js';
-
 import type { HexColorString } from 'discord.js';
 
 import type { SlashCommand } from '../../types.js';
@@ -13,6 +7,12 @@ import type {
 } from '../../types/Artifact.js';
 import type { TNameValue, TSource } from '../../types/BaseTypes.js';
 import type { TSpellLink } from '../../types/Spell.js';
+
+import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
+import { cloneDeep, sortBy } from 'lodash-es';
+
+import { useAxios } from '../../utils/useAxios.js';
+import { useConfig } from '../../utils/useConfig.js';
 
 const http = useAxios();
 const { SITE_URL } = useConfig();
